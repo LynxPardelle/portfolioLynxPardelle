@@ -1,0 +1,79 @@
+$fullRed: #FF5555 !default;
+$fullYellow: #f9c24f !default;
+$fullGreen: #55FF55 !default;
+$facebook: #0a58ca !default;
+$whatsApp: #48C02D !default;
+$twitter: #1C9BEA !default;
+$gmail: #CF4B3B !default;
+$linkedIn: #2465AA !default;
+$udark: #050505 !default;
+$tdark: #000000 !default;
+$ulight: #f5f5f5 !default;
+$tlight: #ffffff !default;
+$transparent: rgba(0,0,0,0) !default;
+$trdark25: rgba(0,0,0,0.25) !default;
+$trdark5: rgba(0,0,0,0.5) !default;
+$trlight25: rgba($tlight, 0.25) !default;
+$trlight5: rgba($tlight, 0.5) !default;
+$fRed25: rgba($fullRed,0.25) !default;
+$fRed5: rgba($fullRed,0.5) !default;
+
+$theme-colors: () !default;
+
+$theme-colors: map-merge(
+  (
+    "fullRed": $fullRed,
+    "fullYellow": $fullYellow,
+    "fullGreen": $fullGreen,
+    "facebook": $facebook,
+    "whatsApp": $whatsApp,
+    "twitter": $twitter,
+    "gmail": $gmail,
+    "linkedIn": $linkedIn,
+    "udark": $udark,
+    "tdark": $tdark,
+    "ulight": $ulight,
+    "tlight": $tlight,
+    "transparent": $transparent,
+    "trdark25": $trdark25,
+    "trdark5": $trdark5,
+    "trlight25": $trlight25,
+    "trlight5": $trlight5,
+    "fRed25": $fRed25,
+    "fRed5": $fRed5,
+    ),
+  $theme-colors
+);
+
+@mixin hover-focus() {
+  &:hover,
+  &:focus {
+    @content;
+  }
+}
+
+@mixin text-emphasis-variant($parent, $color) {
+  #{$parent} {
+    color: $color !important;
+  }
+}
+
+@each $color, $value in $theme-colors {
+  @include text-emphasis-variant(".text-#{$color}", $value);
+}
+
+@mixin bg-variant($parent, $color) {
+  #{$parent} {
+    background-color: $color !important;
+  }
+  a#{$parent},
+  button#{$parent} {
+    @include hover-focus() {
+      background-color: darken($color, 10%) !important;
+    }
+  }
+}
+
+@each $color, $value in $theme-colors {
+  @include bg-variant(".bg-#{$color}", $value);
+}

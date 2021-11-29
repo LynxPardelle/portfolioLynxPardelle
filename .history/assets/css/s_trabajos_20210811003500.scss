@@ -1,0 +1,24 @@
+#s_clases {
+   
+    #programas{
+        
+        &:hover{
+            
+        }
+        h3{
+            cursor: default;
+            &:hover{
+                color:white !important;
+                background-color: black !important;
+                // border-style: solid;
+                // border-color: white;
+                // border-width: 1px;
+                box-shadow: 0 0 5px white;
+        
+            }
+        }
+                
+    }
+
+    
+}
