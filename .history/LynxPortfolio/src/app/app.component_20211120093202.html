@@ -1,0 +1,55 @@
+<header
+  class="
+    d-flex
+    bg-bg1M
+    justify-content-evenly
+    px-2
+    pt-3
+    align-items-center
+    position-fixed
+    top-0
+    z-5
+    w-100
+  "
+>
+  <!-- Icon -->
+  <a
+    href="/"
+    [routerLink]="['/']"
+    class="text-center iconLynx"
+  >
+    <img
+      src="../assets/images/Lince.png"
+      alt="Lynx Pardelle"
+      title="Lynx Pardelle"
+    />
+  </a>
+
+  <!-- Title -->
+  <a href="/" [routerLink]="['/']" class="w-65 mx-auto titleLynx text-decoration-none">
+    <h1 class="text-center h2">Lynx Pardelle</h1>
+  </a>
+
+  <!-- Menu -->
+  <button
+    class="btn menuIconContainer rounded-circle p-0 m-0"
+    type="button"
+    data-bs-toggle="offcanvas"
+    data-bs-target="#offcanvasMenu"
+    aria-controls="offcanvasMenu"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="28"
+      height="28"
+      fill="currentColor"
+      class="bi bi-list d-block mx-auto my-2"
+      viewBox="0 0 16 16"
+    >
+      <path
+        fill-rule="evenodd"
+        d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"
+      />
+    </svg>
+  </button>
+</header>
