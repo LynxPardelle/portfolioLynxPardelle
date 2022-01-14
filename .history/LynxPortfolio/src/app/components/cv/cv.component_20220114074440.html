@@ -169,16 +169,6 @@
         </svg>
       </button>
     </div>
-    <accordion-group
-    [panelClass]="
-    'bef bef-bg-' +
-    (cvSection.bgColor && cvSection.bgColor !== ''
-    ? cvSection.bgColor.replace('#', 'a')
-    : 'fullRed') +
-    ' text-center'
-    "
-    (isOpenChange)="checkAccordion($event)"
-    >
     <div accordion-heading class="position-relative">
       <h3
         class="text-center bef bef-fs-1rem"
@@ -231,8 +221,18 @@
         </ng-template>
       </span>
     </div>
+    <accordion-group
+      *ngFor="let cvSubSection of cvSection.CVSubSections"
+      [panelClass]="
+        'bef bef-bg-' +
+        (cvSection.bgColor && cvSection.bgColor !== ''
+          ? cvSection.bgColor.replace('#', 'a')
+          : 'fullRed') +
+        ' text-center'
+      "
+      (isOpenChange)="checkAccordion($event)"
+    >
       <accordion
-        *ngFor="let cvSubSection of cvSection.CVSubSections"
         [closeOthers]="true"
         [isAnimated]="true"
         class="mx-auto d-block w-80 position-relative"

@@ -717,11 +717,17 @@ var controller = {
           throw new Error("No se guardó el main.");
         }
 
+        delete mainStored.key;
+        delete mainStored.keyOld;
+
         return res.status(200).send({
           status: "success",
           main: mainStored,
         });
       } else {
+        delete mainOld.key;
+        delete mainOld.keyOld;
+
         return res.status(200).send({
           status: "success",
           main: mainOld,

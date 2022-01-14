@@ -396,7 +396,7 @@ export class CvComponent implements OnInit, DoCheck {
   async delete(type: string, id: string) {
     try {
       let result = await Swal.fire({
-        title: `¿Seguro que quieres eliminar la ${type}?`,
+        title: '¿Seguro que quieres eliminar la imagen de book?',
         showDenyButton: true,
         showCancelButton: true,
         confirmButtonText: 'Si',
@@ -409,7 +409,7 @@ export class CvComponent implements OnInit, DoCheck {
 
       if (result.isConfirmed) {
         switch (type) {
-          case 'cvSection':
+          case 'CVSection':
             const CVSectionDeleted = await this._mainService
               .deleteCVSection(id)
               .toPromise();
@@ -438,7 +438,7 @@ export class CvComponent implements OnInit, DoCheck {
               },
             });
             break;
-          case 'cvSubSection':
+          case 'CVSubSection':
             const CVSubSectionDeleted = await this._mainService
               .deleteCVSubSection(id)
               .toPromise();
