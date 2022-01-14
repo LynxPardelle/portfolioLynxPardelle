@@ -1,0 +1,72 @@
+<div
+  class="
+    w-75 w-max-350px w-min-275px
+    mx-auto
+    my-5
+    box-shadow-0-0-5-trdark25
+    rounded-30
+    p-3
+  "
+>
+  <h2 class="text-center text-tlight my-3">Login</h2>
+
+  <!-- Email -->
+  <div *ngIf="user && user.email" class="d-block w-75 mx-auto my-3">
+    <!--     *ngIf="user.email.length > 0" -->
+    <label class="text-tlight mb-1 d-block" for="email"
+      >Correo electrónico</label
+    >
+    <input
+      class="w-100 text-bgtdark bg-tlight border-0"
+      type="email"
+      name="email"
+      #email="ngModel"
+      [(ngModel)]="user.email"
+      placeholder="Correo electrónico"
+      required
+    />
+    <!--     <hr class="bg-textM" /> -->
+    <span
+      class="text-tlight font-weight-bold"
+      *ngIf="!email.valid && email.touched"
+    >
+      El correo electrónico es obligatorio.
+    </span>
+  </div>
+
+  <!-- Password -->
+  <div *ngIf="user && user.password" class="d-block w-75 mx-auto my-3">
+    <!--     *ngIf="user.password.length > 0" -->
+    <label class="text-tlight mb-1 d-block" for="password">Contraseña</label>
+    <input
+      class="w-100 text-tdark bg-tlight border-0"
+      type="password"
+      name="password"
+      #password="ngModel"
+      [(ngModel)]="user.password"
+      placeholder="Contraseña"
+      required
+    />
+    <!--     <hr class="bg-textM" /> -->
+    <span
+      class="text-tlight font-weight-bold"
+      *ngIf="!password.valid && password.touched"
+    >
+      La contraseña es obligatoria.
+    </span>
+  </div>
+
+  <button
+    (click)="onSubmit()"
+    *ngIf="
+      user &&
+      user.password &&
+      user.password.length > 0 &&
+      user.email &&
+      user.email.length > 0
+    "
+    class="btn bg-linkM text-bg1M p-2 mx-auto my-5 d-block w-50"
+  >
+    Login
+  </button>
+</div>

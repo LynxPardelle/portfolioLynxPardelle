@@ -1,0 +1,85 @@
+<h2 class="text-center">Web Sites</h2>
+
+<section>
+  <article
+    *ngFor="let website of [0, 1, 2, 3, 4]; let i = index"
+    class="my-3 py-5 bef bef-bg-tdark__OPA__0_75"
+  >
+    <div
+      class="d-flex flex-column px-3 w-95 mx-auto"
+      [ngClass]="{
+        'align-items-start': i % 2 === 0,
+        'align-items-end': i % 2 === 1
+      }"
+    >
+      <h3>Website</h3>
+      <h4>Type</h4>
+    </div>
+    <div class="d-flex flex-row flex-md-column align-items-center my-3">
+      <div
+        [ngStyle]="{ order: i % 2 === 0 ? 2 : 1 }"
+        [ngClass]="{
+          'w-50': checkWindowWidth('down', 767),
+          'w-90 mt-3 mb-5': checkWindowWidth('up', 767)
+        }"
+      >
+        <div
+          class="position-relative mx-auto"
+          [ngClass]="{
+            'h-150px': checkWindowWidth('down', 575),
+            'h-250px': checkWindowWidth('down', 767) && checkWindowWidth('up', 576),
+            'w-90': checkWindowWidth('down', 767),
+            'd-flex justify-content-between align-items-end w-75':
+              checkWindowWidth('up', 767)
+          }"
+        >
+          <img
+            src="https://picsum.photos/192{{ i }}/108{{ i }}"
+            alt="https://picsum.photos/200/300"
+            [ngClass]="{
+              'position-absolute top-0 start-0 w-100': checkWindowWidth(
+                'down',
+                767
+              ),
+              'position-relative w-50': checkWindowWidth('up', 767)
+            }"
+          />
+          <img
+          class="rounded-5"
+            src="https://picsum.photos/76{{ i }}/102{{ i }}"
+            alt="https://picsum.photos/200/300"
+            [ngClass]="{
+              'position-absolute bottom-25 end-0 w-33': checkWindowWidth(
+                'down',
+                767
+              ),
+              'position-relative w-15': checkWindowWidth('up', 767)
+            }"
+          />
+          <img
+          class="rounded-5"
+            src="https://picsum.photos/32{{ i }}/56{{ i }}"
+            alt="https://picsum.photos/200/300"
+            [ngClass]="{
+              'position-absolute bottom-0 end-25 w-20': checkWindowWidth(
+                'down',
+                767
+              ),
+              'position-relative w-10': checkWindowWidth('up', 767)
+            }"
+          />
+        </div>
+      </div>
+      <div
+        class="w-50 w-md-100 text-ulight px-2"
+        [ngStyle]="{ order: i % 2 === 1 ? 1 : 2 }"
+      >
+        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Velit quas
+        mollitia doloremque, voluptatum dolor at.
+      </div>
+    </div>
+    <a href="" target="_blank" class="text-center fw-bold d-block mx-auto my-3">
+      link
+    </a>
+  </article>
+</section>

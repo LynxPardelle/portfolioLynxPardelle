@@ -1,0 +1,541 @@
+<div id="CV" class="py-3 my-3 bef bef-w-100vw position-relative">
+  <!-- Edit/Delete Buttons -->
+  <div
+    class="position-fixed end-0 bef"
+    *ngIf="identity && identity.role == 'ROLE_ADMIN'"
+    [ngClass]="{
+      'bef-top-150px': windowWidth < 767,
+      'bef-top-15per': windowWidth >= 767
+    }"
+  >
+    <button
+      *ngIf="edit === false"
+      class="btn bef bef-btn-fullYellow bef-text-tdark mr-2"
+      (click)="editChange()"
+    >
+      <svg
+        width="1em"
+        height="1em"
+        viewBox="0 0 16 16"
+        class="bi bi-pencil-square"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"
+        />
+        <path
+          fill-rule="evenodd"
+          d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+        />
+      </svg>
+    </button>
+
+    <button
+      *ngIf="edit == true"
+      class="btn bef bef-btn-fullYellow bef-text-tdark mr-2 font-weight-normal float-right"
+      (click)="editChange()"
+    >
+      X
+    </button>
+  </div>
+
+  <!-- CVBackground -->
+  <img
+    id="CVBG"
+    *ngIf="main && main.CVBackground && main.CVBackground.location"
+    src="{{ urlMain + 'get-file/' + main.CVBackground.location }}"
+    alt="{{
+      lang === 'es' ? main.CVBackground.title : main.CVBackground.titleEng
+    }}"
+    title="{{
+      lang === 'es' ? main.CVBackground.title : main.CVBackground.titleEng
+    }}"
+    class="obj-fit-cover d-block position-absolute top-0 start-0 bef bef-w-100vw bef-hmn-100vh"
+    [ngClass]="classCreator(('bef-h-' + checkHeight() + 'px').toString(), true)"
+  />
+
+  <!-- Title -->
+  <h2 class="text-center mt-3 mb-5">CV</h2>
+
+  <!-- CVImage -->
+  <img
+    id="CVImage"
+    *ngIf="main && main.CVImage && main.CVImage.location"
+    src="{{ urlMain + 'get-file/' + main.CVImage.location }}"
+    alt="{{ lang === 'es' ? main.CVImage.title : main.CVImage.titleEng }}"
+    title="{{ lang === 'es' ? main.CVImage.title : main.CVImage.titleEng }}"
+    class="obj-fit-cover d-block mx-auto my-3 bef bef-rounded-15px bef-boxShadow-0__0__5px__tlight"
+    [ngClass]="{
+      'bef-w-50vw bef-h-50vw': windowWidth < 767,
+      'bef-w-25vw bef-h-25vw': windowWidth >= 767
+    }"
+  />
+
+  <!-- CVDesc -->
+  <div
+    *ngIf="
+      main &&
+      main.CVDesc &&
+      main.CVDesc !== '' &&
+      main.CVDescEng &&
+      main.CVDescEng !== ''
+    "
+    class="text-center bef bef-text-tlight d-block mx-auto my-5 fw-bold"
+    [ngClass]="{
+      'bef-w-80vw': windowWidth < 767,
+      'bef-w-50vw': windowWidth >= 767
+    }"
+  >
+    <ng-container *ngIf="lang === 'es'; else elseCVDescTemplate">
+      <div
+        *ngIf="main.CVDesc && main.CVDesc !== ''"
+        [innerHTML]="
+          Linkify(this.valuefy(main.CVDesc), '#ffffff', '#f9c24f') | safeHtml
+        "
+      ></div>
+    </ng-container>
+    <ng-template #elseCVDescTemplate>
+      <div
+        *ngIf="main.CVDescEng && main.CVDescEng !== ''"
+        [innerHTML]="
+          Linkify(this.valuefy(main.CVDescEng), '#ffffff', '#f9c24f') | safeHtml
+        "
+      ></div>
+    </ng-template>
+  </div>
+
+  <!-- CVSections -->
+  <accordion
+    [closeOthers]="true"
+    [isAnimated]="true"
+    class="mx-auto d-block bef"
+    [ngClass]="{
+      'bef-w-80vw': windowWidth < 767,
+      'bef-w-66vw': windowWidth >= 767
+    }"
+  >
+    <accordion-group
+      [panelClass]="'bef bef-bg-fullRed text-center'"
+      (isOpenChange)="checkAccordion($event)"
+    >
+      <div accordion-heading class="position-relative">
+        <h3 class="text-center bef bef-text-tdark bef-fs-1rem">
+          Computer programs
+        </h3>
+        <span class="position-absolute top-0 end-0">
+          <ng-container *ngIf="true; else elseCVAHTemplate">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-caret-down-fill"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"
+              />
+            </svg>
+          </ng-container>
+          <ng-template #elseCVAHTemplate>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-caret-up-fill"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"
+              />
+            </svg>
+          </ng-template>
+        </span>
+      </div>
+      <accordion
+        [closeOthers]="true"
+        [isAnimated]="true"
+        class="mx-auto d-block w-80"
+      >
+        <accordion-group
+          [panelClass]="'bef bef-bg-tdark text-center'"
+          (isOpenChange)="checkAccordion($event)"
+        >
+          <div accordion-heading class="position-relative">
+            <h3 class="text-center bef bef-text-tlight bef-fs-1rem">
+              Music Production
+            </h3>
+            <span class="position-absolute top-0 end-0 bef bef-text-tlight">
+              <ng-container *ngIf="true; else elseCVAHITemplate">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-caret-down-fill"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"
+                  />
+                </svg>
+              </ng-container>
+              <ng-template #elseCVAHITemplate>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-caret-up-fill"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"
+                  />
+                </svg>
+              </ng-template>
+            </span>
+          </div>
+          <p class="bef bef-text-tlight">Content.</p>
+        </accordion-group>
+      </accordion>
+      <p class="bef bef-text-tdark">Content.</p>
+    </accordion-group>
+  </accordion>
+
+  <!-- CVDesc2 -->
+  <div
+    *ngIf="
+      main &&
+      main.CVDesc2 &&
+      main.CVDesc2 !== '' &&
+      main.CVDesc2Eng &&
+      main.CVDesc2Eng !== ''
+    "
+    class="text-center bef bef-text-tlight d-block mx-auto my-5 fw-bold"
+    [ngClass]="{
+      'bef-w-80vw': windowWidth < 767,
+      'bef-w-50vw': windowWidth >= 767
+    }"
+  >
+    <ng-container *ngIf="lang === 'es'; else elseCVDesc2Template">
+      <div
+        *ngIf="main.CVDesc2 && main.CVDesc2 !== ''"
+        [innerHTML]="
+          Linkify(this.valuefy(main.CVDesc2), '#ffffff', '#f9c24f') | safeHtml
+        "
+      ></div>
+    </ng-container>
+    <ng-template #elseCVDesc2Template>
+      <div
+        *ngIf="main.CVDesc2Eng && main.CVDesc2Eng !== ''"
+        [innerHTML]="
+          Linkify(this.valuefy(main.CVDesc2Eng), '#ffffff', '#f9c24f')
+            | safeHtml
+        "
+      ></div>
+    </ng-template>
+  </div>
+
+  <!-- Edit -->
+  <div class="my-5 py-5" *ngIf="edit === true">
+    <h2 class="text-center my-3">Edición del CV</h2>
+
+    <!-- CVDesc Edit -->
+    <div class="d-block w-75 mx-auto my-3">
+      <label class="bef bef-text-tlight mb-1 d-block" for="CVDesc"
+        >Descripción de CV</label
+      >
+      <textarea
+        class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
+        type="text"
+        name="CVDesc"
+        #CVDesc="ngModel"
+        [(ngModel)]="main.CVDesc"
+        placeholder="Descripción de CV"
+        required
+      ></textarea>
+      <span
+        class="bef bef-text-tlight font-weight-bold"
+        *ngIf="!CVDesc.valid && CVDesc.touched"
+      >
+        La descripción de CV es obligatoria.
+      </span>
+    </div>
+
+    <!-- CVDescEng Edit -->
+    <div class="d-block w-75 mx-auto my-3">
+      <label class="bef bef-text-tlight mb-1 d-block" for="CVDescEng"
+        >CV Description</label
+      >
+      <textarea
+        class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
+        type="text"
+        name="CVDescEng"
+        #CVDescEng="ngModel"
+        [(ngModel)]="main.CVDescEng"
+        placeholder="CV Description"
+        required
+      ></textarea>
+      <span
+        class="bef bef-text-tlight font-weight-bold"
+        *ngIf="!CVDescEng.valid && CVDescEng.touched"
+      >
+        The description of the CV is required.
+      </span>
+    </div>
+
+    <!-- CVDesc2 Edit -->
+    <div class="d-block w-75 mx-auto my-3">
+      <label class="bef bef-text-tlight mb-1 d-block" for="CVDesc2"
+        >Descripción de CV 2</label
+      >
+      <textarea
+        class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
+        type="text"
+        name="CVDesc2"
+        #CVDesc2="ngModel"
+        [(ngModel)]="main.CVDesc2"
+        placeholder="Descripción de CV 2"
+        required
+      ></textarea>
+      <span
+        class="bef bef-text-tlight font-weight-bold"
+        *ngIf="!CVDesc2.valid && CVDesc2.touched"
+      >
+        La descripción de CV es obligatoria.
+      </span>
+    </div>
+
+    <!-- CVDesc2Eng Edit -->
+    <div class="d-block w-75 mx-auto my-3">
+      <label class="bef bef-text-tlight mb-1 d-block" for="CVDesc2Eng"
+        >CV Description 2</label
+      >
+      <textarea
+        class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
+        type="text"
+        name="CVDesc2Eng"
+        #CVDesc2Eng="ngModel"
+        [(ngModel)]="main.CVDesc2Eng"
+        placeholder="CV Description 2"
+        required
+      ></textarea>
+      <span
+        class="bef bef-text-tlight font-weight-bold"
+        *ngIf="!CVDesc2Eng.valid && CVDesc2Eng.touched"
+      >
+        The description 2 of the CV is required.
+      </span>
+    </div>
+
+    <div class="my-5 d-flex flex-wrap justify-content-evenly">
+      <h2 class="text-center my-3 w-100">Archivos</h2>
+
+      <!-- CVImage Upload -->
+      <div class="m-3">
+        <h3 class="bef bef-text-tlight text-center w-75 my-3 d-block mx-auto">
+          Subida de la imagen del CV
+        </h3>
+        <img
+          *ngIf="main && main.CVImage && main.CVImage.location"
+          class="bef bef-wmx-75 d-block mx-auto bef-hmx-25vh my-3"
+          src="{{ urlMain + 'get-file/' + main.CVImage.location }}"
+          alt="{{ main.CVImage.title }}"
+        />
+        <app-file-uploader
+          [type]="'main'"
+          [typeMeta]="'one'"
+          [typeThingComRes]="'main'"
+          [thing]="main.CVImage"
+          [thingInside]="true"
+          [id]="'CVImage'"
+          (pre_loader)="pre_load($event)"
+          (recoverThing)="recoverThingFather($event)"
+        ></app-file-uploader>
+      </div>
+
+      <!-- CVBackground Upload -->
+      <div class="m-3">
+        <h3 class="bef bef-text-tlight text-center w-75 my-3 d-block mx-auto">
+          Subida del fondo del CV
+        </h3>
+        <img
+          *ngIf="main && main.CVBackground && main.CVBackground.location"
+          class="bef bef-wmx-75 d-block mx-auto bef-hmx-25vh my-3"
+          src="{{ urlMain + 'get-file/' + main.CVBackground.location }}"
+          alt="{{ main.CVBackground.title }}"
+        />
+        <app-file-uploader
+          [type]="'main'"
+          [typeMeta]="'one'"
+          [typeThingComRes]="'main'"
+          [thing]="main.CVBackground"
+          [thingInside]="true"
+          [id]="'CVBackground'"
+          (pre_loader)="pre_load($event)"
+          (recoverThing)="recoverThingFather($event)"
+        ></app-file-uploader>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <button
+      (click)="onSubmit('main')"
+      class="btn bef bef-btn-fullRed bef-text-tdark p-2 mx-auto my-5 d-block w-50"
+    >
+      Submit CV
+    </button>
+
+    <hr class="bef bef-bg-tlight" />
+
+    <h2 class="text-center my-3">
+      <ng-container
+        *ngIf="
+          CVSection._id && CVSection._id !== '';
+          else elseCVSectionIdTemplate
+        "
+      >
+        Edición
+      </ng-container>
+      <ng-template #elseCVSectionIdTemplate> Creación </ng-template>
+      de sección del CV
+    </h2>
+
+    <!-- Title Edit -->
+    <div class="d-block w-75 mx-auto my-3">
+      <label class="bef bef-text-tlight mb-1 d-block" for="title">Título</label>
+      <input
+        class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
+        type="text"
+        name="title"
+        #title="ngModel"
+        [(ngModel)]="CVSection.title"
+        placeholder="Título"
+        required
+      />
+      <span
+        class="bef bef-text-tlight font-weight-bold"
+        *ngIf="!title.valid && title.touched"
+      >
+        El título es obligatorio.
+      </span>
+    </div>
+
+    <!-- TitleEng Edit -->
+    <div class="d-block w-75 mx-auto my-3">
+      <label class="bef bef-text-tlight mb-1 d-block" for="titleEng"
+        >Title(English)</label
+      >
+      <input
+        class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
+        type="text"
+        name="titleEng"
+        #titleEng="ngModel"
+        [(ngModel)]="CVSection.titleEng"
+        placeholder="Title"
+        required
+      />
+      <span
+        class="bef bef-text-tlight font-weight-bold"
+        *ngIf="!titleEng.valid && titleEng.touched"
+      >
+        The title(english) is required.
+      </span>
+    </div>
+
+    <!-- Text Edit -->
+    <div class="d-block w-75 mx-auto my-3">
+      <label class="bef bef-text-tlight mb-1 d-block" for="text">Texto</label>
+      <input
+        class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
+        type="text"
+        name="text"
+        #text="ngModel"
+        [(ngModel)]="CVSection.text"
+        placeholder="Texto"
+        required
+      />
+      <span
+        class="bef bef-text-tlight font-weight-bold"
+        *ngIf="!text.valid && text.touched"
+      >
+        El texto es obligatorio.
+      </span>
+    </div>
+
+    <!-- TextEng Edit -->
+    <div class="d-block w-75 mx-auto my-3">
+      <label class="bef bef-text-tlight mb-1 d-block" for="textEng"
+        >Text(English)</label
+      >
+      <input
+        class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
+        type="text"
+        name="textEng"
+        #textEng="ngModel"
+        [(ngModel)]="CVSection.textEng"
+        placeholder="Text"
+        required
+      />
+      <span
+        class="bef bef-text-tlight font-weight-bold"
+        *ngIf="!textEng.valid && textEng.touched"
+      >
+        The text(english) is required.
+      </span>
+    </div>
+
+    <div class="d-flex" *ngFor="let insertion of CVSection.insertions; let i = index">
+      <!-- TextEng Edit -->
+      <div class="d-block w-50 mx-auto my-3">
+        <label class="bef bef-text-tlight mb-1 d-block" for="insertion{{ i }}"
+          >Inserción {{ i }}</label
+        >
+        <input
+          class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
+          type="text"
+          name="insertion{{ i }}"
+          #insertion{{i}}="ngModel"
+          [(ngModel)]="CVSection.insertions[i]"
+          placeholder="Inserción {{ i }}"
+          required
+        />
+      </div>
+
+      <!-- Delete insertion BTN -->
+      <button
+        (click)="insertionHandler('CVSection', newInsertionSection, 'rmv', i)"
+        class="btn bef bef-btn-fullRed bef-text-tdark p-2 mx-auto my-5 d-block w-50"
+      >
+        Delete insertion {{ i }}
+      </button>
+    </div>
+
+    <!-- TextEng Edit -->
+    <div class="d-block w-75 mx-auto my-3">
+      <label class="bef bef-text-tlight mb-1 d-block" for="insertionN"
+        >Nueva Inserción</label
+      >
+      <input
+        class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
+        type="text"
+        name="insertionN"
+        #insertionN="ngModel"
+        [(ngModel)]="newInsertionSection"
+        placeholder="Nueva Inserción"
+        required
+      />
+    </div>
+
+    <!-- Insert insertion BTN -->
+    <button
+      (click)="insertionHandler('CVSection', newInsertionSection, 'add')"
+      class="btn bef bef-btn-fullRed bef-text-tdark p-2 mx-auto my-5 d-block w-50"
+    >
+      Insert insertion
+    </button>
+  </div>
+</div>

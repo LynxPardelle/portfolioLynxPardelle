@@ -1,0 +1,87 @@
+<p
+  *ngIf="
+    main &&
+    main.welcome &&
+    main.welcome !== '' &&
+    main.welcomeEng &&
+    main.welcomeEng !== ''
+  "
+  class="mx-auto my-5 p-5 text-center w-75"
+>
+  <!--
+  Best regards:
+  <br />
+  <br />
+  I'm Alec Jonathan Montaño Romero, also known as Lynx Pardelle, Glitch
+  Artist.
+  <br />
+  <br />
+  Also I'm web designer, web developer, audiovisual producer, music
+  producer, audio engineer, sound designer and graphic designer. :P
+  <br />
+  <br />
+  I wish you a good week. ;)
+  <br />
+  <br />
+  But wait, there's more:
+  -->
+  <ng-container *ngIf="lang === 'es'; else elseTemplate">
+    {{ main.welcome }}
+  </ng-container>
+  <ng-template #elseTemplate> {{ main.welcomeEng }} </ng-template>
+</p>
+
+<nav>
+  <ul class="mx-auto w-75 d-flex flex-wrap justify-content-center ps-0 mb-0">
+    <li class="mx-3">
+      <a
+        href="/webs"
+        [routerLink]="['/webs']"
+        class="text-decoration-none fw-bold"
+      >
+        {{ "app.websites" | translate }}
+      </a>
+    </li>
+    <li class="mx-3">
+      <a
+        href="/reel"
+        [routerLink]="['/reel']"
+        class="text-decoration-none fw-bold"
+      >
+        {{ "app.demoreel" | translate }}
+      </a>
+    </li>
+    <li class="mx-3">
+      <a
+        href="/book"
+        [routerLink]="['/book']"
+        class="text-decoration-none fw-bold"
+      >
+        {{ "app.book" | translate }}
+      </a>
+    </li>
+    <li class="mx-3">
+      <a
+        href="/music"
+        [routerLink]="['/music']"
+        class="text-decoration-none fw-bold"
+      >
+        {{ "app.music" | translate }}
+      </a>
+    </li>
+    <li class="mx-3">
+      <a href="/cv" [routerLink]="['/cv']" class="text-decoration-none fw-bold">
+        {{ "app.cv" | translate }}
+      </a>
+    </li>
+    <li class="mx-3">
+      <a
+        href="/blog"
+        [routerLink]="['/blog']"
+        class="text-decoration-none fw-bold"
+      >
+        {{ "app.blog" | translate }}
+      </a>
+    </li>
+  </ul>
+</nav>

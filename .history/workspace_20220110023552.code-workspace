@@ -1,0 +1,34 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "..\\BCAN"
+		},
+		{
+			"path": "..\\Monta-oReyesArrazola"
+		},
+		{
+			"path": "..\\KatzeCommunity"
+		},
+		{
+			"path": "..\\foaAngular"
+		},
+		{
+			"path": "..\\proyect-KC"
+		},
+		{
+			"path": "..\\proyect-FOA"
+		},
+		{
+			"path": "..\\passwordGenerator"
+		},
+		{
+			"path": "..\\bootstrap-expanded-features"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "bootstrap-expanded-features"
+	}
+}
