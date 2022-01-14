@@ -8,7 +8,7 @@ var port = 6164;
 mongoose.Promise = global.Promise;
 
 mongoose
-  .connect("mongodb://localhost:27017/lynx_portfolio", {
+  .connect("mongodb://159.203.122.158:27017/lynx_portfolio", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -19,7 +19,7 @@ mongoose
 
     // Crear servidor y escuchar peticiones http
     var server = app.listen(port, () => {
-      console.log("Servidor corriendo en https://localhost:6164.");
+      console.log("Servidor corriendo en https://lynxpardelle.com.");
     });
 
     app.use(express.static("client"));
