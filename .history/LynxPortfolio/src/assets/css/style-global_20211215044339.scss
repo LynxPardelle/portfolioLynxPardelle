@@ -1,0 +1,219 @@
+// @import "./colors.scss";
+// @import "./sizes.scss";
+@import "./shadows.scss";
+
+html {
+  overflow-x: hidden;
+
+  body {
+    background-color: $tdark;
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    .iconMontano {
+      color: $ulight;
+    }
+
+    p {
+      color: $ulight;
+    }
+
+    a {
+      color: $fullYellow;
+      &:hover {
+        color: darken($fullYellow, 25%);
+      }
+    }
+
+    ul {
+      li {
+        list-style-type: none;
+      }
+    }
+
+    .BGCustom {
+      background-color: $tdark;
+      z-index: -20;
+    }
+
+    .BGdefault1 {
+      background-color: $tdark;
+      mix-blend-mode: hue;
+      z-index: -20;
+    }
+
+    .imgBGdefault1 {
+      background: url("../images/image5DarkForest90deg.jpg") center center
+        no-repeat;
+      background-size: cover;
+      opacity: 0.5;
+      mix-blend-mode: lighten;
+      z-index: -15;
+    }
+
+    .imgBGdefault2 {
+      background: url("../images/image5DarkForest90deg.jpg") center center
+        no-repeat;
+      background-size: cover;
+      z-index: -10;
+      opacity: 0.5;
+      mix-blend-mode: lighten;
+      transform: scaleX(-1);
+      -webkit-transform: scaleX(-1);
+      -moz-transform: scaleX(-1);
+      -ms-transform: scaleX(-1);
+      -o-transform: scaleX(-1);
+    }
+
+    .BGdefault2 {
+      background-color: $midRed;
+      mix-blend-mode: hue;
+      z-index: -5;
+    }
+
+    .obj-fit-fill {
+      object-fit: fill;
+    }
+
+    .obj-fit-contain {
+      object-fit: contain;
+    }
+
+    .obj-fit-cover {
+      object-fit: cover;
+    }
+
+    .obj-fit-scale-down {
+      object-fit: scale-down;
+    }
+
+    .obj-fit-none {
+      object-fit: none;
+    }
+
+    .btn-link {
+      color: $tdark !important;
+      text-decoration: none !important;
+      box-shadow: 0 0 0 transparent !important;
+      width: 100%;
+    }
+
+    header {
+      .iconLynx {
+        img {
+          width: 45px !important;
+          height: 45px !important;
+        }
+      }
+
+      .menuIconContainer {
+        box-shadow: 0 0 10px $trlight5;
+        color: $tlight;
+        width: 45px;
+        height: 45px;
+      }
+
+      .titleLynx {
+        h1 {
+          line-height: 1.25rem;
+          color: $udark;
+          text-shadow: 0 0 5px $fRed5;
+        }
+      }
+
+      .offcanvasul {
+        box-shadow: inset 0 0 12px $fRed5, 0 0 12px $fRed5;
+        background-color: rgba(0, 0, 0, 0.9);
+        overflow-y: scroll;
+
+        &::-webkit-scrollbar {
+          width: 10px;
+        }
+
+        &::-webkit-scrollbar-track {
+          background: $transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          background: $transparent;
+        }
+
+        &:hover {
+          &::-webkit-scrollbar-track {
+            background: $transparent;
+            box-shadow: inset 0 0 12px $fRed5, 0 0 12px $fRed5;
+            border-radius: 30px;
+            -webkit-border-radius: 30px;
+            -moz-border-radius: 30px;
+            -ms-border-radius: 30px;
+            -o-border-radius: 30px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background: $fRed25;
+            border-radius: 30px;
+            -webkit-border-radius: 30px;
+            -moz-border-radius: 30px;
+            -ms-border-radius: 30px;
+            -o-border-radius: 30px;
+          }
+        }
+      }
+    }
+
+    main {
+      #CV {
+        /* #CVBG{
+          mix-blend-mode: difference;
+          z-index: -1;
+        } */
+        #CVImage {
+          // mix-blend-mode: lighten;
+          z-index: 1;
+        }
+      }
+
+      /* #cv::before {
+        background: url("../images/UndergroundSunBackGround.png") center center
+          no-repeat;
+        background-size: cover;
+        background-blend-mode: difference;
+      } */
+    }
+
+    footer {
+      a {
+        color: $tlight;
+        width: 35px;
+        height: 35px;
+        &:hover {
+          color: $tlight;
+        }
+
+        svg {
+          width: 37px;
+          height: 37px;
+          margin: -1px;
+        }
+      }
+
+      #whatsappIcon {
+        background-color: $whatsApp;
+        clip-path: path(
+          "M29.75,5.09A17.17,17.17,0,0,0,17.49,0a17.36,17.36,0,0,0-15,26L0,35l9.2-2.41a17.37,17.37,0,0,0,8.29,2.11h0A17.34,17.34,0,0,0,29.75,5.09Z"
+        );
+      }
+    }
+  }
+}
+
+/* .metallic {
+  background-image: linear-gradient(180deg, rgba(112, 112, 112, 0.25) 0%,rgba(235, 235, 235,0.25) 20%,rgba(255, 255, 255,0.30) 30%,rgba(235, 235, 235,0.25) 40%, rgba(194, 192, 192,0.25) 50%,rgba(214, 214, 214,0.40) 70%,rgba(255, 255, 255,0.30) 80%,rgba(214, 214, 214,0.25) 90%,rgba(92, 92, 92, 0.25) 100%);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.6) inset,
+    0px -8px 8px -4px rgb(0, 0, 0) inset,
+    0 -16px 4px -4px rgba(0, 0, 0, 0.125) inset;
+} */
