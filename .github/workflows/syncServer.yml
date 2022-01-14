@@ -18,8 +18,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install # installs your dependencies
-      - run: npm run test # builds your app
-      - run: npm test # runs your test suite
+      - run: npm update
+      - run: npm start
+      # - run: npm run test # builds your app
+      # - run: npm test # runs your test suite
         env:
           CI: true # shows terminal output!
 
