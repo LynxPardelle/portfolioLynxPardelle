@@ -19,7 +19,7 @@ mongoose
 
     // Crear servidor y escuchar peticiones http
     var server = app.listen(port, () => {
-      console.log("Servidor corriendo en https://lynxpardelle.com.");
+      console.log("Servidor corriendo en https://localhost:6164.");
     });
 
     app.use(express.static("client"));

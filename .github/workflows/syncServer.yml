@@ -18,8 +18,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install # installs your dependencies
-      - run: npm run test # builds your app
-      - run: npm test # runs your test suite
+      - run: sudo rm -rf node_modules
+      - run: npm install
+      # - run: npm run test # builds your app
+      # - run: npm test # runs your test suite
         env:
           CI: true # shows terminal output!
 
@@ -36,8 +38,8 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           script: |
-            cd /hom/LynxPardelle/portfolioLynxPardelle # we move into our app's folder
-            git pull # we pull any changes from git
+            cd /home/LynxPardelle/portfolioLynxPardelle # we move into our app's folder
+            git pull git@github.com:LynxPardelle/portfolioLynxPardelle.git # we pull any changes from git
             npm prune # we remove any unused dependencies
             npm install # we install any missing dependencies
             npm run build # we build our app
