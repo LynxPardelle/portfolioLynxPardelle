@@ -20,7 +20,6 @@ jobs:
       - run: npm install # installs your dependencies
       - run: sudo rm -rf node_modules
       - run: npm install
-      - run: npm start
       # - run: npm run test # builds your app
       # - run: npm test # runs your test suite
         env:
