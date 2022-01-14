@@ -170,69 +170,69 @@
       </button>
     </div>
     <accordion-group
-    [panelClass]="
-    'bef bef-bg-' +
-    (cvSection.bgColor && cvSection.bgColor !== ''
-    ? cvSection.bgColor.replace('#', 'a')
-    : 'fullRed') +
-    ' text-center'
-    "
-    (isOpenChange)="checkAccordion($event)"
+      *ngFor="let cvSubSection of cvSection.CVSubSections"
+      [panelClass]="
+        'bef bef-bg-' +
+        (cvSection.bgColor !== ''
+          ? cvSection.bgColor.replace('#', 'a')
+          : 'fullRed') +
+        ' text-center'
+      "
+      (isOpenChange)="checkAccordion($event)"
     >
-    <div accordion-heading class="position-relative">
-      <h3
-        class="text-center bef bef-fs-1rem"
-        [ngClass]="
-          classCreator(
-            'bef-text-' +
-              (cvSection.titleColor !== ''
-                ? cvSection.titleColor.replace('#', 'a')
-                : 'fullYellow'),
-            true
-          )
-        "
-      >
-        {{
-          lang === "es" && cvSection.title
-            ? cvSection.title
-            : lang === "en" && cvSection.titleEng
-            ? cvSection.titleEng
-            : ""
-        }}
-      </h3>
-      <span class="position-absolute top-0 end-0">
-        <ng-container *ngIf="true; else elseCVAHTemplate">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-caret-down-fill"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"
-            />
-          </svg>
-        </ng-container>
-        <ng-template #elseCVAHTemplate>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-caret-up-fill"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"
-            />
-          </svg>
-        </ng-template>
-      </span>
-    </div>
+      <div accordion-heading class="position-relative">
+        <h3
+          class="text-center bef bef-fs-1rem"
+          [ngClass]="
+            classCreator(
+              'bef-text-' +
+                (cvSection.titleColor !== ''
+                  ? cvSection.titleColor.replace('#', 'a')
+                  : 'fullYellow'),
+              true
+            )
+          "
+        >
+          {{
+            lang === "es" && cvSection.title
+              ? cvSection.title
+              : lang === "en" && cvSection.titleEng
+              ? cvSection.titleEng
+              : ""
+          }}
+        </h3>
+        <span class="position-absolute top-0 end-0">
+          <ng-container *ngIf="true; else elseCVAHTemplate">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-caret-down-fill"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"
+              />
+            </svg>
+          </ng-container>
+          <ng-template #elseCVAHTemplate>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-caret-up-fill"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"
+              />
+            </svg>
+          </ng-template>
+        </span>
+      </div>
       <accordion
-        *ngFor="let cvSubSection of cvSection.CVSubSections"
         [closeOthers]="true"
         [isAnimated]="true"
         class="mx-auto d-block w-80 position-relative"
@@ -293,7 +293,7 @@
         <accordion-group
           [panelClass]="
             'bef bef-bg-' +
-            (cvSubSection.bgColor && cvSubSection.bgColor !== ''
+            (cvSubSection.bgColor !== ''
               ? cvSubSection.bgColor.replace('#', 'a')
               : 'tdark') +
             ' text-center'
