@@ -23,6 +23,12 @@ app.use(
 var allowedDomains = [
   "http://localhost:4200",
   "http://localhost:6164",
+  "http://159.203.122.158",
+  "http://159.203.122.158:6164",
+  "https://159.203.122.158",
+  "https://159.203.122.158:6164",
+  "https://lynxpardelle.com",
+  "https://lynxpardelle.com:6164",
 ];
 app.use(
   cors({
