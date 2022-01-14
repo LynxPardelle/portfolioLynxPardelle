@@ -11,8 +11,7 @@ var cors = require("cors");
 var app = express();
 
 // Cargar rutas
-// var article_routes = require("./routes/article");
-
+var main_routes = require("./routes/main");
 
 // Middlewares de body-parser
 app.use(express.json({ limit: "50mb" }));
@@ -24,6 +23,12 @@ app.use(
 var allowedDomains = [
   "http://localhost:4200",
   "http://localhost:6164",
+  "http://159.203.122.158",
+  "http://159.203.122.158:6164",
+  "https://159.203.122.158",
+  "https://159.203.122.158:6164",
+  "https://lynxpardelle.com",
+  "https://lynxpardelle.com:6164",
 ];
 app.use(
   cors({
@@ -43,12 +48,11 @@ app.use(
 
 // rutas body-parser
 app.use("/", express.static("client", { redirect: false }));
-// app.use("/api/article", article_routes);
+app.use("/api/main", main_routes);
 
 app.get("*", function (req, res, next) {
   res.sendFile(path.resolve("client/index.html"));
 });
-
 
 // Ruta o método de prueba para el API
 app.get("/datos-autor", (req, res) => {
