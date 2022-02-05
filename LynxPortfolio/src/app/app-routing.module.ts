@@ -19,6 +19,7 @@ const routes: Routes = [
   { path: '', component: InicioComponent },
 
   // Main
+  { path: 'inicio', component: InicioComponent },
   { path: 'webs', component: WebsitesComponent },
   { path: 'reel', component: DemoreelComponent },
   { path: 'book', component: BookComponent },
