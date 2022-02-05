@@ -209,7 +209,7 @@ export class BookComponent implements OnInit {
           }
           this.getBookImgs();
           Swal.fire({
-            title: 'La creación de la imagen del book se ha realizado con éxito',
+            title: 'La creación la imagen del book se ha realizado con éxito',
             text: '',
             icon: 'success',
             customClass: {

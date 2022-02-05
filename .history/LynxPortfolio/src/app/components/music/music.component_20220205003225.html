@@ -52,16 +52,16 @@
         *ngFor="let item of [0, 1]; let i = index"
         class="bef bef-w-100per bef-w-md-50per bef-mt-md-1rem bef-mb-md-3rem"
       >
-        <div *ngFor="let song of songs; let ix = index">
+        <div *ngFor="let nitem of [0, 1, 2, 3, 4, 5, 6, 7, 8]; let ix = index">
           <div
             *ngIf="
-              (i === 0 && ix <= songs.length / 2) ||
-              (i === 1 && ix > songs.length / 2)
+              (i === 0 && ix <= [0, 1, 2, 3, 4, 5, 6, 7, 8].length / 2) ||
+              (i === 1 && ix > [0, 1, 2, 3, 4, 5, 6, 7, 8].length / 2)
             "
             class="mx-auto bef bef-w-90per d-flex align-items-center justify-content-between bef-text-tlight"
           >
             <button class="btn bef bef-w-80per m-0 text-left bef-text-tlight">
-              {{ song.title }}
+              Song {{ ix }}
             </button>
             <button class="btn w-10 bef bef-text-tlight">
               <svg
@@ -109,12 +109,12 @@
       >
         <div
           class="bef bef-m-md-2_5vw"
-          *ngFor="let album of albums; let ix = index"
+          *ngFor="let nitem of [0, 1, 2, 3, 4, 5, 6, 7, 8]; let ix = index"
         >
           <div
             *ngIf="
-              (i === 0 && ix <= albums.length / 2) ||
-              (i === 1 && ix > albums.length / 2)
+              (i === 0 && ix <= [0, 1, 2, 3, 4, 5, 6, 7, 8].length / 2) ||
+              (i === 1 && ix > [0, 1, 2, 3, 4, 5, 6, 7, 8].length / 2)
             "
             class="mx-auto my-4 bef bef-w-90vw bef-w-md-40vw d-flex align-items-center justify-content-between bef-text-tlight"
           >
@@ -122,40 +122,38 @@
               class="bef bef-w-40vw bef-h-40vw bef-w-md-18_75vw bef-h-md-18_75vw"
               [ngClass]="{
                 'order-2':
-                  (i === 0 && ix <= albums.length / 2 && ix % 2 === 1) ||
-                  (i === 1 && ix > albums.length / 2 && ix % 2 === 0)
+                  (i === 0 &&
+                    ix <= [0, 1, 2, 3, 4, 5, 6, 7, 8].length / 2 &&
+                    ix % 2 === 1) ||
+                  (i === 1 &&
+                    ix > [0, 1, 2, 3, 4, 5, 6, 7, 8].length / 2 &&
+                    ix % 2 === 0)
               }"
-              src="{{ urlMain + 'get-file/' + album.img.location }}"
-              alt="{{ album.title }}"
+              src="https://picsum.photos/30{{ ix + 1 }}/30{{ ix + 1 }}"
+              alt="https://picsum.photos/30{{ ix + 1 }}/30{{ ix + 1 }}"
             />
             <div
               class="bef bef-w-40vw bef-w-md-18_75vw bef-h-40vw bef-h-md-18_75vw d-flex"
               [ngClass]="{
                 'order-2':
-                  (i === 0 && ix <= albums.length / 2 && ix % 2 === 0) ||
-                  (i === 1 && ix > albums.length / 2 && ix % 2 === 1)
+                  (i === 0 &&
+                    ix <= [0, 1, 2, 3, 4, 5, 6, 7, 8].length / 2 &&
+                    ix % 2 === 0) ||
+                  (i === 1 &&
+                    ix > [0, 1, 2, 3, 4, 5, 6, 7, 8].length / 2 &&
+                    ix % 2 === 1)
               }"
             >
-              <a
+              <img
                 class="bef bef-w-33per m-3 align-self-start"
-                href="{{ album.tidal }}"
-              >
-                <img
-                  class="bef bef-w-100per bef-h-100per"
-                  src="../../../assets/images/Tidal-logo.jpg"
-                  alt="Tidal"
-                />
-              </a>
-              <a
-                class="bef bef-w-33per m-3 align-self-start"
-                href="{{ album.spotify }}"
-              >
-                <img
-                  class="bef bef-w-100per bef-h-100per"
-                  src="../../../assets/images/Spotify.png"
-                  alt="Spotify"
-                />
-              </a>
+                src="../../../assets/images/Tidal-logo.jpg"
+                alt="Tidal"
+              />
+              <img
+                class="bef bef-w-33per bef-bg-tlight rounded-circle overflow-hidden m-3 align-self-end"
+                src="../../../assets/images/Spotify.png"
+                alt="Spotify"
+              />
             </div>
           </div>
         </div>
@@ -164,7 +162,6 @@
   </article>
 </section>
 
-<!-- EditAlbum -->
 <section class="my-5 py-5" *ngIf="edit === true">
   <h2 class="text-center my-3">
     <ng-container
@@ -283,105 +280,5 @@
     </ng-container>
     <ng-template #elseAlbumSubmitIdTemplate> Crear </ng-template>
     de album
-  </button>
-</section>
-
-<!-- EditSong -->
-<section class="my-5 py-5" *ngIf="edit === true">
-  <h2 class="text-center my-3">
-    <ng-container *ngIf="song._id && song._id !== ''; else elseSongIdTemplate">
-      Edición
-    </ng-container>
-    <ng-template #elseSongIdTemplate> Creación </ng-template>
-    de la canción
-  </h2>
-
-  <!-- Title Edit -->
-  <div class="d-block w-75 mx-auto my-3">
-    <label class="bef bef-text-tlight mb-1 d-block" for="title">Título</label>
-    <input
-      class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
-      type="text"
-      name="title"
-      #title="ngModel"
-      [(ngModel)]="song.title"
-      placeholder="Título"
-      required
-    />
-    <span
-      class="bef bef-text-tlight font-weight-bold"
-      *ngIf="!title.valid && title.touched"
-    >
-      El título es obligatorio.
-    </span>
-  </div>
-
-  <div
-    *ngIf="(song._id && song._id !== '') || (song.title && song.title !== '')"
-    class="my-5 d-flex flex-wrap justify-content-evenly"
-  >
-    <!-- img Upload -->
-    <div class="m-3">
-      <h3 class="bef bef-text-tlight text-center w-75 my-3 d-block mx-auto">
-        Subida de imagen
-      </h3>
-      <img
-        *ngIf="song && song.coverArt && song.coverArt.location"
-        class="bef bef-wmx-75per d-block mx-auto bef-hmx-25vh my-3"
-        src="{{ urlMain + 'get-file/' + song.coverArt.location }}"
-        alt="{{ song.title }}"
-      />
-      <app-file-uploader
-        [type]="'main'"
-        [typeMeta]="'one'"
-        [typeThingComRes]="'song'"
-        [thing]="song.coverArt"
-        [thingInside]="true"
-        [id]="song._id === '' ? '' : song._id + '/coverArt'"
-        (pre_loader)="pre_load($event, 'coverArt')"
-        (recoverThing)="recoverThingFather($event)"
-      ></app-file-uploader>
-    </div>
-
-    <!-- song Upload -->
-    <div class="m-3">
-      <h3 class="bef bef-text-tlight text-center w-75 my-3 d-block mx-auto">
-        Subida de la canción
-      </h3>
-      <audio>
-        <source
-          src="{{ urlMain + 'get-file/' + song.song.location }}"
-          type="{{ 'audio/' + song.song.type }}"
-        />
-        Your browser does not support the audio element.
-      </audio>
-      <app-file-uploader
-        [type]="'main'"
-        [typeMeta]="'one'"
-        [typeThingComRes]="'song'"
-        [thing]="song.song"
-        [thingInside]="true"
-        [id]="song._id === '' ? '' : song._id + '/song'"
-        (pre_loader)="pre_load($event)"
-        (recoverThing)="recoverThingFather($event)"
-      ></app-file-uploader>
-    </div>
-  </div>
-
-  <!-- Submit -->
-  <button
-    [disabled]="
-      !song._id || song._id === '' || !song.title || song.title === ''
-    "
-    (click)="onSubmit('song')"
-    class="bef btn bef-btn-fullRed bef-text-tdark p-2 mx-auto my-5 d-block w-50"
-  >
-    <ng-container
-      *ngIf="song._id && song._id !== ''; else elseSongSubmitIdTemplate"
-    >
-      Editar
-    </ng-container>
-    <ng-template #elseSongSubmitIdTemplate> Crear </ng-template>
-    canción
   </button>
 </section>

@@ -41,7 +41,6 @@ export class MusicComponent implements OnInit {
 
   // Utility
   public edit: boolean = false;
-  public windowWidth = window.innerWidth;
   constructor(
     private _mainService: MainService,
 
@@ -67,9 +66,6 @@ export class MusicComponent implements OnInit {
             break;
           case 'identity':
             this.identity = sharedContent.thing;
-            break;
-          case 'windowWidth':
-            this.windowWidth = sharedContent.thing;
             break;
           case 'onlyConsoleMessage':
             this._webService.consoleLog(
@@ -477,7 +473,7 @@ export class MusicComponent implements OnInit {
     this.getSongs();
   }
 
-  async pre_load(event: any, thingy: string = 'song') {
+  async pre_load(event: any) {
     try {
       switch (event.typeThingComRes) {
         case 'album':
@@ -486,7 +482,6 @@ export class MusicComponent implements OnInit {
           break;
         case 'song':
           await this.onSubmit('song', true);
-          let adding = thingy === 'song' ? 'song': 'coverArt';
           return this.song._id;
           break;
         default:
