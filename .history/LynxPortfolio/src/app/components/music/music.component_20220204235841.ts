@@ -41,7 +41,6 @@ export class MusicComponent implements OnInit {
 
   // Utility
   public edit: boolean = false;
-  public windowWidth = window.innerWidth;
   constructor(
     private _mainService: MainService,
 
@@ -67,9 +66,6 @@ export class MusicComponent implements OnInit {
             break;
           case 'identity':
             this.identity = sharedContent.thing;
-            break;
-          case 'windowWidth':
-            this.windowWidth = sharedContent.thing;
             break;
           case 'onlyConsoleMessage':
             this._webService.consoleLog(
@@ -295,189 +291,13 @@ export class MusicComponent implements OnInit {
     }
   }
 
-  async deleteAlbum(id: string) {
-    try {
-      let result = await Swal.fire({
-        title: '¿Seguro que quieres eliminar el album?',
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonText: 'Si',
-        denyButtonText: `No`,
-      });
-
-      if (!result) {
-        throw new Error('Error con la opción.');
-      }
-
-      if (result.isConfirmed) {
-        const albumDeleted = await this._mainService
-          .deleteAlbum(id)
-          .toPromise();
-
-        if (!albumDeleted) {
-          throw new Error('No hay album.');
-        }
-
-        await this.getAlbums();
-
-        this._webService.consoleLog(
-          albumDeleted,
-          this.document + ' 257',
-          this.customConsoleCSS
-        );
-
-        Swal.fire({
-          title: 'El album se ha eliminado con éxito',
-          text: '',
-          icon: 'success',
-          customClass: {
-            popup: 'bef bef-bg-fullRed',
-            title: 'bef bef-text-fullYellow',
-            closeButton: 'bef bef-text-fullYellow',
-            confirmButton: 'bef bef-text-fullYellow',
-          },
-        });
-      } else if (result.isDenied) {
-        Swal.fire({
-          title: 'No se eliminó el album.',
-          text: '',
-          icon: 'info',
-          customClass: {
-            popup: 'bef bef-bg-fullRed',
-            title: 'bef bef-text-fullYellow',
-            closeButton: 'bef bef-text-fullYellow',
-            confirmButton: 'bef bef-text-fullYellow',
-          },
-        });
-      }
-    } catch (err: any) {
-      this._webService.consoleLog(
-        err,
-        this.document + ' 108',
-        this.customConsoleCSS
-      );
-
-      let errorMessage = '';
-      if (err.error) {
-        errorMessage = err.error.message;
-        if (err.error.errorMessage) {
-          errorMessage += '<br/>' + err.error.errorMessage;
-        }
-      } else {
-        errorMessage = err.message;
-      }
-
-      //Alerta
-      Swal.fire({
-        title: 'Error',
-        html: `Fallo en la petición.
-          <br/>
-          ${errorMessage}`,
-        icon: 'error',
-        customClass: {
-          popup: 'bef bef-bg-fullRed',
-          title: 'text-titleM',
-          closeButton: 'bef bef-text-fullYellow',
-          confirmButton: 'bef bef-text-fullYellow',
-        },
-      });
-    }
-  }
-
-  async deleteSong(id: string) {
-    try {
-      let result = await Swal.fire({
-        title: '¿Seguro que quieres eliminar la canción?',
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonText: 'Si',
-        denyButtonText: `No`,
-      });
-
-      if (!result) {
-        throw new Error('Error con la opción.');
-      }
-
-      if (result.isConfirmed) {
-        const songDeleted = await this._mainService.deleteSong(id).toPromise();
-
-        if (!songDeleted) {
-          throw new Error('No hay canción.');
-        }
-
-        await this.getSongs();
-
-        this._webService.consoleLog(
-          songDeleted,
-          this.document + ' 257',
-          this.customConsoleCSS
-        );
-
-        Swal.fire({
-          title: 'La canción se ha eliminado con éxito',
-          text: '',
-          icon: 'success',
-          customClass: {
-            popup: 'bef bef-bg-fullRed',
-            title: 'bef bef-text-fullYellow',
-            closeButton: 'bef bef-text-fullYellow',
-            confirmButton: 'bef bef-text-fullYellow',
-          },
-        });
-      } else if (result.isDenied) {
-        Swal.fire({
-          title: 'No se eliminó la canción.',
-          text: '',
-          icon: 'info',
-          customClass: {
-            popup: 'bef bef-bg-fullRed',
-            title: 'bef bef-text-fullYellow',
-            closeButton: 'bef bef-text-fullYellow',
-            confirmButton: 'bef bef-text-fullYellow',
-          },
-        });
-      }
-    } catch (err: any) {
-      this._webService.consoleLog(
-        err,
-        this.document + ' 108',
-        this.customConsoleCSS
-      );
-
-      let errorMessage = '';
-      if (err.error) {
-        errorMessage = err.error.message;
-        if (err.error.errorMessage) {
-          errorMessage += '<br/>' + err.error.errorMessage;
-        }
-      } else {
-        errorMessage = err.message;
-      }
-
-      //Alerta
-      Swal.fire({
-        title: 'Error',
-        html: `Fallo en la petición.
-          <br/>
-          ${errorMessage}`,
-        icon: 'error',
-        customClass: {
-          popup: 'bef bef-bg-fullRed',
-          title: 'text-titleM',
-          closeButton: 'bef bef-text-fullYellow',
-          confirmButton: 'bef bef-text-fullYellow',
-        },
-      });
-    }
-  }
-
   // Upload
   recoverThingFather(event: any) {
     this.getAlbums();
     this.getSongs();
   }
 
-  async pre_load(event: any, thingy: string = 'song') {
+  async pre_load(event: any) {
     try {
       switch (event.typeThingComRes) {
         case 'album':
@@ -486,7 +306,6 @@ export class MusicComponent implements OnInit {
           break;
         case 'song':
           await this.onSubmit('song', true);
-          let adding = thingy === 'song' ? 'song': 'coverArt';
           return this.song._id;
           break;
         default:

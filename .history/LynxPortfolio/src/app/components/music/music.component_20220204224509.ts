@@ -2,26 +2,29 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { Location } from '@angular/common';
 
 // Services
-import { GlobalMain } from '../../../services/global';
-import { MainService } from '../../../services/main.service';
-import { WebService } from '../../../services/web.service';
-import { SharedService } from '../../../services/shared.service';
+import { GlobalMain } from '../../services/global';
+import { MainService } from '../../services/main.service';
+import { WebService } from '../../services/web.service';
+import { SharedService } from '../../services/shared.service';
 
 // Models
-import { Main } from '../../../models/main';
+import { Main, Album } from '../../models/main';
 
 // Extras
 import { TranslateService } from '@ngx-translate/core';
 import Swal from 'sweetalert2';
 
 @Component({
-  selector: 'blog',
-  templateUrl: './blog.component.html',
-  styleUrls: ['./blog.component.scss'],
+  selector: 'music',
+  templateUrl: './music.component.html',
+  styleUrls: ['./music.component.scss'],
+  providers: [WebService, TranslateService],
 })
-export class BlogComponent implements OnInit {
+export class MusicComponent implements OnInit {
   public identity: any;
   public main!: Main;
+  public albums: Album[] = [];
+  public album: Album = new Album('', null, '', '', 0);
 
   // Translate
   public lang: string = 'es';
@@ -30,14 +33,13 @@ export class BlogComponent implements OnInit {
   public urlMain: string = GlobalMain.url;
 
   // Console Settings
-  public document: string = 'blog.component.ts';
+  public document: string = 'music.component.ts';
   public customConsoleCSS =
-    'background-color: rgba(75, 5, 200, 1); color: white; padding: 1em;';
+    'background-color: rgba(50, 235, 100, 1); color: black; padding: 1em;';
 
   // Utility
   public edit: boolean = false;
   public windowWidth = window.innerWidth;
-
   constructor(
     private _mainService: MainService,
 
@@ -51,8 +53,8 @@ export class BlogComponent implements OnInit {
     _sharedService.changeEmitted$.subscribe((sharedContent) => {
       if (
         typeof sharedContent === 'object' &&
-        sharedContent.from !== 'blog' &&
-        (sharedContent.to === 'blog' || sharedContent.to === 'all')
+        sharedContent.from !== 'music' &&
+        (sharedContent.to === 'music' || sharedContent.to === 'all')
       ) {
         switch (sharedContent.property) {
           case 'main':
@@ -86,7 +88,7 @@ export class BlogComponent implements OnInit {
       this.customConsoleCSS
     );
     this._sharedService.emitChange({
-      from: 'blog',
+      from: 'music',
       to: 'all',
       property: 'identity',
       thing: this.identity,
@@ -95,10 +97,13 @@ export class BlogComponent implements OnInit {
 
   ngOnInit(): void {
     this._sharedService.emitChange({
-      from: 'blog',
+      from: 'music',
       to: 'all',
       property: 'onlyConsoleMessage',
-      thing: 'Data from blog',
+      thing: 'Data from music',
     });
+
+    // this.getAlbums();
   }
+
 }

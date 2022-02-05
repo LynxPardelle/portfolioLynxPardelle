@@ -133,10 +133,6 @@ export class BookComponent implements OnInit {
       this.bookImgs = bookImgs.bookImgs;
       this.bookImgs = this.shuffle(bookImgs.bookImgs);
 
-      setInterval(()=>{
-        this.bookImgs = this.shuffle(bookImgs.bookImgs);
-      }, 15000)
-
       for (let bookImg of this.bookImgs) {
         if (bookImg.img && bookImg.img.location && !bookImg.width) {
           this.checkImgWNH(bookImg);
@@ -202,14 +198,14 @@ export class BookComponent implements OnInit {
             throw new Error('No se creo la imagen book.');
           }
 
-          if (isFromPreload === true) {
+          if(isFromPreload === true){
             this.bookImg = bookImg.bookImg;
           } else {
             this.bookImg = new BookImg('', '', '', null, 0, 0);
           }
           this.getBookImgs();
           Swal.fire({
-            title: 'La creación de la imagen del book se ha realizado con éxito',
+            title: 'La creación la imagen del book se ha realizado con éxito',
             text: '',
             icon: 'success',
             customClass: {
@@ -478,20 +474,18 @@ export class BookComponent implements OnInit {
   }
 
   shuffle(array: BookImg[]) {
-    let currentIndex = array.length,
-      randomIndex;
+    let currentIndex = array.length,  randomIndex;
 
     // While there remain elements to shuffle...
     while (currentIndex != 0) {
+
       // Pick a remaining element...
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex--;
 
       // And swap it with the current element.
       [array[currentIndex], array[randomIndex]] = [
-        array[randomIndex],
-        array[currentIndex],
-      ];
+        array[randomIndex], array[currentIndex]];
     }
 
     return array;

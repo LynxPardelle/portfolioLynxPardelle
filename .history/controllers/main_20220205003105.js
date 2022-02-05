@@ -356,15 +356,17 @@ var controller = {
     // Validar datos (validator)
     try {
       var validate_title = !validator.isEmpty(body.title);
+      var validate_duration = !validator.isEmpty(body.duration);
     } catch (err) {
       return res.status(500).send({
         status: "error",
         message: "¡faltan datos por enviar!",
         validate_title: "validate_title: " + validate_title,
+        validate_duration: "validate_duration: " + validate_duration,
       });
     }
 
-    if (validate_title) {
+    if (validate_title && validate_duration) {
       // Si todo es válido, crear la song a guardar
       var song = new Song();
 
@@ -1047,7 +1049,8 @@ var controller = {
       }
 
       // Buscar cvSubSections
-      const cvSubSections = await CVSubSection.find().sort("order");
+      const cvSubSections = await CVSubSection.find()
+        .sort("order");
 
       if (cvSubSections) {
         for (let cvSubSectionCheck of cvSubSections) {
@@ -1133,8 +1136,10 @@ var controller = {
       main = await (() => {
         for (let key in update) {
           if (
-            (key !== "key" || (key === "key" && update[key] !== "")) &&
-            (key !== "keyOld" || (key === "keyOld" && update[keyOld] !== ""))
+            (key !== "key" ||
+              (key === "key" && update[key] !== "")) &&
+            (key !== "keyOld" ||
+              (key === "keyOld" && update[keyOld] !== ""))
           ) {
             main[key] = update[key];
           }
@@ -2203,20 +2208,10 @@ var controller = {
         var file_size = req.files[0].size;
         var file_path = req.files[0].path;
 
-        // Actualizar main
-        var option = req.params.option;
-
         if (
-          !option ||
-          (option === "song" &&
-            file_ext != "mp3" &&
-            file_ext != "ogg" &&
-            file_ext != "wav") ||
-          (option === "coverArt" &&
-            file_ext != "png" &&
-            file_ext != "gif" &&
-            file_ext != "jpg" &&
-            file_ext != "jpeg")
+          file_ext != "mp3" &&
+          file_ext != "ogg" &&
+          file_ext != "wav"
         ) {
           // Borrar el archivo
           await fs.unlink(file_path, (err) => {
@@ -2289,6 +2284,9 @@ var controller = {
             message: "El archivo NO se ha guardado.",
           });
         }
+
+        // Actualizar main
+        var option = req.params.option;
 
         await (() => {
           switch (option) {

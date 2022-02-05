@@ -131,11 +131,6 @@ export class BookComponent implements OnInit {
       }
 
       this.bookImgs = bookImgs.bookImgs;
-      this.bookImgs = this.shuffle(bookImgs.bookImgs);
-
-      setInterval(()=>{
-        this.bookImgs = this.shuffle(bookImgs.bookImgs);
-      }, 15000)
 
       for (let bookImg of this.bookImgs) {
         if (bookImg.img && bookImg.img.location && !bookImg.width) {
@@ -156,7 +151,7 @@ export class BookComponent implements OnInit {
     }
   }
 
-  async onSubmit(isFromPreload: boolean = false) {
+  async onSubmit() {
     try {
       let result = await Swal.fire({
         title:
@@ -202,14 +197,10 @@ export class BookComponent implements OnInit {
             throw new Error('No se creo la imagen book.');
           }
 
-          if (isFromPreload === true) {
-            this.bookImg = bookImg.bookImg;
-          } else {
-            this.bookImg = new BookImg('', '', '', null, 0, 0);
-          }
+          this.bookImg = bookImg.bookImg;
           this.getBookImgs();
           Swal.fire({
-            title: 'La creación de la imagen del book se ha realizado con éxito',
+            title: 'La creación la imagen del book se ha realizado con éxito',
             text: '',
             icon: 'success',
             customClass: {
@@ -340,7 +331,15 @@ export class BookComponent implements OnInit {
     try {
       switch (event.type) {
         case 'main':
-          await this.onSubmit(true);
+          await this.onSubmit();
+          /* for (let bookImg of this.bookImgs) {
+            if (
+              bookImg.title === bookImg.title &&
+              bookImg.titleEng === bookImg.titleEng
+            ) {
+              this.bookImg = bookImg;
+            }
+          } */
           return this.bookImg._id;
           break;
         default:
@@ -475,26 +474,6 @@ export class BookComponent implements OnInit {
         this.customConsoleCSS
       );
     }
-  }
-
-  shuffle(array: BookImg[]) {
-    let currentIndex = array.length,
-      randomIndex;
-
-    // While there remain elements to shuffle...
-    while (currentIndex != 0) {
-      // Pick a remaining element...
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex--;
-
-      // And swap it with the current element.
-      [array[currentIndex], array[randomIndex]] = [
-        array[randomIndex],
-        array[currentIndex],
-      ];
-    }
-
-    return array;
   }
 
   /*

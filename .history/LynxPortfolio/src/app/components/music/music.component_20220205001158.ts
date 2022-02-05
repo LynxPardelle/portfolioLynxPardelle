@@ -477,7 +477,7 @@ export class MusicComponent implements OnInit {
     this.getSongs();
   }
 
-  async pre_load(event: any, thingy: string = 'song') {
+  async pre_load(event: any) {
     try {
       switch (event.typeThingComRes) {
         case 'album':
@@ -486,7 +486,6 @@ export class MusicComponent implements OnInit {
           break;
         case 'song':
           await this.onSubmit('song', true);
-          let adding = thingy === 'song' ? 'song': 'coverArt';
           return this.song._id;
           break;
         default:
