@@ -1041,9 +1041,7 @@ var controller = {
     var cvSubSectionId = req.params.id;
     var nError = 500;
     try {
-      const cvSubSection = await CVSubSection.findById(cvSubSectionId).populate(
-        populateCVSubSection
-      );
+      const cvSubSection = await CVSubSection.findById(cvSubSectionId);
 
       if (!cvSubSection) {
         nError = 404;
@@ -1052,7 +1050,6 @@ var controller = {
 
       // Buscar cvSubSections
       const cvSubSections = await CVSubSection.find()
-        .populate(populateCVSubSection)
         .sort("order");
 
       if (cvSubSections) {
@@ -1069,7 +1066,7 @@ var controller = {
         {
           new: true,
         }
-      ).populate(populateCVSubSection);
+      );
 
       if (!cvSubSectionUpdated) {
         nError = 404;
@@ -1136,7 +1133,21 @@ var controller = {
         }
       }
 
-      const mainUpdated = await Main.findByIdAndUpdate(mainId, update, {
+      main = await (() => {
+        for (let key in update) {
+          if (
+            (key !== "key" ||
+              (key === "key" && update[key] !== "")) &&
+            (key !== "keyOld" ||
+              (key === "keyOld" && update[keyOld] !== ""))
+          ) {
+            main[key] = update[key];
+          }
+        }
+        return main;
+      })();
+
+      const mainUpdated = await Main.findByIdAndUpdate(mainId, main, {
         new: true,
       }).populate(populateMain);
 
