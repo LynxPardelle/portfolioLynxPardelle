@@ -117,7 +117,7 @@
               }}"
               placement="top"
               [isDisabled]="
-                (!songi.song || copiedToClipBoard !== songi.song.location) &&
+                copiedToClipBoard !== songi.song.location &&
                 copiedToClipBoard !== songi.link
               "
             >

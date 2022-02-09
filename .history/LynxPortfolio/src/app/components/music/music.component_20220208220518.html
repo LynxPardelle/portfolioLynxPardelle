@@ -65,12 +65,7 @@
             <button class="btn bef bef-w-80per m-0 text-left bef-text-tlight">
               {{ songi.title }}
             </button>
-            <button
-              *ngIf="
-                songi.song && songi.song.location && songi.song.location !== ''
-              "
-              class="btn w-10 bef bef-text-tlight"
-            >
+            <button class="btn w-10 bef bef-text-tlight">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -85,41 +80,8 @@
               </svg>
             </button>
             <button
-              (click)="
-                copyToClipBoard(
-                  songi.song &&
-                    songi.song.location &&
-                    songi.song.location !== ''
-                    ? songi.song.location
-                    : songi.link && songi.link !== ''
-                    ? songi.link
-                    : ''
-                )
-              "
-              *ngIf="
-                (songi.song &&
-                  songi.song.location &&
-                  songi.song.location !== '') ||
-                (songi.link && songi.link !== '')
-              "
+              (click)="copyToClipBoard(songi.title)"
               class="btn w-10 bef bef-text-tlight"
-              tooltip="{{
-                (lang === 'en'
-                  ? 'Copied to ClipBoard: '
-                  : 'Copiado al portapapeles: ') +
-                  (songi.song &&
-                  songi.song.location &&
-                  songi.song.location !== ''
-                    ? songi.song.location
-                    : songi.link && songi.link !== ''
-                    ? songi.link
-                    : '')
-              }}"
-              placement="top"
-              [isDisabled]="
-                (!songi.song || copiedToClipBoard !== songi.song.location) &&
-                copiedToClipBoard !== songi.link
-              "
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -476,26 +438,6 @@
       *ngIf="!title.valid && title.touched"
     >
       El título es obligatorio.
-    </span>
-  </div>
-
-  <!-- Title Edit -->
-  <div class="d-block w-75 mx-auto my-3">
-    <label class="bef bef-text-tlight mb-1 d-block" for="link">Link</label>
-    <input
-      class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
-      type="text"
-      name="link"
-      #link="ngModel"
-      [(ngModel)]="song.link"
-      placeholder="Link"
-      required
-    />
-    <span
-      class="bef bef-text-tlight font-weight-bold"
-      *ngIf="!link.valid && link.touched"
-    >
-      El link es obligatorio.
     </span>
   </div>
 

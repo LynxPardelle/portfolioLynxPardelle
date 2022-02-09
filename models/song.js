@@ -8,6 +8,7 @@ var SongSchema = Schema({
   song: { type: Schema.ObjectId, ref: "File" },
   duration: Number,
   coverArt: { type: Schema.ObjectId, ref: "File" },
+  link: String,
   order: {
     type: Number,
     unique: true

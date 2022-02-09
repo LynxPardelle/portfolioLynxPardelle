@@ -26,7 +26,7 @@ export class MusicComponent implements OnInit {
   public albums: Album[] = [];
   public album: Album = new Album('', '', null, '', '', 0);
   public songs: Song[] = [];
-  public song: Song = new Song('', '', null, 0, null, '', 0);
+  public song: Song = new Song('', '', null, 0, null, 0);
 
   // Translate
   public lang: string = 'es';
@@ -42,7 +42,6 @@ export class MusicComponent implements OnInit {
   // Utility
   public edit: boolean = false;
   public windowWidth = window.innerWidth;
-  public copiedToClipBoard: string = '';
   constructor(
     private _mainService: MainService,
 
@@ -165,9 +164,7 @@ export class MusicComponent implements OnInit {
           (type === 'album' && this.album._id && this.album._id !== '') ||
           (type === 'song' && this.song._id && this.song._id !== '')
             ? '¿Seguro que quieres hacer los cambios?'
-            : `¿Seguro que quieres crear ${
-                type === 'album' ? 'el album' : 'la canción'
-              }?`,
+            : '¿Seguro que quieres crear la imagen de book?',
         showDenyButton: true,
         showCancelButton: true,
         confirmButtonText: 'Si',
@@ -260,7 +257,7 @@ export class MusicComponent implements OnInit {
             if (isFromPreload === true) {
               this.song = song.song;
             } else {
-              this.song = new Song('', '', null, 0, null, '', 0);
+              this.song = new Song('', '', null, 0, null, 0);
             }
             this.getSongs();
             Swal.fire({
@@ -494,7 +491,7 @@ export class MusicComponent implements OnInit {
           break;
         case 'song':
           await this.onSubmit('song', true);
-          let adding = thingy === 'song' ? 'song' : 'coverArt';
+          let adding = thingy === 'song' ? 'song': 'coverArt';
           return this.song._id;
           break;
         default:
@@ -556,14 +553,8 @@ export class MusicComponent implements OnInit {
     if (this.song._id === '' || this.song._id !== song._id) {
       this.song = song;
     } else {
-      this.song = new Song('', '', null, 0, null, '', 0);
+      this.song = new Song('', '', null, 0, null, 0);
     }
-  }
-
-  copyToClipBoard(copyText: string) {
-    navigator.clipboard.writeText(copyText);
-    this.copiedToClipBoard = '';
-    this.copiedToClipBoard = copyText;
   }
 
   Linkify(

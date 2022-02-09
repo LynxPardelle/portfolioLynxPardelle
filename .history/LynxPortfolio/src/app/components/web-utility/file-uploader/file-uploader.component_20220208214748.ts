@@ -17,7 +17,7 @@ import {
 
 // Services
 import { Global } from '../../../services/global';
-import { UserService } from '../../../services/user.service';
+import { MainService } from '../../../services/main.service';
 import { WebService } from '../../../services/web.service';
 
 // NGX-Bootstrap
@@ -76,15 +76,15 @@ export class FileUploaderComponent implements OnInit {
   public fileProgress: UploadFile[];
   public doneUploading: boolean;
   constructor(
-    private _userService: UserService,
+    private _mainService: MainService,
     private _webService: WebService,
     private modalService: BsModalService,
 
     private _http: HttpClient
   ) {
     // Identity
-    this.identity = this._userService.getIdentity();
-    this.token = this._userService.getToken();
+    this.identity = this._mainService.getIdentity();
+    this.token = this._mainService.getToken();
 
     // Urls
     this.url = Global.url;
@@ -98,7 +98,7 @@ export class FileUploaderComponent implements OnInit {
     this.optionsOne = {
       concurrency: 1,
       maxUploads: 1,
-      maxFileSize: 50000000,
+      maxFileSize: 100000000,
     };
     this.files = []; // local uploading files array
     this.uploadInput = new EventEmitter<UploadInput>(); // input events, we use this to emit data to ngx-uploader
@@ -381,7 +381,7 @@ export class FileUploaderComponent implements OnInit {
       type: 'uploadAll',
       url: url,
       method: 'POST',
-      headers: { Authorization: this._userService.getToken() },
+      headers: { Authorization: this._mainService.getToken() },
       data: { foo: 'bar' },
     };
 
