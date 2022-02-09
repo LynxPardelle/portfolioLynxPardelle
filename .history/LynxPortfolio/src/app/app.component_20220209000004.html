@@ -18,23 +18,24 @@
   ></div>
 </ng-container>
 <ng-template #elseBGMainTemplate>
-  <div
-    class="BGdefault1 position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh"
-  ></div>
-  <div
-    class="imgBGdefault1 position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh"
-  ></div>
-  <div
-    class="imgBGdefault2 position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh"
-  ></div>
-  <div
-    class="BGdefault2 position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh"
-  ></div>
+  <div class="BGdefault1 position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh"></div>
+  <div class="imgBGdefault1 position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh"></div>
+  <div class="imgBGdefault2 position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh"></div>
+  <div class="BGdefault2 position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh"></div>
 </ng-template>
 
 <header class="position-fixed top-0 bef bef-z-5 w-100">
   <div
-    class="d-flex flex-wrap bef bef-bg-tdark__OPA__0_5 justify-content-evenly align-items-center px-2 py-3 w-100"
+    class="
+      d-flex
+      flex-wrap
+      bef
+      bef-bg-tdark__OPA__0_5
+      justify-content-evenly
+      align-items-center
+      px-2 py-3
+      w-100
+    "
   >
     <!-- Icon -->
     <a href="/" [routerLink]="['/']" class="text-center iconLynx w-max-15">
@@ -102,7 +103,14 @@
         id="button-basic"
         dropdownToggle
         type="button"
-        class="btn btn-fullRed dropdown-toggle bef bef-text-tdark border-0 bef-boxShadow-0__0__0__transparent"
+        class="
+          btn btn-fullRed
+          dropdown-toggle
+          bef
+          bef-text-tdark
+          border-0
+          bef-boxShadow-0__0__0__transparent
+        "
         aria-controls="dropdown-basic"
       >
         <ng-container *ngIf="lang === 'es'; else elseTemplate">
@@ -121,7 +129,18 @@
         <li>
           <button
             (click)="changeLang('es')"
-            class="dropdown-item btn w-100 py-3 bef bef-text-tdark bef-btn-fullRed text-center border-0 rounded-0"
+            class="
+              dropdown-item
+              btn
+              w-100
+              py-3
+              bef
+              bef-text-tdark
+              bef-btn-fullRed
+              text-center
+              border-0
+              rounded-0
+            "
           >
             Español
           </button>
@@ -129,7 +148,18 @@
         <li>
           <button
             (click)="changeLang('en')"
-            class="dropdown-item btn w-100 py-3 bef bef-text-tdark bef-btn-fullRed text-center border-0 rounded-0"
+            class="
+              dropdown-item
+              btn
+              w-100
+              py-3
+              bef
+              bef-text-tdark
+              bef-btn-fullRed
+              text-center
+              border-0
+              rounded-0
+            "
           >
             English
           </button>
@@ -146,12 +176,22 @@
     aria-labelledby="offcanvasMenuLabel"
     data-bs-scroll="true"
   >
-    <div
-      class="offcanvas-header bef bef-text-tlight px-2 pt-3 justify-content-end"
-    >
+    <div class="offcanvas-header bef bef-text-tlight px-2 pt-3 justify-content-end">
       <button
         type="button"
-        class="btn bef bef-bg-tdark fw-bold fs-1_5rem bef-text-tlight border-0 menuIconContainer rounded-circle p-0 m-0"
+        class="
+          btn
+          bef
+          bef-bg-tdark
+          fw-bold
+          fs-1_5rem
+          bef-text-tlight
+          border-0
+          menuIconContainer
+          rounded-circle
+          p-0
+          m-0
+        "
         data-bs-dismiss="offcanvas"
         aria-label="Close"
       >
@@ -160,7 +200,18 @@
     </div>
     <div class="offcanvas-body">
       <ul
-        class="w-75 bef bef-wmx-300px px-0 py-3 my-3 mx-auto offcanvasul rounded-30 bef-hmx-75vh"
+        class="
+          w-75
+          bef
+          bef-wmx-300px
+          px-0
+          py-3
+          my-3
+          mx-auto
+          offcanvasul
+          rounded-30
+          bef-hmx-75vh
+        "
       >
         <li class="text-center my-4 h3">
           <a
@@ -243,132 +294,23 @@
 </main>
 
 <footer
-  class="d-flex justify-content-between px-4 py-2 align-items-center position-fixed bottom-0 w-100 bef bef-z-10"
+  class="
+    d-flex
+    justify-content-between
+    px-4
+    py-3
+    align-items-center
+    position-fixed
+    bottom-0
+    w-100
+    bef
+    bef-z-10
+  "
 >
-  <div>
-    <div
-      class="d-flex bef bef-bg-tdark__OPA__0_75 bef-boxShadow-0__0__10px__fullRed bef-rounded-50px p-3 justify-content-between align-items-center"
-      *ngIf="currentSong._id"
-    >
-      <button
-        *ngIf="
-          currentSong.song &&
-          currentSong.song.location &&
-          currentSong.song.location !== '' &&
-          currentAudio.paused !== false
-        "
-        (click)="playAudio(currentSong)"
-        class="btn w-10 bef bef-text-fullRed bef-boxShadow-0__0__10px__fullRed bef-p-6px bef-mx-6px rounded-circle"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          fill="currentColor"
-          class="bi bi-play-fill"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"
-          />
-        </svg>
-      </button>
-      <button
-        *ngIf="currentAudio.paused === false"
-        class="btn w-10 bef bef-text-fullRed bef-boxShadow-0__0__10px__fullRed bef-p-6px bef-mx-6px rounded-circle"
-        (click)="pause()"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          fill="currentColor"
-          class="bi bi-pause-fill"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"
-          />
-        </svg>
-      </button>
-      <a href="{{currentSong.link}}" target="_blank" class="btn bef bef-w-80per m-0 text-left bef-text-fullRed">
-        {{ currentSong.title }}
-      </a>
-      <button
-        (click)="
-          copyToClipBoard(
-            currentSong.song &&
-              currentSong.song.location &&
-              currentSong.song.location !== ''
-              ? urlMain + 'get-file/' + currentSong.song.location
-              : currentSong.link && currentSong.link !== ''
-              ? currentSong.link
-              : ''
-          )
-        "
-        *ngIf="
-          (currentSong.song &&
-            currentSong.song.location &&
-            currentSong.song.location !== '') ||
-          (currentSong.link && currentSong.link !== '')
-        "
-        class="btn w-10 bef bef-text-fullRed bef-boxShadow-0__0__10px__fullRed bef-p-6px bef-mx-6px rounded-circle"
-        tooltip="{{
-          (lang === 'en'
-            ? 'Copied to ClipBoard: '
-            : 'Copiado al portapapeles: ') +
-            (currentSong.song &&
-            currentSong.song.location &&
-            currentSong.song.location !== ''
-              ? urlMain + 'get-file/' + currentSong.song.location
-              : currentSong.link && currentSong.link !== ''
-              ? currentSong.link
-              : '')
-        }}"
-        placement="top"
-        [isDisabled]="
-          (!currentSong.song ||
-            copiedToClipBoard !==
-              urlMain + 'get-file/' + currentSong.song.location) &&
-          copiedToClipBoard !== currentSong.link
-        "
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          fill="currentColor"
-          class="bi bi-link"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10.5H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"
-          />
-          <path
-            d="M9 5.5a3 3 0 0 0-2.83 4h1.098A2 2 0 0 1 9 6.5h3a2 2 0 1 1 0 4h-1.535a4.02 4.02 0 0 1-.82 1H12a3 3 0 1 0 0-6H9z"
-          />
-        </svg>
-      </button>
-      <a
-        href="/music"
-        [routerLink]="['/music']"
-        class="btn w-10 bef bef-text-fullRed border-0 bef-w-40px bef-h-38px bef-boxShadow-0__0__10px__fullRed bef-p-6px bef-mx-6px rounded-circle"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          fill="currentColor"
-          class="bi bi-list-ul bef bef-w-24px bef-h-24px"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
-          />
-        </svg>
-      </a>
-    </div>
+  <div id="audioDiv">
+    <button (click)="pause()" *ngIf="currentSong._id">
+      pause
+    </button>
   </div>
 
   <!-- Whats -->

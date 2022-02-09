@@ -71,7 +71,6 @@ export class AppComponent implements OnInit, DoCheck {
 
   // Utility
   public windowWidth = window.innerWidth;
-  public copiedToClipBoard: string = '';
   public currentAudio: any;
   constructor(
     private _mainService: MainService,
@@ -102,9 +101,6 @@ export class AppComponent implements OnInit, DoCheck {
             break;
           case 'windowWidth':
             this.windowWidth = sharedContent.thing;
-            break;
-          case 'copiedToClipBoard':
-            this.copiedToClipBoard = sharedContent.thing;
             break;
           case 'play':
             this.playAudio(sharedContent.thing);
@@ -245,13 +241,10 @@ export class AppComponent implements OnInit, DoCheck {
       let songs = await this._mainService.getSongs().toPromise();
 
       if (!songs || !songs.songs) {
-        throw new Error('There is no songs.');
+        throw new Error('There is no albums.');
       }
 
       this.songs = songs.songs;
-
-      this.playAudio(this.songs[0]);
-      this.pause();
 
       this._webService.consoleLog(
         this.songs,
@@ -281,18 +274,6 @@ export class AppComponent implements OnInit, DoCheck {
       to: 'all',
       property: 'lang',
       thing: this.lang,
-    });
-  }
-
-  copyToClipBoard(copyText: string) {
-    navigator.clipboard.writeText(copyText);
-    this.copiedToClipBoard = '';
-    this.copiedToClipBoard = copyText;
-    this._sharedService.emitChange({
-      from: 'music',
-      to: 'all',
-      property: 'copiedToClipBoard',
-      thing: this.copiedToClipBoard,
     });
   }
 
@@ -370,12 +351,6 @@ export class AppComponent implements OnInit, DoCheck {
         to: 'music',
         property: 'currentSong',
         thing: this.currentSong,
-      });
-      this._sharedService.emitChange({
-        from: 'app',
-        to: 'music',
-        property: 'currentAudio',
-        thing: this.currentAudio,
       });
     }
   }

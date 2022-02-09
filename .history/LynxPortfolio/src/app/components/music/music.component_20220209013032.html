@@ -51,164 +51,180 @@
 
     <div class="d-flex flex-wrap p-3">
       <div
-        *ngFor="let songi of songs; let ix = index"
-        class="bef bef-w-90per bef-w-md-45per bef-mt-md-1rem bef-mb-md-3rem mx-auto d-flex align-items-center justify-content-between bef-text-tlight"
+        *ngFor="let i of [0, 1]"
+        class="bef bef-w-100per bef-w-md-50per bef-mt-md-1rem bef-mb-md-3rem"
       >
-        <a href="{{songi.link}}" target="_blank" class="btn bef bef-w-80per m-0 text-left bef-text-tlight">
-          {{ songi.title }}
-        </a>
-        <button
-          *ngIf="
-            songi.song &&
-            songi.song.location &&
-            songi.song.location !== '' &&
-            (currentSong._id !== songi._id ||
-              (currentSong._id === songi._id &&
-                (!currentAudio ||
-                  (currentAudio && currentAudio.paused !== false))))
-          "
-          (click)="playAudio(songi)"
-          class="btn w-10 bef bef-text-tlight"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="currentColor"
-            class="bi bi-play-fill"
-            viewBox="0 0 16 16"
+        <div *ngFor="let songi of songs; let ix = index">
+          <div
+            *ngIf="
+              (i === 0 && ix <= songs.length / 2) ||
+              (i === 1 && ix > songs.length / 2)
+            "
+            class="mx-auto bef bef-w-90per d-flex align-items-center justify-content-between bef-text-tlight"
           >
-            <path
-              d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"
-            />
-          </svg>
-        </button>
-        <button
-          *ngIf="
-            songi.song &&
-            songi.song.location &&
-            songi.song.location !== '' &&
-            currentSong._id === songi._id &&
-            currentAudio &&
-            currentAudio.paused === false
-          "
-          class="btn w-10 bef bef-text-tlight rounded-circle"
-          (click)="pause()"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="currentColor"
-            class="bi bi-pause-fill"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"
-            />
-          </svg>
-        </button>
-        <button
-          (click)="
-            copyToClipBoard(
-              songi.song && songi.song.location && songi.song.location !== ''
-                ? urlMain + 'get-file/' + songi.song.location
-                : songi.link && songi.link !== ''
-                ? songi.link
-                : ''
-            )
-          "
-          *ngIf="
-            (songi.song && songi.song.location && songi.song.location !== '') ||
-            (songi.link && songi.link !== '')
-          "
-          class="btn w-10 bef bef-text-tlight"
-          tooltip="{{
-            (lang === 'en'
-              ? 'Copied to ClipBoard: '
-              : 'Copiado al portapapeles: ') +
-              (songi.song && songi.song.location && songi.song.location !== ''
-                ? urlMain + 'get-file/' + songi.song.location
-                : songi.link && songi.link !== ''
-                ? songi.link
-                : '')
-          }}"
-          placement="top"
-          [isDisabled]="
-            (!songi.song ||
-              copiedToClipBoard !==
-                urlMain + 'get-file/' + songi.song.location) &&
-            copiedToClipBoard !== songi.link
-          "
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="currentColor"
-            class="bi bi-link"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10.5H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"
-            />
-            <path
-              d="M9 5.5a3 3 0 0 0-2.83 4h1.098A2 2 0 0 1 9 6.5h3a2 2 0 1 1 0 4h-1.535a4.02 4.02 0 0 1-.82 1H12a3 3 0 1 0 0-6H9z"
-            />
-          </svg>
-        </button>
-        <!-- Edit/Delete Buttons -->
-        <div
-          *ngIf="identity && identity.role == 'ROLE_ADMIN' && edit === true"
-          class="d-flex"
-        >
-          <button
-            *ngIf="songi._id !== song._id"
-            class="btn bef bef-bg-transparent bef-text-tlight mr-2"
-            (click)="SongEdit(songi)"
-          >
-            <svg
-              width="1em"
-              height="1em"
-              viewBox="0 0 16 16"
-              class="bi bi-pencil-square"
-              fill="currentColor"
-              xmlns="http://www.w3.org/2000/svg"
+            <button class="btn bef bef-w-80per m-0 text-left bef-text-tlight">
+              {{ songi.title }}
+            </button>
+            <button
+              *ngIf="
+                songi.song &&
+                songi.song.location &&
+                songi.song.location !== '' &&
+                (currentSong._id !== songi._id ||
+                  (currentSong._id === songi._id &&
+                    (!currentAudio ||
+                      (currentAudio && currentAudio.paused !== false))))
+              "
+              (click)="playAudio(songi)"
+              class="btn w-10 bef bef-text-tlight"
             >
-              <path
-                d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"
-              />
-              <path
-                fill-rule="evenodd"
-                d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
-              />
-            </svg>
-          </button>
-          <button
-            *ngIf="songi._id === song._id"
-            class="btn bef bef-bg-transparent bef-text-tlight mr-2 font-weight-normal float-right"
-            (click)="SongEdit(songi)"
-          >
-            X
-          </button>
-          <button
-            class="btn bef-bg-transparent bef-text-tlight mr-2"
-            (click)="deleteSong(songi._id)"
-          >
-            <svg
-              width="1em"
-              height="1em"
-              viewBox="0 0 16 16"
-              class="bi bi-trash-fill"
-              fill="currentColor"
-              xmlns="http://www.w3.org/2000/svg"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="currentColor"
+                class="bi bi-play-fill"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"
+                />
+              </svg>
+            </button>
+            <button
+              *ngIf="
+                songi.song &&
+                songi.song.location &&
+                songi.song.location !== '' &&
+                currentSong._id === songi._id &&
+                currentAudio &&
+                currentAudio.paused === false
+              "
+              class="btn w-10 bef bef-text-light rounded-circle"
+              (click)="pause()"
             >
-              <path
-                fill-rule="evenodd"
-                d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"
-              />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="currentColor"
+                class="bi bi-pause-fill"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"
+                />
+              </svg>
+            </button>
+            <button
+              (click)="
+                copyToClipBoard(
+                  songi.song &&
+                    songi.song.location &&
+                    songi.song.location !== ''
+                    ? urlMain + 'get-file/' + songi.song.location
+                    : songi.link && songi.link !== ''
+                    ? songi.link
+                    : ''
+                )
+              "
+              *ngIf="
+                (songi.song &&
+                  songi.song.location &&
+                  songi.song.location !== '') ||
+                (songi.link && songi.link !== '')
+              "
+              class="btn w-10 bef bef-text-tlight"
+              tooltip="{{
+                (lang === 'en'
+                  ? 'Copied to ClipBoard: '
+                  : 'Copiado al portapapeles: ') +
+                  (songi.song &&
+                  songi.song.location &&
+                  songi.song.location !== ''
+                    ? urlMain + 'get-file/' + songi.song.location
+                    : songi.link && songi.link !== ''
+                    ? songi.link
+                    : '')
+              }}"
+              placement="top"
+              [isDisabled]="
+                (!songi.song ||
+                  copiedToClipBoard !==
+                    urlMain + 'get-file/' + songi.song.location) &&
+                copiedToClipBoard !== songi.link
+              "
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="currentColor"
+                class="bi bi-link"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10.5H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"
+                />
+                <path
+                  d="M9 5.5a3 3 0 0 0-2.83 4h1.098A2 2 0 0 1 9 6.5h3a2 2 0 1 1 0 4h-1.535a4.02 4.02 0 0 1-.82 1H12a3 3 0 1 0 0-6H9z"
+                />
+              </svg>
+            </button>
+            <!-- Edit/Delete Buttons -->
+            <div
+              *ngIf="identity && identity.role == 'ROLE_ADMIN' && edit === true"
+              class="d-flex"
+            >
+              <button
+                *ngIf="songi._id !== song._id"
+                class="btn bef bef-bg-transparent bef-text-tlight mr-2"
+                (click)="SongEdit(songi)"
+              >
+                <svg
+                  width="1em"
+                  height="1em"
+                  viewBox="0 0 16 16"
+                  class="bi bi-pencil-square"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+                  />
+                </svg>
+              </button>
+              <button
+                *ngIf="songi._id === song._id"
+                class="btn bef bef-bg-transparent bef-text-tlight mr-2 font-weight-normal float-right"
+                (click)="SongEdit(songi)"
+              >
+                X
+              </button>
+              <button
+                class="btn bef-bg-transparent bef-text-tlight mr-2"
+                (click)="deleteSong(songi._id)"
+              >
+                <svg
+                  width="1em"
+                  height="1em"
+                  viewBox="0 0 16 16"
+                  class="bi bi-trash-fill"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

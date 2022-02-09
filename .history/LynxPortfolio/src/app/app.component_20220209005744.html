@@ -243,11 +243,11 @@
 </main>
 
 <footer
-  class="d-flex justify-content-between px-4 py-2 align-items-center position-fixed bottom-0 w-100 bef bef-z-10"
+  class="d-flex justify-content-between px-4 py-3 align-items-center position-fixed bottom-0 w-100 bef bef-z-10"
 >
   <div>
     <div
-      class="d-flex bef bef-bg-tdark__OPA__0_75 bef-boxShadow-0__0__10px__fullRed bef-rounded-50px p-3 justify-content-between align-items-center"
+      class="d-flex bef bef-bg-tdark bef-rounded-50px p-1 justify-content-between align-items-center"
       *ngIf="currentSong._id"
     >
       <button
@@ -258,7 +258,7 @@
           currentAudio.paused !== false
         "
         (click)="playAudio(currentSong)"
-        class="btn w-10 bef bef-text-fullRed bef-boxShadow-0__0__10px__fullRed bef-p-6px bef-mx-6px rounded-circle"
+        class="btn w-10 bef bef-text-tlight rounded-circle"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -275,7 +275,7 @@
       </button>
       <button
         *ngIf="currentAudio.paused === false"
-        class="btn w-10 bef bef-text-fullRed bef-boxShadow-0__0__10px__fullRed bef-p-6px bef-mx-6px rounded-circle"
+        class="btn w-10 bef bef-text-light rounded-circle"
         (click)="pause()"
       >
         <svg
@@ -291,83 +291,9 @@
           />
         </svg>
       </button>
-      <a href="{{currentSong.link}}" target="_blank" class="btn bef bef-w-80per m-0 text-left bef-text-fullRed">
+      <h4 class="btn bef bef-w-80per m-0 text-left bef-text-tlight">
         {{ currentSong.title }}
-      </a>
-      <button
-        (click)="
-          copyToClipBoard(
-            currentSong.song &&
-              currentSong.song.location &&
-              currentSong.song.location !== ''
-              ? urlMain + 'get-file/' + currentSong.song.location
-              : currentSong.link && currentSong.link !== ''
-              ? currentSong.link
-              : ''
-          )
-        "
-        *ngIf="
-          (currentSong.song &&
-            currentSong.song.location &&
-            currentSong.song.location !== '') ||
-          (currentSong.link && currentSong.link !== '')
-        "
-        class="btn w-10 bef bef-text-fullRed bef-boxShadow-0__0__10px__fullRed bef-p-6px bef-mx-6px rounded-circle"
-        tooltip="{{
-          (lang === 'en'
-            ? 'Copied to ClipBoard: '
-            : 'Copiado al portapapeles: ') +
-            (currentSong.song &&
-            currentSong.song.location &&
-            currentSong.song.location !== ''
-              ? urlMain + 'get-file/' + currentSong.song.location
-              : currentSong.link && currentSong.link !== ''
-              ? currentSong.link
-              : '')
-        }}"
-        placement="top"
-        [isDisabled]="
-          (!currentSong.song ||
-            copiedToClipBoard !==
-              urlMain + 'get-file/' + currentSong.song.location) &&
-          copiedToClipBoard !== currentSong.link
-        "
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          fill="currentColor"
-          class="bi bi-link"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10.5H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"
-          />
-          <path
-            d="M9 5.5a3 3 0 0 0-2.83 4h1.098A2 2 0 0 1 9 6.5h3a2 2 0 1 1 0 4h-1.535a4.02 4.02 0 0 1-.82 1H12a3 3 0 1 0 0-6H9z"
-          />
-        </svg>
-      </button>
-      <a
-        href="/music"
-        [routerLink]="['/music']"
-        class="btn w-10 bef bef-text-fullRed border-0 bef-w-40px bef-h-38px bef-boxShadow-0__0__10px__fullRed bef-p-6px bef-mx-6px rounded-circle"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          fill="currentColor"
-          class="bi bi-list-ul bef bef-w-24px bef-h-24px"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
-          />
-        </svg>
-      </a>
+      </h4>
     </div>
   </div>
 

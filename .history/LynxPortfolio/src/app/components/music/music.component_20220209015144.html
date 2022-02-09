@@ -54,9 +54,9 @@
         *ngFor="let songi of songs; let ix = index"
         class="bef bef-w-90per bef-w-md-45per bef-mt-md-1rem bef-mb-md-3rem mx-auto d-flex align-items-center justify-content-between bef-text-tlight"
       >
-        <a href="{{songi.link}}" target="_blank" class="btn bef bef-w-80per m-0 text-left bef-text-tlight">
+        <h4 class="btn bef bef-w-80per m-0 text-left bef-text-tlight">
           {{ songi.title }}
-        </a>
+        </h4>
         <button
           *ngIf="
             songi.song &&

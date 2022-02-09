@@ -74,14 +74,8 @@ export class MusicComponent implements OnInit {
           case 'windowWidth':
             this.windowWidth = sharedContent.thing;
             break;
-          case 'copiedToClipBoard':
-            this.copiedToClipBoard = sharedContent.thing;
-            break;
           case 'currentSong':
             this.currentSong = sharedContent.thing;
-            break;
-          case 'currentAudio':
-            this.currentAudio = sharedContent.thing;
             break;
           case 'onlyConsoleMessage':
             this._webService.consoleLog(
@@ -582,12 +576,6 @@ export class MusicComponent implements OnInit {
     navigator.clipboard.writeText(copyText);
     this.copiedToClipBoard = '';
     this.copiedToClipBoard = copyText;
-    this._sharedService.emitChange({
-      from: 'music',
-      to: 'all',
-      property: 'copiedToClipBoard',
-      thing: this.copiedToClipBoard,
-    });
   }
 
   playAudio(newSong: Song) {
