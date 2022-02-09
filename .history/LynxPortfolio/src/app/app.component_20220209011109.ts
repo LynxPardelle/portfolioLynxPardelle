@@ -71,7 +71,6 @@ export class AppComponent implements OnInit, DoCheck {
 
   // Utility
   public windowWidth = window.innerWidth;
-  public copiedToClipBoard: string = '';
   public currentAudio: any;
   constructor(
     private _mainService: MainService,
@@ -102,9 +101,6 @@ export class AppComponent implements OnInit, DoCheck {
             break;
           case 'windowWidth':
             this.windowWidth = sharedContent.thing;
-            break;
-          case 'copiedToClipBoard':
-            this.copiedToClipBoard = sharedContent.thing;
             break;
           case 'play':
             this.playAudio(sharedContent.thing);
@@ -284,18 +280,6 @@ export class AppComponent implements OnInit, DoCheck {
     });
   }
 
-  copyToClipBoard(copyText: string) {
-    navigator.clipboard.writeText(copyText);
-    this.copiedToClipBoard = '';
-    this.copiedToClipBoard = copyText;
-    this._sharedService.emitChange({
-      from: 'music',
-      to: 'all',
-      property: 'copiedToClipBoard',
-      thing: this.copiedToClipBoard,
-    });
-  }
-
   playAudio(newSong: Song) {
     if (this.currentSong !== newSong) {
       if (this.currentAudio) {
@@ -322,6 +306,7 @@ export class AppComponent implements OnInit, DoCheck {
           this.urlMain + 'get-file/' + this.currentSong.song.location
         );
         this.currentAudio.play();
+        this.currentAudio.controls = true;
         this._sharedService.emitChange({
           from: 'app',
           to: 'music',

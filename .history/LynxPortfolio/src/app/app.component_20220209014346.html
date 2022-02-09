@@ -291,9 +291,9 @@
           />
         </svg>
       </button>
-      <a href="{{currentSong.link}}" target="_blank" class="btn bef bef-w-80per m-0 text-left bef-text-fullRed">
+      <h4 class="btn bef bef-w-80per m-0 text-left bef-text-fullRed">
         {{ currentSong.title }}
-      </a>
+      </h4>
       <button
         (click)="
           copyToClipBoard(
@@ -312,7 +312,7 @@
             currentSong.song.location !== '') ||
           (currentSong.link && currentSong.link !== '')
         "
-        class="btn w-10 bef bef-text-fullRed bef-boxShadow-0__0__10px__fullRed bef-p-6px bef-mx-6px rounded-circle"
+        class="btn w-10 bef bef-text-tlight"
         tooltip="{{
           (lang === 'en'
             ? 'Copied to ClipBoard: '

@@ -71,7 +71,6 @@ export class AppComponent implements OnInit, DoCheck {
 
   // Utility
   public windowWidth = window.innerWidth;
-  public copiedToClipBoard: string = '';
   public currentAudio: any;
   constructor(
     private _mainService: MainService,
@@ -103,17 +102,11 @@ export class AppComponent implements OnInit, DoCheck {
           case 'windowWidth':
             this.windowWidth = sharedContent.thing;
             break;
-          case 'copiedToClipBoard':
-            this.copiedToClipBoard = sharedContent.thing;
-            break;
           case 'play':
             this.playAudio(sharedContent.thing);
             break;
           case 'pause':
             this.pause();
-            break;
-          case 'checkForCurrentSong':
-            this.checkForCurrentSong();
             break;
           case 'onlyConsoleMessage':
             this._webService.consoleLog(
@@ -245,13 +238,10 @@ export class AppComponent implements OnInit, DoCheck {
       let songs = await this._mainService.getSongs().toPromise();
 
       if (!songs || !songs.songs) {
-        throw new Error('There is no songs.');
+        throw new Error('There is no albums.');
       }
 
       this.songs = songs.songs;
-
-      this.playAudio(this.songs[0]);
-      this.pause();
 
       this._webService.consoleLog(
         this.songs,
@@ -284,99 +274,35 @@ export class AppComponent implements OnInit, DoCheck {
     });
   }
 
-  copyToClipBoard(copyText: string) {
-    navigator.clipboard.writeText(copyText);
-    this.copiedToClipBoard = '';
-    this.copiedToClipBoard = copyText;
-    this._sharedService.emitChange({
-      from: 'music',
-      to: 'all',
-      property: 'copiedToClipBoard',
-      thing: this.copiedToClipBoard,
-    });
-  }
-
   playAudio(newSong: Song) {
     if (this.currentSong !== newSong) {
       if (this.currentAudio) {
         this.currentAudio.pause();
       }
-      this.currentSong = newSong;
+      this.currentSong !== newSong;
       this._webService.consoleLog(
-        this.currentSong,
+        newSong,
         this.document + ' 148',
         this.customConsoleCSS
       );
-      this._sharedService.emitChange({
-        from: 'app',
-        to: 'music',
-        property: 'currentSong',
-        thing: this.currentSong,
-      });
       if (
         this.currentSong.song &&
         this.currentSong.song.location &&
         this.currentSong.song.location !== ''
       ) {
-        this.currentAudio = new Audio(
-          this.urlMain + 'get-file/' + this.currentSong.song.location
-        );
+        this.currentAudio = new Audio(this.currentSong.song.location);
         this.currentAudio.play();
-        this._sharedService.emitChange({
-          from: 'app',
-          to: 'music',
-          property: 'currentAudio',
-          thing: this.currentAudio,
-        });
-        setTimeout(() => {
-          this._befService.cssCreate();
-        }, 0.05);
       } else {
         this.currentAudio = null;
-        this._sharedService.emitChange({
-          from: 'app',
-          to: 'music',
-          property: 'currentAudio',
-          thing: this.currentAudio,
-        });
       }
     } else {
       this.currentAudio.play();
-      this._sharedService.emitChange({
-        from: 'app',
-        to: 'music',
-        property: 'currentAudio',
-        thing: this.currentAudio,
-      });
     }
   }
 
   pause() {
     if (this.currentAudio) {
       this.currentAudio.pause();
-      this._sharedService.emitChange({
-        from: 'app',
-        to: 'music',
-        property: 'currentAudio',
-        thing: this.currentAudio,
-      });
-    }
-  }
-
-  checkForCurrentSong() {
-    if (this.currentSong._id !== '') {
-      this._sharedService.emitChange({
-        from: 'app',
-        to: 'music',
-        property: 'currentSong',
-        thing: this.currentSong,
-      });
-      this._sharedService.emitChange({
-        from: 'app',
-        to: 'music',
-        property: 'currentAudio',
-        thing: this.currentAudio,
-      });
     }
   }
 

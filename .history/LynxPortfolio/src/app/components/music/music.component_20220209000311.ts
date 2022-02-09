@@ -27,7 +27,6 @@ export class MusicComponent implements OnInit {
   public album: Album = new Album('', '', null, '', '', 0);
   public songs: Song[] = [];
   public song: Song = new Song('', '', null, 0, null, '', 0);
-  public currentSong: Song = new Song('', '', null, 0, null, '', 0);
 
   // Translate
   public lang: string = 'es';
@@ -44,7 +43,6 @@ export class MusicComponent implements OnInit {
   public edit: boolean = false;
   public windowWidth = window.innerWidth;
   public copiedToClipBoard: string = '';
-  public currentAudio: any;
   constructor(
     private _mainService: MainService,
 
@@ -73,15 +71,6 @@ export class MusicComponent implements OnInit {
             break;
           case 'windowWidth':
             this.windowWidth = sharedContent.thing;
-            break;
-          case 'copiedToClipBoard':
-            this.copiedToClipBoard = sharedContent.thing;
-            break;
-          case 'currentSong':
-            this.currentSong = sharedContent.thing;
-            break;
-          case 'currentAudio':
-            this.currentAudio = sharedContent.thing;
             break;
           case 'onlyConsoleMessage':
             this._webService.consoleLog(
@@ -119,13 +108,6 @@ export class MusicComponent implements OnInit {
 
     this.getAlbums();
     this.getSongs();
-
-    this._sharedService.emitChange({
-      from: 'music',
-      to: 'app',
-      property: 'checkForCurrentSong',
-      thing: '',
-    });
   }
 
   async getAlbums() {
@@ -582,12 +564,6 @@ export class MusicComponent implements OnInit {
     navigator.clipboard.writeText(copyText);
     this.copiedToClipBoard = '';
     this.copiedToClipBoard = copyText;
-    this._sharedService.emitChange({
-      from: 'music',
-      to: 'all',
-      property: 'copiedToClipBoard',
-      thing: this.copiedToClipBoard,
-    });
   }
 
   playAudio(newSong: Song) {

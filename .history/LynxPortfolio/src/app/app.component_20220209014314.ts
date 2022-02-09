@@ -103,9 +103,9 @@ export class AppComponent implements OnInit, DoCheck {
           case 'windowWidth':
             this.windowWidth = sharedContent.thing;
             break;
-          case 'copiedToClipBoard':
-            this.copiedToClipBoard = sharedContent.thing;
-            break;
+            case 'copiedToClipBoard':
+              this.copiedToClipBoard = sharedContent.thing;
+              break;
           case 'play':
             this.playAudio(sharedContent.thing);
             break;
