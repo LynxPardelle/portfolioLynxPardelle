@@ -26,7 +26,7 @@ export class MusicComponent implements OnInit {
   public albums: Album[] = [];
   public album: Album = new Album('', '', null, '', '', 0);
   public songs: Song[] = [];
-  public song: Song = new Song('', '', null, 0, null, '', 0);
+  public song: Song = new Song('', '', null, 0, null, 0);
 
   // Translate
   public lang: string = 'es';
@@ -42,7 +42,6 @@ export class MusicComponent implements OnInit {
   // Utility
   public edit: boolean = false;
   public windowWidth = window.innerWidth;
-  public copiedToClipBoard: string = '';
   constructor(
     private _mainService: MainService,
 
@@ -260,7 +259,7 @@ export class MusicComponent implements OnInit {
             if (isFromPreload === true) {
               this.song = song.song;
             } else {
-              this.song = new Song('', '', null, 0, null, '', 0);
+              this.song = new Song('', '', null, 0, null, 0);
             }
             this.getSongs();
             Swal.fire({
@@ -556,14 +555,16 @@ export class MusicComponent implements OnInit {
     if (this.song._id === '' || this.song._id !== song._id) {
       this.song = song;
     } else {
-      this.song = new Song('', '', null, 0, null, '', 0);
+      this.song = new Song('', '', null, 0, null, 0);
     }
   }
 
   copyToClipBoard(copyText: string) {
+    /* Copy the text inside the text field */
     navigator.clipboard.writeText(copyText);
-    this.copiedToClipBoard = '';
-    this.copiedToClipBoard = copyText;
+
+    /* Alert the copied text */
+    alert('Link copy: ' + copyText);
   }
 
   Linkify(

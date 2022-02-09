@@ -8,7 +8,11 @@ var SongSchema = Schema({
   song: { type: Schema.ObjectId, ref: "File" },
   duration: Number,
   coverArt: { type: Schema.ObjectId, ref: "File" },
-  order: Number,
+  link: String,
+  order: {
+    type: Number,
+    unique: true
+  },
 });
 
 module.exports = mongoose.model("Song", SongSchema);

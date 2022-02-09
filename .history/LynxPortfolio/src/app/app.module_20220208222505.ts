@@ -12,9 +12,14 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 /* NGX-Bootstrap */
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+import { ModalModule } from 'ngx-bootstrap/modal';
+import { TooltipModule } from 'ngx-bootstrap/tooltip';
 
 // NGX-Uploader
 import { NgxUploaderModule } from 'ngx-uploader';
+
+// YoutubePlayer
+import { YouTubePlayerModule } from '@angular/youtube-player';
 
 /* Components */
 import { AccordionModule } from 'ngx-bootstrap/accordion';
@@ -41,6 +46,7 @@ import { FileUploaderComponent } from './components/web-utility/file-uploader/fi
 import { GlobalMain, GlobalWeb } from './services/global';
 import { MainService } from './services/main.service';
 import { WebService } from './services/web.service';
+import { BefService } from './services/bef.service';
 import { SharedService } from './services/shared.service';
 
 /* Pipes */
@@ -88,11 +94,16 @@ import { SafeHtmlPipe } from './pipes/safe-html';
     /* NGX-Bootstrap */
     BsDropdownModule.forRoot(),
     AccordionModule.forRoot(),
+    ModalModule.forRoot(),
+    TooltipModule.forRoot(),
 
     // NGX-Uploader
     NgxUploaderModule,
+
+    // YoutubePlayer
+    YouTubePlayerModule,
   ],
-  providers: [MainService, WebService, SharedService],
+  providers: [MainService, WebService, BefService, SharedService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

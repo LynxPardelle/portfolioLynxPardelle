@@ -98,7 +98,7 @@ export class FileUploaderComponent implements OnInit {
     this.optionsOne = {
       concurrency: 1,
       maxUploads: 1,
-      maxFileSize: 50000000,
+      maxFileSize: 100000000,
     };
     this.files = []; // local uploading files array
     this.uploadInput = new EventEmitter<UploadInput>(); // input events, we use this to emit data to ngx-uploader

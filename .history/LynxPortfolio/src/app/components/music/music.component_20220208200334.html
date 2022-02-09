@@ -42,19 +42,17 @@
 <h2 class="text-center bef bef-my-3rem">Music</h2>
 
 <section>
-  <!-- Songs -->
   <article
-    *ngIf="songs && songs.length > 0"
     class="bef bef-bg-tdark__OPA__0_75 bef-boxShadow-4px__0__4px__midRed p-3"
   >
     <h3 class="text-center">Best Songs</h3>
 
     <div class="d-flex flex-wrap p-3">
       <div
-        *ngFor="let i of [0, 1]"
+        *ngFor="let item of [0, 1]; let i = index"
         class="bef bef-w-100per bef-w-md-50per bef-mt-md-1rem bef-mb-md-3rem"
       >
-        <div *ngFor="let songi of songs; let ix = index">
+        <div *ngFor="let song of songs; let ix = index">
           <div
             *ngIf="
               (i === 0 && ix <= songs.length / 2) ||
@@ -63,14 +61,9 @@
             class="mx-auto bef bef-w-90per d-flex align-items-center justify-content-between bef-text-tlight"
           >
             <button class="btn bef bef-w-80per m-0 text-left bef-text-tlight">
-              {{ songi.title }}
+              {{ song.title }}
             </button>
-            <button
-              *ngIf="
-                songi.song && songi.song.location && songi.song.location !== ''
-              "
-              class="btn w-10 bef bef-text-tlight"
-            >
+            <button class="btn w-10 bef bef-text-tlight">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -84,43 +77,7 @@
                 />
               </svg>
             </button>
-            <button
-              (click)="
-                copyToClipBoard(
-                  songi.song &&
-                    songi.song.location &&
-                    songi.song.location !== ''
-                    ? songi.song.location
-                    : songi.link && songi.link !== ''
-                    ? songi.link
-                    : ''
-                )
-              "
-              *ngIf="
-                (songi.song &&
-                  songi.song.location &&
-                  songi.song.location !== '') ||
-                (songi.link && songi.link !== '')
-              "
-              class="btn w-10 bef bef-text-tlight"
-              tooltip="{{
-                (lang === 'en'
-                  ? 'Copied to ClipBoard: '
-                  : 'Copiado al portapapeles: ') +
-                  (songi.song &&
-                  songi.song.location &&
-                  songi.song.location !== ''
-                    ? songi.song.location
-                    : songi.link && songi.link !== ''
-                    ? songi.link
-                    : '')
-              }}"
-              placement="top"
-              [isDisabled]="
-                (!songi.song || copiedToClipBoard !== songi.song.location) &&
-                copiedToClipBoard !== songi.link
-              "
-            >
+            <button class="btn w-10 bef bef-text-tlight">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -137,148 +94,36 @@
                 />
               </svg>
             </button>
-            <!-- Edit/Delete Buttons -->
-            <div
-              *ngIf="identity && identity.role == 'ROLE_ADMIN' && edit === true"
-              class="d-flex"
-            >
-              <button
-                *ngIf="songi._id !== song._id"
-                class="btn bef bef-bg-transparent bef-text-tlight mr-2"
-                (click)="SongEdit(songi)"
-              >
-                <svg
-                  width="1em"
-                  height="1em"
-                  viewBox="0 0 16 16"
-                  class="bi bi-pencil-square"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
-                  />
-                </svg>
-              </button>
-              <button
-                *ngIf="songi._id === song._id"
-                class="btn bef bef-bg-transparent bef-text-tlight mr-2 font-weight-normal float-right"
-                (click)="SongEdit(songi)"
-              >
-                X
-              </button>
-              <button
-                class="btn bef-bg-transparent bef-text-tlight mr-2"
-                (click)="deleteSong(songi._id)"
-              >
-                <svg
-                  width="1em"
-                  height="1em"
-                  viewBox="0 0 16 16"
-                  class="bi bi-trash-fill"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"
-                  />
-                </svg>
-              </button>
-            </div>
           </div>
         </div>
       </div>
     </div>
   </article>
-
-  <!-- Albums -->
   <article class="my-5">
     <h3 class="text-center my-3">Albums</h3>
 
     <div class="d-flex flex-wrap justify-content-between p-3">
       <div
-        *ngFor="let i of [0, 1]"
+        *ngFor="let item of [0, 1]; let i = index"
         class="bef bef-w-100per bef-w-md-45vw bef-mt-md-1rem bef-mb-md-3rem"
       >
         <div
           class="bef bef-m-md-2_5vw"
-          *ngFor="let albumi of albums; let ix = index"
+          *ngFor="let album of albums; let ix = index"
         >
           <div
             *ngIf="
               (i === 0 && ix <= albums.length / 2) ||
               (i === 1 && ix > albums.length / 2)
             "
-            class="mx-auto my-4 bef bef-w-90vw bef-w-md-40vw d-flex align-items-center justify-content-between bef-text-tlight position-relative"
+            class="mx-auto my-4 bef bef-w-90vw bef-w-md-40vw d-flex align-items-center justify-content-between bef-text-tlight"
           >
-            <!-- Edit/Delete Buttons -->
-            <div
-              class="position-absolute end-0 bef bef-top-20per bef-z-10"
-              *ngIf="identity && identity.role == 'ROLE_ADMIN' && edit === true"
-              [ngClass]="{
-                'bef-top-50px': windowWidth <= 767,
-                'bef-top-5per': windowWidth > 767
-              }"
-            >
-              <button
-                *ngIf="albumi._id !== album._id"
-                class="btn bef bef-btn-fullYellow bef-text-tdark mr-2"
-                (click)="AlbumEdit(albumi)"
-              >
-                <svg
-                  width="1em"
-                  height="1em"
-                  viewBox="0 0 16 16"
-                  class="bi bi-pencil-square"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
-                  />
-                </svg>
-              </button>
-              <button
-                *ngIf="albumi._id === album._id"
-                class="btn bef bef-btn-fullYellow bef-text-tdark mr-2 font-weight-normal float-right"
-                (click)="AlbumEdit(albumi)"
-              >
-                X
-              </button>
-              <button
-                class="btn btn-warning mr-2"
-                (click)="deleteAlbum(albumi._id)"
-              >
-                <svg
-                  width="1em"
-                  height="1em"
-                  viewBox="0 0 16 16"
-                  class="bi bi-trash-fill"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"
-                  />
-                </svg>
-              </button>
-            </div>
             <img
               *ngIf="
-                albumi &&
-                albumi.img &&
-                albumi.img.location &&
-                albumi.img.location !== ''
+                album &&
+                album.img &&
+                album.img.location &&
+                album.img.location !== ''
               "
               class="bef bef-w-40vw bef-h-40vw bef-w-md-18_75vw bef-h-md-18_75vw"
               [ngClass]="{
@@ -286,8 +131,8 @@
                   (i === 0 && ix <= albums.length / 2 && ix % 2 === 1) ||
                   (i === 1 && ix > albums.length / 2 && ix % 2 === 0)
               }"
-              src="{{ urlMain + 'get-file/' + albumi.img.location }}"
-              alt="{{ albumi.title }}"
+              src="{{ urlMain + 'get-file/' + album.img.location }}"
+              alt="{{ album.title }}"
             />
             <div
               class="bef bef-w-40vw bef-w-md-18_75vw bef-h-40vw bef-h-md-18_75vw d-flex"
@@ -299,8 +144,7 @@
             >
               <a
                 class="bef bef-w-33per m-3 align-self-start"
-                href="{{ albumi.tidal }}"
-                target="_blank"
+                href="{{ album.tidal }}"
               >
                 <img
                   class="bef bef-w-100per bef-h-100per"
@@ -309,9 +153,8 @@
                 />
               </a>
               <a
-                class="bef bef-w-33per m-3 align-self-end"
-                href="{{ albumi.spotify }}"
-                target="_blank"
+                class="bef bef-w-33per m-3 align-self-start"
+                href="{{ album.spotify }}"
               >
                 <img
                   class="bef bef-w-100per bef-h-100per"
@@ -479,26 +322,6 @@
     </span>
   </div>
 
-  <!-- Title Edit -->
-  <div class="d-block w-75 mx-auto my-3">
-    <label class="bef bef-text-tlight mb-1 d-block" for="link">Link</label>
-    <input
-      class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
-      type="text"
-      name="link"
-      #link="ngModel"
-      [(ngModel)]="song.link"
-      placeholder="Link"
-      required
-    />
-    <span
-      class="bef bef-text-tlight font-weight-bold"
-      *ngIf="!link.valid && link.touched"
-    >
-      El link es obligatorio.
-    </span>
-  </div>
-
   <div
     *ngIf="(song._id && song._id !== '') || (song.title && song.title !== '')"
     class="my-5 d-flex flex-wrap justify-content-evenly"
@@ -531,9 +354,7 @@
       <h3 class="bef bef-text-tlight text-center w-75 my-3 d-block mx-auto">
         Subida de la canción
       </h3>
-      <audio
-        *ngIf="song.song && song.song.location && song.song.location !== ''"
-      >
+      <audio>
         <source
           src="{{ urlMain + 'get-file/' + song.song.location }}"
           type="{{ 'audio/' + song.song.type }}"

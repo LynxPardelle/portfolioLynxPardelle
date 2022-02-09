@@ -85,41 +85,18 @@
               </svg>
             </button>
             <button
-              (click)="
-                copyToClipBoard(
-                  songi.song &&
-                    songi.song.location &&
-                    songi.song.location !== ''
-                    ? songi.song.location
-                    : songi.link && songi.link !== ''
-                    ? songi.link
-                    : ''
-                )
-              "
+              (click)="copyToClipBoard('songi.song.location')"
               *ngIf="
-                (songi.song &&
-                  songi.song.location &&
-                  songi.song.location !== '') ||
-                (songi.link && songi.link !== '')
+                songi.song && songi.song.location && songi.song.location !== ''
               "
               class="btn w-10 bef bef-text-tlight"
               tooltip="{{
                 (lang === 'en'
                   ? 'Copied to ClipBoard: '
-                  : 'Copiado al portapapeles: ') +
-                  (songi.song &&
-                  songi.song.location &&
-                  songi.song.location !== ''
-                    ? songi.song.location
-                    : songi.link && songi.link !== ''
-                    ? songi.link
-                    : '')
+                  : 'Copiado al portapapeles: ') + 'songi.song.location'
               }}"
               placement="top"
-              [isDisabled]="
-                (!songi.song || copiedToClipBoard !== songi.song.location) &&
-                copiedToClipBoard !== songi.link
-              "
+              [isDisabled]="copiedToClipBoard !== 'songi.song.location'"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

@@ -13,10 +13,10 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 /* NGX-Bootstrap */
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { ModalModule } from 'ngx-bootstrap/modal';
+import { TooltipModule } from 'ngx-bootstrap/tooltip';
 
 // NGX-Uploader
 import { NgxUploaderModule } from 'ngx-uploader';
-
 
 // YoutubePlayer
 import { YouTubePlayerModule } from '@angular/youtube-player';
@@ -95,6 +95,7 @@ import { SafeHtmlPipe } from './pipes/safe-html';
     BsDropdownModule.forRoot(),
     AccordionModule.forRoot(),
     ModalModule.forRoot(),
+    TooltipModule.forRoot(),
 
     // NGX-Uploader
     NgxUploaderModule,

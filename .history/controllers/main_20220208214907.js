@@ -372,7 +372,6 @@ var controller = {
       song.title = body.title;
       song.song = body.song ? body.song : null;
       song.duration = body.duration;
-      song.link = body.link;
       song.coverArt = body.coverArt ? body.coverArt : null;
 
       let nError = 500;
