@@ -1,28 +1,28 @@
 var nodemailer = require("nodemailer");
 
 exports.DoSendEmail = async (mails) => {
-  var transporter = nodemailer.createTransport({
+  var transporterOne = nodemailer.createTransport({
     service: "gmail",
     // tsl
     // 465+
     // secure: true,
     // port: 465,
     auth: {
-      user: "lnxdrk@gmail.com",
-      pass: "lyxunfprfzcfaenv",
+      user: "user@domain.com",
+      pass: "password",
     },
   });
 
   for (let mail of mails) {
-    var mailOptions = {
-      from: "lynxpardelle@lynxpardelle.com",
+    var mailOptionsOne = {
+      from: "user@domain.com",
       to: mail.to,
       subject: mail.title,
       text: mail.text,
       html: mail.html,
     };
 
-    transporter.sendMail(mailOptions, function (error, info) {
+    transporterOne.sendMail(mailOptionsOne, function (error, info) {
       if (error) {
         console.log(error);
       } else {
