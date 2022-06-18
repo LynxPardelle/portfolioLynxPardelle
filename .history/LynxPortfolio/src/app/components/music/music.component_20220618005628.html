@@ -227,7 +227,7 @@
     <div class="d-flex flex-wrap justify-content-between p-3">
       <div
         class="bef bef-m-md-2_5vw mx-auto my-4 bef bef-w-90vw bef-w-md-40vw d-flex align-items-center justify-content-between bef-text-tlight position-relative"
-        *ngFor="let albumi of albums; let ix = index; let $last = last"
+        *ngFor="let albumi of albums; let i = index; let $last = last"
         [exist]="$last"
         (ngInit)="cssCreate()"
       >

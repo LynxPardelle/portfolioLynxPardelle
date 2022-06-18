@@ -130,7 +130,7 @@
       [innerHTML]="videoO.insert | safeHtml"
     ></div>
     <youtube-player
-      *ngIf="videoO.link && videoO.link !== ''"
+    *ngIf="videoO.link && videoO.link !== ''"
       videoId="{{ videoO.link }}"
       SuggestedQuality="hd1080"
       class="w-100 bef bef-wmx-100vw bef-hmx-100vh mx-auto"

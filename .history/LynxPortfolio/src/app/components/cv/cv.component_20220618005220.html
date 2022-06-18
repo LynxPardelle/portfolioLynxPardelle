@@ -126,7 +126,7 @@
       <button
         *ngIf="CVSection._id !== cvSection._id"
         class="btn bef bef-btn-fullYellow bef-text-tdark mr-2"
-        (click)="chooseEditThing('cvSection', cvSection)"
+        (click)="chosseEditThing('cvSection', cvSection)"
       >
         <svg
           width="1em"
@@ -148,7 +148,7 @@
       <button
         *ngIf="CVSection._id === cvSection._id"
         class="btn bef bef-btn-fullYellow bef-text-tdark mr-2 font-weight-normal float-right"
-        (click)="chooseEditThing('cvSection', cvSection)"
+        (click)="chosseEditThing('cvSection', cvSection)"
       >
         X
       </button>
@@ -253,7 +253,7 @@
           <button
             *ngIf="CVSubSection._id !== cvSubSection._id"
             class="btn bef bef-btn-fullYellow bef-text-tdark mr-2"
-            (click)="chooseEditThing('cvSubSection', cvSubSection)"
+            (click)="chosseEditThing('cvSubSection', cvSubSection)"
           >
             <svg
               width="1em"
@@ -275,7 +275,7 @@
           <button
             *ngIf="CVSubSection._id === cvSubSection._id"
             class="btn bef bef-btn-fullYellow bef-text-tdark mr-2 font-weight-normal float-right"
-            (click)="chooseEditThing('cvSubSection', cvSubSection)"
+            (click)="chosseEditThing('cvSubSection', cvSubSection)"
           >
             X
           </button>

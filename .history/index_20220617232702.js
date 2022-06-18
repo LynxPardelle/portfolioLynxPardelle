@@ -8,7 +8,7 @@ var port = 6164;
 mongoose.Promise = global.Promise;
 
 mongoose
-  .connect("mongodb://localhost:27017/lynx_portfolio", {
+  .connect("mongodb://lynxpardelle.com:27017/lynx_portfolio", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })

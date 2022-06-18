@@ -96,15 +96,12 @@ export class BlogComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this._befService.cssCreate();
     this._sharedService.emitChange({
       from: 'blog',
       to: 'all',
       property: 'onlyConsoleMessage',
       thing: 'Data from blog',
     });
-  }
-
-  cssCreate() {
-    this._befService.cssCreate();
   }
 }
