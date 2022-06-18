@@ -605,7 +605,7 @@ export class CvComponent implements OnInit, DoCheck {
         : false;
   }
 
-  chooseEditThing(type: string, thing: any) {
+  chosseEditThing(type: string, thing: any) {
     switch (type) {
       case 'cvSection':
         if (this.CVSection._id === '' || this.CVSection._id !== thing._id) {

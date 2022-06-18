@@ -103,8 +103,4 @@ export class BlogComponent implements OnInit {
       thing: 'Data from blog',
     });
   }
-
-  cssCreate() {
-    this._befService.cssCreate();
-  }
 }

@@ -39,7 +39,7 @@
   </button>
 </div>
 
-<h2 class="text-center bef bef-my-3rem">{{ "app.websites" | translate }}</h2>
+<h2 class="text-center bef bef-my-3rem">Web Sites & Proyects</h2>
 
 <section>
   <article
@@ -189,14 +189,17 @@
         </div>
       </div>
       <div
-        *ngIf="website.insert && website.insert !== ''"
+        *ngIf="
+          website.insert && website.insert !== ''
+        "
         [ngStyle]="{ order: i % 2 === 0 ? 2 : 1 }"
         [ngClass]="{
           'w-100': windowWidth < 767,
           'mt-3 mb-5': windowWidth >= 767
         }"
         [innerHTML]="website.insert | safeHtml"
-      ></div>
+      >
+      </div>
       <div
         class="bef w-100 bef-text-ulight px-2 mx-auto text-center"
         [ngStyle]="{ order: i % 2 === 1 ? 1 : 2 }"
@@ -380,9 +383,7 @@
 
   <!-- Insert Edit -->
   <div class="d-block w-75 mx-auto my-3">
-    <label class="bef bef-text-tlight mb-1 d-block" for="insert"
-      >Inserción</label
-    >
+    <label class="bef bef-text-tlight mb-1 d-block" for="insert">Inserción</label>
     <input
       class="w-100 bef bef-text-tlight bef-bg-tdark border-0"
       type="text"

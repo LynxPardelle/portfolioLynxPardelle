@@ -135,9 +135,9 @@ export class BookComponent implements OnInit {
       this.bookImgs = bookImgs.bookImgs;
       this.bookImgs = this.shuffle(bookImgs.bookImgs);
 
-      setInterval(() => {
+      setInterval(()=>{
         this.bookImgs = this.shuffle(bookImgs.bookImgs);
-      }, 15000);
+      }, 15000)
 
       for (let bookImg of this.bookImgs) {
         if (bookImg.img && bookImg.img.location && !bookImg.width) {
@@ -211,8 +211,7 @@ export class BookComponent implements OnInit {
           }
           this.getBookImgs();
           Swal.fire({
-            title:
-              'La creación de la imagen del book se ha realizado con éxito',
+            title: 'La creación de la imagen del book se ha realizado con éxito',
             text: '',
             icon: 'success',
             customClass: {

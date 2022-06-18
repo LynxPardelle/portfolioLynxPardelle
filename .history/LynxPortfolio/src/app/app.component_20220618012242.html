@@ -108,7 +108,7 @@
         <ng-container *ngIf="lang === 'es'; else elseTemplate">
           Lenguaje
         </ng-container>
-        <ng-template #elseTemplate>Language </ng-template>
+        <ng-template #elseTemplate> Language </ng-template>
         <span class="caret"></span>
       </button>
       <ul
@@ -222,8 +222,7 @@
             {{ "app.cv" | translate }}
           </a>
         </li>
-        <!--
-          <li class="text-center my-4 h3">
+        <li class="text-center my-4 h3">
           <a
             class="d-block mx-auto bef bef-text-fullYellow text-decoration-none"
             href="/blog"
@@ -233,7 +232,6 @@
             {{ "app.blog" | translate }}
           </a>
         </li>
-        -->
       </ul>
     </div>
   </div>
@@ -293,11 +291,7 @@
           />
         </svg>
       </button>
-      <a
-        href="{{ currentSong.link }}"
-        target="_blank"
-        class="btn bef bef-w-80per m-0 text-left bef-text-fullRed"
-      >
+      <a href="{{currentSong.link}}" target="_blank" class="btn bef bef-w-80per m-0 text-left bef-text-fullRed">
         {{ currentSong.title }}
       </a>
       <button

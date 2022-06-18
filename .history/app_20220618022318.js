@@ -21,7 +21,6 @@ app.use(
 
 // Config cabeceras y CORS
 var allowedDomains = [
-  "http://localhost:4200",
   "https://lynxpardelle.com",
   "https://lynxpardelle.com",
 ];

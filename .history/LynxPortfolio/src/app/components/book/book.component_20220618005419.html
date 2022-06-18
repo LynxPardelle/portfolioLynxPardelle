@@ -45,51 +45,46 @@
   <article
     class="d-flex flex-wrap align-items-center mx-auto bef bef-w-95per p-1 my-3 position-relative"
   >
-    <ng-container
-      *ngFor="let bookimg of bookImgs; let i = index; let $last = last"
-      [exist]="$last"
-      (ngInit)="cssCreate()"
-    >
-      <div
-        class="mx-auto p-1"
-        [ngClass]="{
-          'col-1': bookimg.width < windowWidth / 12,
-          'col-2':
-            bookimg.width >= windowWidth / 12 &&
-            bookimg.width < (windowWidth / 12) * 2,
-          'col-3':
-            bookimg.width >= (windowWidth / 12) * 2 &&
-            bookimg.width < (windowWidth / 12) * 3,
-          'col-4':
-            bookimg.width >= (windowWidth / 12) * 3 &&
-            bookimg.width < (windowWidth / 12) * 4,
-          'col-5':
-            bookimg.width >= (windowWidth / 12) * 4 &&
-            bookimg.width < (windowWidth / 12) * 5,
-          'col-6':
-            bookimg.width >= (windowWidth / 12) * 5 &&
-            bookimg.width < (windowWidth / 12) * 6,
-          'col-7':
-            bookimg.width >= (windowWidth / 12) * 6 &&
-            bookimg.width < (windowWidth / 12) * 7,
-          'col-8':
-            bookimg.width >= (windowWidth / 12) * 7 &&
-            bookimg.width < (windowWidth / 12) * 8,
-          'col-9':
-            bookimg.width >= (windowWidth / 12) * 8 &&
-            bookimg.width < (windowWidth / 12) * 9,
-          'col-10':
-            bookimg.width >= (windowWidth / 12) * 9 &&
-            bookimg.width < (windowWidth / 12) * 10,
-          'col-11':
-            bookimg.width >= (windowWidth / 12) * 10 &&
-            bookimg.width < (windowWidth / 12) * 11,
-          'col-12':
-            bookimg.width >= (windowWidth / 12) * 11 &&
-            bookimg.width < windowWidth,
-          col: bookimg.width >= windowWidth
-        }"
-      >
+    <ng-container *ngFor="let bookimg of bookImgs; let i = index; let $last = last"
+    [exist]="$last"
+    (ngInit)="cssCreate()">
+      <div class="mx-auto p-1" [ngClass]="{
+        'col-1': bookimg.width < windowWidth / 12,
+        'col-2':
+          bookimg.width >= windowWidth / 12 &&
+          bookimg.width < (windowWidth / 12) * 2,
+        'col-3':
+          bookimg.width >= (windowWidth / 12) * 2 &&
+          bookimg.width < (windowWidth / 12) * 3,
+        'col-4':
+          bookimg.width >= (windowWidth / 12) * 3 &&
+          bookimg.width < (windowWidth / 12) * 4,
+        'col-5':
+          bookimg.width >= (windowWidth / 12) * 4 &&
+          bookimg.width < (windowWidth / 12) * 5,
+        'col-6':
+          bookimg.width >= (windowWidth / 12) * 5 &&
+          bookimg.width < (windowWidth / 12) * 6,
+        'col-7':
+          bookimg.width >= (windowWidth / 12) * 6 &&
+          bookimg.width < (windowWidth / 12) * 7,
+        'col-8':
+          bookimg.width >= (windowWidth / 12) * 7 &&
+          bookimg.width < (windowWidth / 12) * 8,
+        'col-9':
+          bookimg.width >= (windowWidth / 12) * 8 &&
+          bookimg.width < (windowWidth / 12) * 9,
+        'col-10':
+          bookimg.width >= (windowWidth / 12) * 9 &&
+          bookimg.width < (windowWidth / 12) * 10,
+        'col-11':
+          bookimg.width >= (windowWidth / 12) * 10 &&
+          bookimg.width < (windowWidth / 12) * 11,
+        'col-12':
+          bookimg.width >= (windowWidth / 12) * 11 &&
+          bookimg.width < windowWidth,
+        col: bookimg.width >= windowWidth
+      }">
         <!-- Edit/Delete Buttons -->
         <div
           class="position-absolute end-0 bef bef-top-20per bef-z-10"
