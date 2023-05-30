@@ -46,9 +46,8 @@ import { FileUploaderComponent } from './components/web-utility/file-uploader/fi
 import { GlobalMain, GlobalWeb } from './services/global';
 import { MainService } from './services/main.service';
 import { WebService } from './services/web.service';
-import { BefService } from './services/bef.service';
+import { NgxBootstrapExpandedFeaturesService as BefService } from 'ngx-bootstrap-expanded-features';
 import { SharedService } from './services/shared.service';
-
 
 /* Directives */
 import { NgInitDirective } from './directives/ng-init.directive';

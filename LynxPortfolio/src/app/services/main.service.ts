@@ -335,7 +335,7 @@ export class MainService {
 
   // LocalStorage
   getIdentity() {
-    let identity = localStorage.getItem('identity');
+    let identity = localStorage.getItem('ILP');
     if (identity != null) {
       identity = JSON.parse(identity);
       if (identity != 'undefined') {
@@ -363,7 +363,7 @@ export class MainService {
   }
 
   getToken() {
-    this.token = localStorage.getItem('token');
+    this.token = localStorage.getItem('TLP');
 
     if (!this.token) {
       this.token = sessionStorage.getItem('token');

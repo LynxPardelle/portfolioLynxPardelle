@@ -200,7 +200,7 @@ export class WebService {
                     '<a href="' +
                       harshes[i] +
                       '1' +
-                      '" target="_blank" title="' +
+                      '" target="_blank" rel="noopener noreferrer" title="' +
                       harshes[i] +
                       '2' +
                       '" >' +
@@ -242,7 +242,7 @@ export class WebService {
                   '" title="' +
                   harshes[0] +
                   '2' +
-                  '" target="_blank">' +
+                  '" target="_blank" rel="noopener noreferrer">' +
                   harshes[0] +
                   '3' +
                   '</a>' +
@@ -259,7 +259,7 @@ export class WebService {
                   '" title="' +
                   harshes[0] +
                   '2' +
-                  '" target="_blank">' +
+                  '" target="_blank" rel="noopener noreferrer">' +
                   harshes[0] +
                   '3' +
                   '</a>';
@@ -283,7 +283,7 @@ export class WebService {
                 '" title="' +
                 harshes[i] +
                 '2' +
-                '" target="_blank">' +
+                '" target="_blank" rel="noopener noreferrer">' +
                 harshes[i] +
                 '3' +
                 '</a>';

@@ -1335,11 +1335,11 @@ var controller = {
     // Buscar usuario
     (async () => {
       try {
-        const album = await Album.findById(albumId).populate("populateAlbum");
+        const album = await Album.findById(albumId).populate(populateAlbum);
 
         if (!album) {
           nError = 404;
-          throw new Error("No hay se encontró nada.");
+          throw new Error("No se encontró nada.");
         }
 
         if (album.img) {

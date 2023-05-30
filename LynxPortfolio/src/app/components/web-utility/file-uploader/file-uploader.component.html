@@ -1,6 +1,6 @@
 <button
   type="button"
-  class="btn bg-fullYellow d-block m-auto text-tdark"
+  class="btn bg-fullYellow d-block mx-auto text-tdark"
   title="Sube varios archivos"
   (click)="openModal(subirArchivosPN)"
 >
@@ -130,19 +130,19 @@
         <div *ngIf="files && files[0]">
           <div *ngFor="let file of files">
             <p
-              class="d-block m-auto w-100"
+              class="d-block mx-auto w-100"
               *ngIf="
                 file.nativeFile && file.nativeFile.name && file.nativeFile.size
               "
             >
-              <span class="d-block m-auto w-75">
+              <span class="d-block mx-auto w-75">
                 {{
                   file.nativeFile.name + " " + toKBorMB(file.nativeFile.size)
                 }}
               </span>
-              <span class="d-block m-auto w-25" *ngIf="fileProgress">
+              <span class="d-block mx-auto w-25" *ngIf="fileProgress">
                 <span
-                  class="d-block m-auto w-100"
+                  class="d-block mx-auto w-100"
                   *ngFor="let fileProg of fileProgress"
                 >
                   <span
@@ -152,7 +152,7 @@
                       fileProg.progress.data.percentage &&
                       fileProg.name == file.name
                     "
-                    class="d-block m-auto w-100 border rounded border-white"
+                    class="d-block mx-auto w-100 border rounded border-white"
                     [ngStyle]="{
                       background: toLinearGradientProgress(
                         '#88eff9',
@@ -221,7 +221,7 @@
           </div>
         </div>
         <button
-          class="btn d-block m-auto bg-fullYellow text-tdark"
+          class="btn d-block mx-auto bg-fullYellow text-tdark"
           (click)="closeEnd(modalRef)"
         >
           Aceptar

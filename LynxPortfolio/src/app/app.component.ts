@@ -5,7 +5,7 @@ import { Location } from '@angular/common';
 import { GlobalMain } from './services/global';
 import { MainService } from './services/main.service';
 import { WebService } from './services/web.service';
-import { BefService } from './services/bef.service';
+import { NgxBootstrapExpandedFeaturesService as BefService } from 'ngx-bootstrap-expanded-features';
 import { SharedService } from './services/shared.service';
 
 // Models
@@ -382,8 +382,8 @@ export class AppComponent implements OnInit, DoCheck {
   }
 
   logout() {
-    localStorage.removeItem('identity');
-    localStorage.removeItem('token');
+    localStorage.removeItem('ILP');
+    localStorage.removeItem('>');
     this.identity = null;
     this._sharedService.emitChange({
       from: 'app',

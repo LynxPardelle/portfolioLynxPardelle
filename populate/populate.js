@@ -1,0 +1,21 @@
+module.exports = {
+  album: ["img"],
+  article: [
+    "cat",
+    { path: "cat", populate: { path: "subcats" } },
+    "subCats",
+    "sections",
+    { path: "sections", populate: { path: "principalFile" } },
+    { path: "sections", populate: { path: "files" } },
+  ],
+  articleCat: ["subcats"],
+  articleSection: ["principalFile", "files"],
+  articleSubCat: ["cat", { path: "cat", populate: { path: "subcats" } }],
+  bookImg: ["img"],
+  cvSection: ["CVSubSections"],
+  cvSubSection: ["CVSections"],
+  main: ["logo", "backgroundImg", "CVImage", "CVBackground"],
+  song: ["song", "coverArt"],
+  video: ["video"],
+  website: ["desktopImg", "tabletImg", "mobileImg"],
+};

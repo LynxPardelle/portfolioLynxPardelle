@@ -204,11 +204,10 @@ export class BookComponent implements OnInit {
             throw new Error('No se creo la imagen book.');
           }
 
-          if (isFromPreload === true) {
-            this.bookImg = bookImg.bookImg;
-          } else {
-            this.bookImg = new BookImg('', '', '', null, 0, 0);
-          }
+          this.bookImg =
+            isFromPreload === true
+              ? bookImg.bookImg
+              : new BookImg('', '', '', null, 0, 0);
           this.getBookImgs();
           Swal.fire({
             title:
