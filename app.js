@@ -12,6 +12,7 @@ var app = express();
 
 // Cargar rutas
 var main_routes = require("./routes/main");
+var article_routes = require("./routes/article");
 
 // Middlewares de body-parser
 app.use(express.json({ limit: "50mb" }));
@@ -22,6 +23,7 @@ app.use(
 // Config cabeceras y CORS
 var allowedDomains = [
   "http://localhost:4200",
+  "http://localhost:6164",
   "https://lynxpardelle.com",
   "https://lynxpardelle.com",
 ];
@@ -44,6 +46,7 @@ app.use(
 // rutas body-parser
 app.use("/", express.static("client", { redirect: false }));
 app.use("/api/main", main_routes);
+app.use("/api/article", article_routes);
 
 app.get("*", function (req, res, next) {
   res.sendFile(path.resolve("client/index.html"));

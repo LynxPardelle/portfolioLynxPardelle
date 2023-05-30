@@ -153,6 +153,22 @@ export class BefService {
           case 'opacity':
             befStringed += `{opacity:${value};}`;
             break;
+            case "position":
+          let positionOptions = [
+            "static",
+            "absolute",
+            "fixed",
+            "relative",
+            "sticky",
+            "initial",
+            "inherit",
+          ];
+          if (positionOptions.includes(value)) {
+            befStringed += `{position:${value};}`;
+          } else {
+            befStringed += `{position:static;}`;
+          }
+          break;
           case 'top':
             befStringed += `{top:${value};}`;
             break;
@@ -174,6 +190,12 @@ export class BefService {
           case 'gap':
             befStringed += `{gap:${value};}`;
             break;
+            case "rowGap":
+          befStringed += `{row-gap:${value};}`;
+          break;
+        case "columnGap":
+          befStringed += `{column-gap:${value};}`;
+          break;
           case 'p':
             befStringed += `{padding:${value};}`;
             break;
@@ -509,8 +531,7 @@ export class BefService {
                       3
                     )
                   )}, ${value.split(' ')[2]})
-                ;
-              }`;
+                ;}`;
               } else {
                 befStringed += `{
                   background-color:${this.colors[value]};
@@ -596,8 +617,7 @@ export class BefService {
                         3
                       )
                     )}, ${value.split(' ')[2]})
-                  ;
-                }`;
+                  ;}`;
               } else {
                 befStringed += `{
                   color:${this.colors[value]};
@@ -647,6 +667,17 @@ export class BefService {
               }
               befStringed += `{text-shadow:${value} !important;}`;
               break;
+          }
+        }
+        for (let cssProperty of befStringed.split(";")) {
+          if (
+            !cssProperty.includes("!important") &&
+            cssProperty.length > 5
+          ) {
+            befStringed = befStringed.replace(
+              cssProperty,
+              cssProperty + " !important"
+            );
           }
         }
         if (befStringed.includes('{') && befStringed.includes('}')) {

@@ -113,7 +113,7 @@ export class LoginComponent implements OnInit {
       );
 
       //LocalStorage del identity
-      localStorage.setItem('identity', JSON.stringify(this.identity));
+      localStorage.setItem('ILP', JSON.stringify(this.identity));
 
       this._sharedService.emitChange({
         from: 'login',
@@ -123,7 +123,7 @@ export class LoginComponent implements OnInit {
       });
 
       //LocalStorage del token
-      localStorage.setItem('token', this.token);
+      localStorage.setItem('TLP', this.token);
 
       this._router.navigate(['/inicio']);
 
