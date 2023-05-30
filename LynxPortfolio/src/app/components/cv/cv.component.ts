@@ -5,7 +5,7 @@ import { Location } from '@angular/common';
 import { GlobalMain } from '../../services/global';
 import { MainService } from '../../services/main.service';
 import { WebService } from '../../services/web.service';
-import { BefService } from '../../services/bef.service';
+import { NgxBootstrapExpandedFeaturesService as BefService } from 'ngx-bootstrap-expanded-features';
 import { SharedService } from '../../services/shared.service';
 
 // Models
@@ -151,13 +151,14 @@ export class CvComponent implements OnInit, DoCheck {
 
       let colors: any = {};
 
-      for(let section of this.CVSections){
+      for (let section of this.CVSections) {
         colors[section.titleColor.replace('#', 'a')] = section.titleColor;
         colors[section.textColor.replace('#', 'a')] = section.textColor;
         colors[section.linkColor.replace('#', 'a')] = section.linkColor;
         colors[section.bgColor.replace('#', 'a')] = section.bgColor;
-        for(let subsection of section.CVSubSections){
-          colors[subsection.titleColor.replace('#', 'a')] = subsection.titleColor;
+        for (let subsection of section.CVSubSections) {
+          colors[subsection.titleColor.replace('#', 'a')] =
+            subsection.titleColor;
           colors[subsection.textColor.replace('#', 'a')] = subsection.textColor;
           colors[subsection.linkColor.replace('#', 'a')] = subsection.linkColor;
           colors[subsection.bgColor.replace('#', 'a')] = subsection.bgColor;

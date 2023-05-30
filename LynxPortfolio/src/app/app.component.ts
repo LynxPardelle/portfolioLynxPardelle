@@ -84,7 +84,7 @@ export class AppComponent implements OnInit, DoCheck {
 
     private _sharedService: SharedService
   ) {
-    _sharedService.changeEmitted$.subscribe((sharedContent) => {
+    _sharedService.changeEmitted$.subscribe((sharedContent: any) => {
       if (
         typeof sharedContent === 'object' &&
         sharedContent.from !== 'app' &&
