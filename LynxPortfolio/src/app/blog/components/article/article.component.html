@@ -1,1 +1,37 @@
-<h2 class="text-center bef bef-my-3rem">Article</h2>
+<!-- Edit/Delete Buttons -->
+<generic-group-buttons
+  *ngIf="!!canEdit || !article._id"
+  [buttonComboClass]="
+    'position-fixed d-flex justify-content-start bef bef-t-9rem bef-e-3rem'
+  "
+  [buttons]="buttonsToEdit"
+  (clicked)="onClickButton($event)"
+></generic-group-buttons>
+<!-- Created_at -->
+<p
+  *ngIf="!!article.create_at"
+  class="text-center bef bef-py-1_5rem"
+  [exist]="!!article.create_at"
+  (ngInit)="cssCreate()"
+>
+  {{ article.create_at | amLocale : "es" | amDateFormat : "LL" }}
+</p>
+<!-- Cats -->
+<blog-cat-badgets
+  *ngIf="!!article.cat && !!article.cat._id"
+  [cats]="[article.cat]"
+  [lang]="lang"
+>
+</blog-cat-badgets>
+<!-- SubCats -->
+<blog-subcat-badgets
+  *ngIf="
+    !!article.cat &&
+    !!article.cat._id &&
+    !!article.cat.subCats &&
+    !!article.cat.subCats[0]._id
+  "
+  [subcats]="[article.cat.subCats]"
+  [lang]="lang"
+>
+</blog-subcat-badgets>

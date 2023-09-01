@@ -4,9 +4,9 @@
 
 export const environment = {
   production: false,
-  api: 'https://lynxpardelle.com/api',
+  api: 'http://localhost:6164/api',
   /*
-  'http://localhost:6164/api',
+  'https://lynxpardelle.com/api',
   */
   url: 'http://localhost:4200',
 };

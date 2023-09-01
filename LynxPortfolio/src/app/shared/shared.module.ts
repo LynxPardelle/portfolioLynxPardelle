@@ -9,6 +9,9 @@ import { BootstrapModule } from './bootstrap.module';
 /* NGX-Uploader */
 import { NgxUploaderModule } from '@angular-ex/uploader';
 
+/* Moment */
+import { MomentModule } from 'ngx-moment';
+
 /* YoutubePlayer */
 import { YouTubePlayerModule } from '@angular/youtube-player';
 
@@ -21,9 +24,14 @@ import { NgInitDirective } from './directives/ng-init.directive';
 
 /* Pipes */
 import { SafeHtmlPipe } from './pipes/safe-html';
+import { HarshifyPipe } from './pipes/harshify.pipe';
 
 /* Components */
 import { FileUploaderComponent } from './components/file-uploader/file-uploader.component';
+import { GenericButtonComponent } from './components/generic-button/generic-button.component';
+import { GenericInputComponent } from './components/generic-input/generic-input.component';
+import { GenericDropdownComponent } from './components/generic-dropdown/generic-dropdown.component';
+import { GenericGroupButtonsComponent } from './components/generic-group-buttons/generic-group-buttons.component';
 
 @NgModule({
   declarations: [
@@ -32,9 +40,15 @@ import { FileUploaderComponent } from './components/file-uploader/file-uploader.
 
     /* Pipes */
     SafeHtmlPipe,
+    HarshifyPipe,
 
     /* Components */
     FileUploaderComponent,
+    GenericButtonComponent,
+    GenericInputComponent,
+    GenericGroupButtonsComponent,
+    GenericDropdownComponent,
+    GenericGroupButtonsComponent,
   ],
   imports: [
     CommonModule,
@@ -45,6 +59,13 @@ import { FileUploaderComponent } from './components/file-uploader/file-uploader.
 
     /* NGX-Uploader */
     NgxUploaderModule,
+
+    /* Moment */
+    MomentModule.forRoot({
+      relativeTimeThresholdOptions: {
+        m: 59,
+      },
+    }),
 
     /* YoutubePlayer */
     YouTubePlayerModule,
@@ -68,6 +89,9 @@ import { FileUploaderComponent } from './components/file-uploader/file-uploader.
     /* NGX-Uploader */
     NgxUploaderModule,
 
+    /* Moment */
+    MomentModule,
+
     /* YoutubePlayer */
     YouTubePlayerModule,
 
@@ -79,9 +103,15 @@ import { FileUploaderComponent } from './components/file-uploader/file-uploader.
 
     /* Pipes */
     SafeHtmlPipe,
+    HarshifyPipe,
 
     /* Components */
     FileUploaderComponent,
+    GenericButtonComponent,
+    GenericInputComponent,
+    GenericGroupButtonsComponent,
+    GenericDropdownComponent,
+    GenericGroupButtonsComponent,
   ],
 })
 export class SharedModule {}

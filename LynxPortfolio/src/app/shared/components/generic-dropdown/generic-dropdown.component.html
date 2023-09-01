@@ -1,0 +1,156 @@
+<div
+  *ngIf="!!dropdownOpen && !disabled"
+  class="d-block position-fixed bef bef-h-100vh bef-w-100vw bef-s-0 bef-t-0 overflow-hidden"
+  (click)="dropdownOpen = !!disabled ? false : !dropdownOpen"
+></div>
+<label
+  *ngIf="!!labelTitle"
+  class="d-block text-start bef bef-text-btnBG bef-mt-1rem {{ labelClasses }}"
+>
+  {{ labelTitle }}
+</label>
+<button
+  id="{{ buttonId }}-btn-dropdown"
+  type="button"
+  class="btn bef w-100 bef-lh-1 d-flex flex-wrap justify-content-between align-items-center"
+  [ngClass]="
+    (!withSearcher ? ' bef-p-5px__1rem ' : ' bef-p-0 ') +
+    (disabled && !!disabledClassButton ? disabledClassButton : buttonClasses)
+  "
+  (click)="
+    clickedTitle.emit(placeholder);
+    dropdownOpen = !!disabled ? false : !dropdownOpen
+  "
+  [disabled]="disabled"
+>
+  <ng-container *ngIf="!withSearcher; else elseWithSearcherTemplate">
+    {{ placeholder }}
+  </ng-container>
+  <ng-template #elseWithSearcherTemplate>
+    <ng-container
+      *ngIf="!!placeholder && placeholder.toString() !== '' && multiselect"
+    >
+      <div
+        *ngFor="
+          let pill of placeholder.toString().split(splitter);
+          let i = index;
+          let last$ = last
+        "
+        class="text-break w-25 mat-elevation-z2 bef bef-r-1rem bef-bg-{{
+          getRandomColor(i, last$)
+        }} text-light bef-tsh-0__0__2px__black"
+      >
+        {{ pill }}
+        <button
+          class="btn btn-danger border border-secondary bef-r-100per bef bef-fs-0_5rem bef-w-1rem bef-h-1rem p-0"
+          (click)="
+            onClicked({
+              type: 'menuitemMultiselect',
+              option: pill,
+              click: pill
+            })
+          "
+        >
+          X
+        </button>
+      </div>
+    </ng-container>
+    <generic-input
+      class="bef bef-w-calcSD95per__MIN__1remED"
+      [placeholder]="placeholder.toString().replace(splitterRegEx, ',')"
+      [thingFather]="searcher"
+      [thing]="'search'"
+      [type]="!!multiselect ? 'textarea' : 'text'"
+      [inputContainerClasses]="'w-100 d-flex mx-auto align-items-center'"
+      [inputClasses]="
+        'w-100 bg-transparent bef border-0 ' +
+        (!!multiselect
+          ? 'bef-p-5px__0 bef-rounded-0'
+          : 'bef-p-5px__1rem bef-rounded-1rem')
+      "
+      [inputDisabledClasses]="
+        'w-100 bg-transparent bef border-0' +
+        (!!multiselect
+          ? 'bef-p-5px__0 bef-rounded-0'
+          : 'bef-p-5px__1rem bef-rounded-1rem')
+      "
+      [hrActive]="false"
+      [disabled]="disabled"
+      (changesInput)="InputReacher($event)"
+      [exist]="true"
+      (ngInit)="cssCreate()"
+    ></generic-input>
+  </ng-template>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="10"
+    height="10"
+    viewBox="0 0 15 12"
+  >
+    <path
+      id="Polygon_1"
+      data-name="Polygon 1"
+      d="M6.652,1.357a1,1,0,0,1,1.7,0l5.7,9.113A1,1,0,0,1,13.2,12H1.8a1,1,0,0,1-.848-1.53Z"
+      transform="translate(15 12) rotate(180)"
+      fill="#000"
+    />
+  </svg>
+</button>
+<ul
+  *ngIf="!!dropdownOpen && !disabled"
+  id="{{ dropdownId }}-dropdown"
+  class="list-group list-group-flush dropdown-menu bef bef-bg-white bef-fs-1rem bef-text-btnBG bef-p-5px__1rem bef-rounded-1rem bef-w-{{
+    buttonId !== '' ? checkElementWidth(buttonId + '-btn-dropdown') : 100
+  }}px"
+>
+  <ng-container
+    *ngFor="let option of getOptions(); let last$ = last"
+    [exist]="last$"
+    (ngInit)="cssCreate()"
+  >
+    <ng-container [ngSwitch]="true">
+      <ng-container *ngSwitchCase="option.type.includes('menuitem')">
+        <li
+          *ngIf="
+            !placeholder.toString().includes(option.option) || !multiselect
+          "
+          class="list-group-item cursor-pointer text-center bef"
+          [ngClass]="
+            disabled
+              ? listClasses + ' ' + option.disabledClasses
+              : listClasses + ' ' + option.customClasses
+          "
+          (click)="
+            onClicked(option); dropdownOpen = !!disabled ? false : !dropdownOpen
+          "
+          [exist]="
+            !placeholder.toString().includes(option.option) || !multiselect
+          "
+          (ngInit)="cssCreate()"
+        >
+          {{ option.option }}
+        </li>
+      </ng-container>
+      <li
+        class="list-group-item text-center bef"
+        [ngClass]="disabled ? option.disabledClasses : option.customClasses"
+        *ngSwitchCase="option.type.includes('divider')"
+        class="divider dropdown-divider"
+      ></li>
+      <li
+        *ngSwitchDefault
+        class="list-group-item bef text-center"
+        [ngClass]="
+          disabled
+            ? listClasses + ' ' + option.disabledClasses
+            : listClasses + ' ' + option.customClasses
+        "
+        (click)="
+          onClicked(option); dropdownOpen = !!disabled ? false : !dropdownOpen
+        "
+      >
+        {{ option.option }}
+      </li>
+    </ng-container>
+  </ng-container>
+</ul>

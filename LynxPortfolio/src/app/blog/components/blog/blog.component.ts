@@ -1,14 +1,17 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { Location } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 /* RxJs */
 import { Observable } from 'rxjs';
 /* Environment */
 import { environment } from 'src/environments/environment';
 /* Interfaces */
+import { IArticle } from '../../interfaces/blog';
 import { IMain } from 'src/app/core/interfaces/main';
 /* Models */
 import { Main } from 'src/app/core/models/main';
 /* Services */
+import { BlogService } from '../../services/blog.service';
 import { MainService } from 'src/app/core/services/main.service';
 import { WebService } from 'src/app/shared/services/web.service';
 import { NgxBootstrapExpandedFeaturesService as BefService } from 'ngx-bootstrap-expanded-features';
@@ -30,7 +33,21 @@ import { LoadMain } from 'src/app/state/actions/main.actions';
 export class BlogComponent implements OnInit {
   public identity: any;
   public main!: Main;
+  // Models
+  public articles: IArticle[] = [];
 
+  // Utility
+  public page: number = 1;
+  public next_page: number = 2;
+  public prev_page: number = 1;
+  public total: number = 0;
+  public itemsPerPage: number = 5;
+
+  public noMore: boolean = false;
+
+  public search: string = '';
+
+  public loading: boolean = true;
   /* Translate */
   public lang: string = 'es';
 
@@ -48,10 +65,12 @@ export class BlogComponent implements OnInit {
   /* State */
   public main$: Observable<IMain | undefined>;
   constructor(
+    private _route: ActivatedRoute,
     private _mainService: MainService,
 
     private _webService: WebService,
     private _befService: BefService,
+    private _blogService: BlogService,
 
     private _translate: TranslateService,
     private _location: Location,
@@ -111,6 +130,7 @@ export class BlogComponent implements OnInit {
       thing: 'Data from blog',
     });
     this.getMain();
+    this.getBlog();
   }
   /* State */
   getMain() {
@@ -122,6 +142,61 @@ export class BlogComponent implements OnInit {
         }
       },
       error: (e) => console.error(e),
+    });
+  }
+
+  getBlog() {
+    this.articles = [];
+    this.loading = true;
+    /* Get page from url */
+    this._route.params.subscribe({
+      next: (params) => {
+        this.page = params['page'] ? params['page'] : this.page;
+        this.search = params['search']
+          ? params['search']
+          : params['cat']
+          ? params['cat']
+          : params['subcat']
+          ? params['subcat']
+          : this.search;
+        this.next_page = this.page + 1;
+        this.prev_page = this.page > 1 ? this.page - 1 : 1;
+        this._blogService
+          .getArticles(
+            this.page,
+            5,
+            '_id',
+            'all',
+            'all',
+            this.search || undefined
+          )
+          .subscribe({
+            next: (b) => {
+              this._webService.consoleLog(
+                b,
+                this.document + ' 114',
+                this.customConsoleCSS
+              );
+              this.loading;
+            },
+            error: (e) => {
+              this.loading = false;
+              this._webService.consoleLog(
+                e,
+                this.document + ' 165',
+                this.customConsoleCSS
+              );
+            },
+          });
+      },
+      error: (e) => {
+        this.loading = false;
+        this._webService.consoleLog(
+          e,
+          this.document + ' 165',
+          this.customConsoleCSS
+        );
+      },
     });
   }
 

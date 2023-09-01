@@ -1,0 +1,35 @@
+<div *ngIf="buttons.length > 0" [ngClass]="buttonComboClass">
+  <generic-button
+    *ngFor="let button of buttons; let i = index; let $last = last"
+    [exist]="$last"
+    (ngInit)="cssCreate()"
+    [type]="button.type ? button.type : 'customHTML ' + i"
+    [classButton]="
+      button.classButton
+        ? button.classButton
+        : ' m-0 bef-borderColor-btnBG bef-borderStyle-solid ' +
+          (i === 0 ? 'bef-borderwidth0' : ' bef-borderwidth0__0__0__2px ') +
+          (i === buttons.length - 1
+            ? ' bef-rounded-0__10px__10px__0 '
+            : i === 0
+            ? ' bef-rounded-10px__0__0__10px '
+            : ' bef-rounded-0 ')
+    "
+    [disabledClassButton]="
+      button.disabledClassButton ? button.disabledClassButton : ''
+    "
+    [customHtml]="
+      button.customHtml
+        ? button.customHtml
+        : button.type
+        ? button.type
+        : 'Button ' + i
+    "
+    [disabled]="button.disabled ? button.disabled : false"
+    [tooltip]="button.tooltip ? button.tooltip : ''"
+    [placement]="button.placement ? button.placement : 'auto'"
+    [tooltipClass]="button.tooltipClass ? button.tooltipClass : ''"
+    (clicked)="clicked.emit($event)"
+    (buttonId)="buttonId.emit({ id: $event, index: i })"
+  ></generic-button>
+</div>
