@@ -16,14 +16,9 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "es2020",
-    "lib": [
-      "es2018",
-      "dom",
-      "dom.iterable",
-      "es5",
-      "es6"
-    ],
-    "useDefineForClassFields": false
+    "lib": ["es2018", "dom", "dom.iterable", "es5", "es6"],
+    "useDefineForClassFields": false,
+    "allowSyntheticDefaultImports": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

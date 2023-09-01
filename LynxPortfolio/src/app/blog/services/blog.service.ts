@@ -15,7 +15,7 @@ import { LoadMain } from 'src/app/state/actions/main.actions';
   providedIn: 'root',
 })
 export class BlogService {
-  public urlBlog: string = environment.api + '/blog/';
+  public urlBlog: string = environment.api + '/article/';
   public identity: any;
   public token: any;
   /* State */
@@ -65,13 +65,14 @@ export class BlogService {
   /* Read */
   getArticles(
     page: number = 1,
+    ipp: number = 5,
     sort: string = '_id',
     rootAccess: string | undefined,
     type: string | undefined,
     search: string | undefined
   ): Observable<any> {
     return this._http.get(
-      `${this.urlBlog}articles/${page}/${sort}${
+      `${this.urlBlog}articles/${page}/${ipp}/${sort}${
         rootAccess ? `/${rootAccess}` : ''
       }${type ? `/${type}` : ''}${search ? `/${search}` : ''}`
     );

@@ -1,41 +1,53 @@
 <h2 class="text-center bef bef-my-3rem">Blog</h2>
+<a
+  *ngIf="identity && identity.role == 'ROLE_ADMIN'"
+  href="/article"
+  [routerLink]="['/blog/article']"
+  class="d-block mx-auto my-3 btn bef bef-w-clampSD200pxCOM25perCOM300pxED bef-btn-fullYellow bef-text-tdark p-2"
+  >Crear nuevo artículo</a
+>
+<ng-container *ngIf="articles.length > 0; else elseNoArticlesTemplate">
+  <section class="w-100 d-flex flex-wrap justify-content-evenly">
+    <article
+      *ngFor="let article of articles; let i = index; let $last = last"
+      [exist]="$last"
+      (ngInit)="cssCreate()"
+      class="card bef bef-w-95per bef-wmx-300px mx-auto my-3 bef-bg-fullRed bef-text-tlight p-3 bef-rounded-15px"
+    >
+      <h3 class="card-title text-center">Title</h3>
+      <span class="my-1 text-center"> dd/mm/yy </span>
+      <img
+        src="https://picsum.photos/30{{ i }}/30{{ i }}"
+        alt="https://picsum.photos/30{{ i }}/30{{ i }}"
+        class="w-50 obj-fit-cover d-block mx-auto my-3 bef bef-rounded-15px bef-boxShadow-0__2px__2px__tdark"
+      />
+      <div class="d-flex flex-wrap justify-content-evenly w-75 mx-auto">
+        <span class="badge bg-info"> Nuevo </span>
+        <span class="badge bg-success"> Cat 1 </span>
+        <span class="badge bg-warning"> Cat 2 </span>
+      </div>
+      <div class="card-body">
+        <p class="card-text my-3">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore
+          blanditiis amet inventore, nobis harum perspiciatis aut alias qui unde
+          explicabo accusamus.
+        </p>
 
-<section class="w-100 d-flex flex-wrap justify-content-evenly">
-  <article
-    *ngFor="
-      let item of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-      let i = index;
-      let $last = last
-    "
-    [exist]="$last"
-    (ngInit)="cssCreate()"
-    class="card bef bef-w-95per bef-wmx-300px mx-auto my-3 bef-bg-fullRed bef-text-tlight p-3 bef-rounded-15px"
-  >
-    <h3 class="card-title text-center">Title</h3>
-    <span class="my-1 text-center"> dd/mm/yy </span>
-    <img
-      src="https://picsum.photos/30{{ item }}/30{{ item }}"
-      alt="https://picsum.photos/30{{ item }}/30{{ item }}"
-      class="w-50 obj-fit-cover d-block mx-auto my-3 bef bef-rounded-15px bef-boxShadow-0__2px__2px__tdark"
-    />
-    <div class="d-flex flex-wrap justify-content-evenly w-75 mx-auto">
-      <span class="badge bg-info"> Nuevo </span>
-      <span class="badge bg-success"> Cat 1 </span>
-      <span class="badge bg-warning"> Cat 2 </span>
-    </div>
-    <div class="card-body">
-      <p class="card-text my-3">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore
-        blanditiis amet inventore, nobis harum perspiciatis aut alias qui unde
-        explicabo accusamus.
-      </p>
-
-      <a
-        href="/article"
-        [routerLink]="['/blog/article']"
-        class="card-link badge bef bef-btn-fullYellow bef-text-tdark p-2"
-        >Ver más</a
-      >
-    </div>
-  </article>
-</section>
+        <a
+          href="/article"
+          [routerLink]="['/blog/article']"
+          class="card-link badge bef bef-btn-fullYellow bef-text-tdark p-2"
+          >Ver más</a
+        >
+      </div>
+    </article>
+  </section>
+</ng-container>
+<ng-template #elseNoArticlesTemplate>
+  <ng-container *ngIf="!loading; else elseLoadingTemplate">
+    <p class="text-center p-5">No hay artículos.</p>
+  </ng-container>
+  <ng-template #elseLoadingTemplate>
+    <p class="text-center p-5">Cargando...</p>
+  </ng-template>
+</ng-template>

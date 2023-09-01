@@ -86,7 +86,7 @@ const controller = {
         article: articleStored,
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return res.status(nError).send({
         status: "error",
         message: err.message,
@@ -127,7 +127,7 @@ const controller = {
         articleSection: articleSectionStored,
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return res.status(nError).send({
         status: "error",
         message: err.message,
@@ -177,7 +177,7 @@ const controller = {
         articleCat: articleCatStored,
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return res.status(nError).send({
         status: "error",
         message: err.message,
@@ -222,7 +222,7 @@ const controller = {
         articleSubCat: articleSubCatStored,
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return res.status(nError).send({
         status: "error",
         message: err.message,
@@ -293,6 +293,7 @@ const controller = {
         });
       }
     } catch (err) {
+      console.error(err);
       return res.status(nError).send({
         status: "error",
         message: "Error al devolver los artículos.",
@@ -790,7 +791,6 @@ const controller = {
 
   /* Uploads */
   async UploadFileArticle(req, res) {
-    console.log("uploading image...");
     let nError = 500;
     (async () => {
       try {
@@ -1221,7 +1221,7 @@ const controller = {
         .limit(limit)
         .skip(skip)
         .populate(populate.article);
-      const total = await Articles.count(json);
+      const total = await Article.count(json);
       return { articles, total };
     } catch (err) {
       throw Error(err);

@@ -41,6 +41,7 @@ export class TokenInterceptor implements HttpInterceptor {
   }
 
   handleError(e: HttpErrorResponse) {
+    console.error(e);
     let eMessage = e.error && e.error.message ? e.error.message : e.message;
     return throwError(() => new Error(eMessage));
   }

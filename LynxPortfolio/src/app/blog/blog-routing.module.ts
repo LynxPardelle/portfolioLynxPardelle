@@ -8,10 +8,12 @@ const routes: Routes = [
   { path: 'article', component: ArticleComponent },
   { path: 'article/:id', component: ArticleComponent },
   { path: ':page', component: BlogComponent },
-  { path: ':cat', component: BlogComponent },
-  { path: ':cat/:page', component: BlogComponent },
-  { path: ':subcat', component: BlogComponent },
-  { path: ':subcat/:page', component: BlogComponent },
+  { path: 'list-cat/:cat', component: BlogComponent },
+  { path: 'list-cat/:cat/:page', component: BlogComponent },
+  { path: 'list-subcat/:subcat', component: BlogComponent },
+  { path: 'list-subcat/:subcat/:page', component: BlogComponent },
+  { path: 'search/:search', component: BlogComponent },
+  { path: 'search/:search/:page', component: BlogComponent },
 ];
 @NgModule({
   imports: [RouterModule.forChild(routes)],

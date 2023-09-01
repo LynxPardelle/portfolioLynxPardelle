@@ -1,0 +1,17 @@
+<div
+  class="d-flex flex-wrap justify-content-start align-items-center mx-auto bef bef-w-clampSD200pxCOM50perCOM50perED bef-my-1_5rem"
+>
+  <a
+    *ngFor="let subcat of subcats; let last$ = last"
+    [exist]="last$"
+    (ngInit)="cssCreate()"
+    class="btn text-center bef-lh-1_5 badge rounded-pill px-3 py-1 {{
+      'bef-text-' + subcat.titleColor + ' bef-bg-' + subcat.buttonColor
+    }}"
+    [routerLink]="['/blog/list-subcat/', subcat._id, '1']"
+    href="/blog/list-subcat/{{ subcat._id }}/1"
+    rel=" noopener noreferrer "
+  >
+    {{ lang === "es" ? subcat.title : subcat.titleEng }}
+  </a>
+</div>
