@@ -28,7 +28,7 @@
     "@ngx-translate/http-loader": "^8.0.0",
     "bootstrap": "^5.2.3",
     "ngx-bootstrap": "^10.2.0",
-    "ngx-bootstrap-expanded-features": "^0.10.2",
+    "ngx-bootstrap-expanded-features": "^1.0.0",
     "ngx-moment": "^6.0.2",
     "rxjs": "^7.8.1",
     "sweetalert2": "^11.4.8",
