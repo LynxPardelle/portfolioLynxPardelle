@@ -1,6 +1,6 @@
 "use strict";
 
-// Modulos
+/* Modulos */
 const [validator, bcrypt, fs, path] = [
   require("validator"),
   require("bcrypt"),
@@ -8,14 +8,14 @@ const [validator, bcrypt, fs, path] = [
   require("path"),
 ];
 
-// Modelos
+/* Modelos */
 const [Article, ArticleSection, ArticleCat, ArticleSubCat] = [
   require("../models/article"),
   require("../models/articleSection"),
   require("../models/articleCat"),
   require("../models/articleSubCat"),
 ];
-// Services
+/* Services */
 const [_utility, _mail] = [
   require("../services/utility"),
   require("../services/mail"),
@@ -23,10 +23,10 @@ const [_utility, _mail] = [
 
 const populate = require("../populate/populate");
 
-// jwt
+/* jwt */
 const jwt = require("../services/jwt");
 
-// Key
+/* Key */
 const secret = require("../keys/secret");
 
 const controller = {
@@ -37,7 +37,7 @@ const controller = {
     });
   },
 
-  // Create
+  /* Create */
   async createArticle(req, res) {
     let nError = 500;
     try {
@@ -231,7 +231,7 @@ const controller = {
     }
   },
 
-  // Read
+  /* Read */
   async getArticles(req, res) {
     let nError = 500;
     try {
@@ -351,7 +351,7 @@ const controller = {
     }
   },
 
-  // Update
+  /* Update */
   async updateArticle(req, res) {
     let nError = 500;
     try {
@@ -500,7 +500,7 @@ const controller = {
     }
   },
 
-  // Delete
+  /* Delete */
   async deleteArticle(req, res) {
     let nError = 500;
     try {
@@ -788,7 +788,7 @@ const controller = {
     }
   },
 
-  // Uploads
+  /* Uploads */
   async UploadFileArticle(req, res) {
     console.log("uploading image...");
     let nError = 500;
@@ -810,7 +810,7 @@ const controller = {
           nError = 404;
         }
 
-        // Extensión y tamaño del fichero
+        /* Extensión y tamaño del fichero */
         var file_ext = req.files[0].mimetype.split("/")[1];
         var file_size = req.files[0].size;
         var file_path = req.files[0].path;
@@ -821,7 +821,7 @@ const controller = {
           file_ext != "jpg" &&
           file_ext != "jpeg"
         ) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -831,7 +831,7 @@ const controller = {
         }
 
         if (file_size > 50000000) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -869,10 +869,10 @@ const controller = {
           }
         });
 
-        // Crear el objeto a guardar
+        /* Crear el objeto a guardar */
         var file = await new File();
 
-        // Asignar valores
+        /* Asignar valores */
         if (fileOriginalsplit[0].includes("EnglishTitle")) {
           file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
           file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
@@ -925,7 +925,7 @@ const controller = {
   async UploadFileArticleSectionPrincipalFile(req, res) {
     let nError = 500;
     try {
-      // Recoger el id de la url
+      /* Recoger el id de la url */
       let articleSection = await ArticleSection.findById(req.params.id);
       if (!articleSection) {
         nError = 404;
@@ -936,7 +936,7 @@ const controller = {
         throw new Error("Archivo no subido...");
         nError = 404;
       }
-      // Extensión y tamaño del fichero
+      /* Extensión y tamaño del fichero */
       const file_ext = req.files[0].mimetype.split("/")[1];
       var file_size = req.files[0].size;
       var file_path = req.files[0].path;
@@ -961,7 +961,7 @@ const controller = {
         file_ext != "als" &&
         file_ext != "avi"
       ) {
-        // Borrar el archivo
+        /* Borrar el archivo */
         await fs.unlink(file_path, (err) => {
           if (err) {
             throw new Error("Error al borrar archivo.");
@@ -970,7 +970,7 @@ const controller = {
         throw new Error("La extensión del archivo no es válida.");
       }
       if (file_size > 50000000) {
-        // Borrar el archivo
+        /* Borrar el archivo */
         await fs.unlink(file_path, (err) => {
           if (err) {
             throw new Error("Error al borrar archivo.");
@@ -1007,9 +1007,9 @@ const controller = {
           throw new Error("El archivo NO se ha renombrado correctamente.");
         }
       });
-      // Crear el objeto a guardar
+      /* Crear el objeto a guardar */
       let file = await new File();
-      // Asignar valores
+      /* Asignar valores */
       if (fileOriginalsplit[0].includes("EnglishTitle")) {
         file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
         file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
@@ -1077,7 +1077,7 @@ const controller = {
   async UploadFilesArticleSection(req, res) {
     let nError = 500;
     try {
-      // Recoger el id de la url
+      /* Recoger el id de la url */
       let articleSection = await ArticleSection.findById(req.params.id);
       if (!articleSection) {
         nError = 404;
@@ -1089,7 +1089,7 @@ const controller = {
         nError = 404;
       }
       for (let file of req.files) {
-        // Extensión y tamaño del fichero
+        /* Extensión y tamaño del fichero */
         const file_ext = req.files[0].mimetype.split("/")[1];
         var file_size = req.files[0].size;
         var file_path = req.files[0].path;
@@ -1099,7 +1099,7 @@ const controller = {
           file_ext != "jpg" &&
           file_ext != "jpeg"
         ) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -1108,7 +1108,7 @@ const controller = {
           throw new Error("La extensión del archivo no es válida.");
         }
         if (file_size > 50000000) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -1145,9 +1145,9 @@ const controller = {
             throw new Error("El archivo NO se ha renombrado correctamente.");
           }
         });
-        // Crear el objeto a guardar
+        /* Crear el objeto a guardar */
         let file = await new File();
-        // Asignar valores
+        /* Asignar valores */
         if (fileOriginalsplit[0].includes("EnglishTitle")) {
           file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
           file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
@@ -1213,7 +1213,7 @@ const controller = {
     }
   },
 
-  // Exported Functions
+  /* Exported Functions */
   async DoGetArticles(json, skip, limit, sort) {
     try {
       const articles = await Article.find(json)
@@ -1261,7 +1261,7 @@ const controller = {
             articles.push(article);
           }
 
-          // insertions [String]; subCats []; sections[]; langs [String];
+          /* insertions [String]; subCats []; sections[]; langs [String]; */
           if (
             rootAccess === "all" ||
             (rootAccess.includes("insertion") && article.insertions[0])

@@ -3,10 +3,10 @@ var nodemailer = require("nodemailer");
 exports.DoSendEmail = async (mails) => {
   var transporter = nodemailer.createTransport({
     service: "gmail",
-    // tsl
-    // 465+
-    // secure: true,
-    // port: 465,
+    /* tsl 
+    465+ 
+    secure: true, 
+    port: 465, */
     auth: {
       user: "lnxdrk@gmail.com",
       pass: "lyxunfprfzcfaenv",

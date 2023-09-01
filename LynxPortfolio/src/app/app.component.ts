@@ -1,22 +1,26 @@
 import { Component, DoCheck, OnInit, HostListener } from '@angular/core';
 import { Location } from '@angular/common';
-
-// Services
-import { GlobalMain } from './services/global';
-import { MainService } from './services/main.service';
-import { WebService } from './services/web.service';
-import { NgxBootstrapExpandedFeaturesService as BefService } from 'ngx-bootstrap-expanded-features';
-import { SharedService } from './services/shared.service';
-
-// Models
-import { Main, Song } from './models/main';
-
-// Extras
+/* Environment */
+import { environment } from 'src/environments/environment';
+/* Services */
+import { MainService } from './core/services/main.service';
+import { WebService } from './shared/services/web.service';
+import { SharedService } from './shared/services/shared.service';
+/* Models */
+import { Main, Song } from './core/models/main';
+/* Extras */
 import { TranslateService } from '@ngx-translate/core';
-
-// NGX-Bootstrap
+/* NGX-Bootstrap */
 import { BsDropdownConfig } from 'ngx-bootstrap/dropdown';
-
+import { NgxBootstrapExpandedFeaturesService as BefService } from 'ngx-bootstrap-expanded-features';
+/* State */
+import { Store } from '@ngrx/store';
+import { AppState } from './state/app.state';
+import { MainMainSelector } from './state/selectors/main.selector';
+import { LoadMain } from './state/actions/main.actions';
+import { Observable } from 'rxjs';
+import { IMain } from './core/interfaces/main';
+import { IdentitySelector } from './state/selectors/sesion.selector';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -35,19 +39,16 @@ export class AppComponent implements OnInit, DoCheck {
   public main!: Main;
   public songs: Song[] = [];
   public currentSong: Song = new Song('', '', null, 0, null, '', 0);
-
-  // Translate
+  public bgDefaultClasses: string[] = [];
+  /* Translate */
   public lang: string = 'es';
-
-  // Urls
-  public urlMain: string = GlobalMain.url;
-
-  // Console Settings
+  /* Urls */
+  public urlMain: string = environment.api + '/main/';
+  /* Console Settings */
   public document: string = 'app.component.ts';
   public customConsoleCSS =
     'background-color: green; color: white; padding: 1em;';
-
-  // BEF
+  /* BEF */
   public colors: any = {
     fullRed: '#FF5555',
     midRed: '#DD5555',
@@ -63,26 +64,22 @@ export class AppComponent implements OnInit, DoCheck {
     ulight: '#f5f5f5',
     tlight: '#ffffff',
     transparent: 'rgba(0,0,0,0)',
-    trlight25: 'rgba($tlight, 0.25)',
-    trlight5: 'rgba($tlight, 0.5)',
-    fRed25: 'rgba($fullRed,0.25)',
-    fRed5: 'rgba($fullRed,0.5)',
   };
-
-  // Utility
+  /* Utility */
   public windowWidth = window.innerWidth;
   public copiedToClipBoard: string = '';
   public currentAudio: any;
+  /* State */
+  public main$: Observable<IMain | undefined>;
+  public identity$: Observable<any | undefined>;
   constructor(
     private _mainService: MainService,
-
     private _webService: WebService,
     private _befService: BefService,
-
     private _translate: TranslateService,
     private _location: Location,
-
-    private _sharedService: SharedService
+    private _sharedService: SharedService,
+    private store: Store<AppState>
   ) {
     _sharedService.changeEmitted$.subscribe((sharedContent: any) => {
       if (
@@ -91,14 +88,8 @@ export class AppComponent implements OnInit, DoCheck {
         (sharedContent.to === 'app' || sharedContent.to === 'all')
       ) {
         switch (sharedContent.property) {
-          case 'main':
-            this.main = sharedContent.thing;
-            break;
           case 'lang':
             this.lang = sharedContent.thing;
-            break;
-          case 'identity':
-            this.identity = sharedContent.thing;
             break;
           case 'windowWidth':
             this.windowWidth = sharedContent.thing;
@@ -116,15 +107,17 @@ export class AppComponent implements OnInit, DoCheck {
             this.checkForCurrentSong();
             break;
           case 'onlyConsoleMessage':
-            this._webService.consoleLog(
+            /* this._webService.consoleLog(
               sharedContent.thing,
               this.document + ' 45',
               this.customConsoleCSS
-            );
+            ); */
             break;
         }
       }
     });
+    this.main$ = store.select(MainMainSelector);
+    this.identity$ = store.select(IdentitySelector);
 
     this._translate.addLangs(['es', 'en']);
     this._translate.setDefaultLang(this.lang);
@@ -135,13 +128,8 @@ export class AppComponent implements OnInit, DoCheck {
         ? this._translate.getBrowserLang()!
         : this.lang;
 
-    // Identity
+    /* Identity */
     this.identity = this._mainService.getIdentity();
-    this._webService.consoleLog(
-      this.identity,
-      this.document + ' 60',
-      this.customConsoleCSS
-    );
     this._sharedService.emitChange({
       from: 'app',
       to: 'all',
@@ -151,38 +139,6 @@ export class AppComponent implements OnInit, DoCheck {
 
     //BEF
     this._befService.pushColors(this.colors);
-
-    (async () => {
-      try {
-        let main = await this._mainService.getMain().toPromise();
-
-        if (!main || !main.main) {
-          throw new Error('No se pudo generar main.');
-        }
-
-        this.main = main.main;
-
-        this._webService.consoleLog(
-          this.main,
-          this.document + ' 76',
-          this.customConsoleCSS
-        );
-        this._befService.cssCreate();
-
-        this._sharedService.emitChange({
-          from: 'app',
-          to: 'all',
-          property: 'main',
-          thing: this.main,
-        });
-      } catch (err: any) {
-        this._webService.consoleLog(
-          err,
-          this.document + ' 82',
-          this.customConsoleCSS
-        );
-      }
-    })();
 
     let lang = localStorage.getItem('lang');
     this.lang = lang !== null && typeof lang === 'string' ? lang : this.lang;
@@ -196,7 +152,19 @@ export class AppComponent implements OnInit, DoCheck {
       property: 'lang',
       thing: this.lang,
     });
+    this.store.dispatch(LoadMain());
   }
+  /* addOpacityColors() {
+    Object.keys(this.colors).forEach((key) => {
+      if (key !== 'transparent' && !key.includes('rgba') && key.includes('#')) {
+        Array.from({ length: 100 }, (v, i) => i).forEach((opacity) => {
+          this.colors[
+            key + opacity
+          ] = `rgba(${this.colors[key]}, 0.${opacity})`;
+        });
+      }
+    });
+  } */
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
     this.windowWidth = event.target.innerWidth;
@@ -215,7 +183,27 @@ export class AppComponent implements OnInit, DoCheck {
       property: 'onlyConsoleMessage',
       thing: 'Data from app',
     });
-    this._befService.cssCreate();
+    this.getMain();
+    this.getIdentity();
+    this.bgDefaultClasses = [
+      'position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh bef-z-MIN20 bef-backgroundColor-abyss bef-mixBlendMode-hue',
+      'bef-backgroundImage-' +
+        this.befysize(
+          'url("' +
+            environment.url +
+            '/assets/images/image5DarkForest90deg.jpg")'
+        ) +
+        ' position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh bef-backgroundSize-cover bef-o-0_5 bef-mixBlendMode-lighten bef-z-MIN15 bef-backgroundPosition-center__center bef-backgroundRepeat-noMINrepeat',
+      'bef-backgroundImage-' +
+        this.befysize(
+          'url("' +
+            environment.url +
+            '/assets/images/image5DarkForest90deg.jpg")'
+        ) +
+        ' position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh bef-backgroundSize-cover bef-o-0_5 bef-mixBlendMode-lighten bef-z-MIN10 bef-backgroundPosition-center__center bef-backgroundRepeat-noMINrepeat bef-transform-scaleXSDMIN1ED',
+      'position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh bef-backgroundColor-HASHDD5555 bef-mixBlendMode-hue bef-z-MIN5',
+    ];
+    this.cssCreate();
   }
 
   ngDoCheck(): void {
@@ -237,9 +225,30 @@ export class AppComponent implements OnInit, DoCheck {
       property: 'lang',
       thing: this.lang,
     });
-    this._befService.cssCreate();
   }
 
+  /* State */
+  getMain() {
+    this.main$.subscribe({
+      next: (m) => {
+        if (m !== undefined) {
+          this.main = m;
+          this.cssCreate();
+        }
+      },
+      error: (e) => console.error(e),
+    });
+  }
+  getIdentity() {
+    this.identity$.subscribe({
+      next: (i) => {
+        if (i !== undefined) {
+          this.identity = i;
+        }
+      },
+      error: (e) => console.error(e),
+    });
+  }
   async getSongs() {
     try {
       let songs = await this._mainService.getSongs().toPromise();
@@ -252,18 +261,8 @@ export class AppComponent implements OnInit, DoCheck {
 
       this.playAudio(this.songs[0]);
       this.pause();
-
-      this._webService.consoleLog(
-        this.songs,
-        this.document + ' 142',
-        this.customConsoleCSS
-      );
     } catch (err) {
-      this._webService.consoleLog(
-        err,
-        this.document + ' 148',
-        this.customConsoleCSS
-      );
+      console.error(err);
     }
   }
 
@@ -302,11 +301,6 @@ export class AppComponent implements OnInit, DoCheck {
         this.currentAudio.pause();
       }
       this.currentSong = newSong;
-      this._webService.consoleLog(
-        this.currentSong,
-        this.document + ' 148',
-        this.customConsoleCSS
-      );
       this._sharedService.emitChange({
         from: 'app',
         to: 'music',
@@ -329,9 +323,6 @@ export class AppComponent implements OnInit, DoCheck {
           property: 'currentAudio',
           thing: this.currentAudio,
         });
-        setTimeout(() => {
-          this._befService.cssCreate();
-        }, 0.05);
       } else {
         this.currentAudio = null;
         this._sharedService.emitChange({
@@ -396,5 +387,13 @@ export class AppComponent implements OnInit, DoCheck {
 
   backClicked() {
     this._location.back();
+  }
+
+  befysize(string: string) {
+    return this._befService.befysize(string);
+  }
+
+  cssCreate() {
+    this._befService.cssCreate();
   }
 }

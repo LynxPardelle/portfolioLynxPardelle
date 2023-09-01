@@ -1,6 +1,6 @@
 "use strict";
 
-// Modules
+/* Modules */
 var express = require("express");
 var MainController = require("../controllers/main");
 
@@ -12,10 +12,10 @@ var multer = require("multer");
 var md_upload = multer({ dest: "./uploads/main" });
 var md_upload = md_upload.any();
 
-// Rutas de prueba
+/* Rutas de prueba */
 router.get("/datos-autor", MainController.datosAutor);
 
-// Create
+/* Create */
 router.post(
   "/album",
   [md_auth.ensureAuth, md_admin.isAdmin],
@@ -52,7 +52,7 @@ router.post(
   MainController.createWebsite
 );
 
-// Get
+/* Get */
 router.get("/albums", MainController.getAlbums);
 router.get("/book-imgs", MainController.getBookImgs);
 router.get("/cv-sections", MainController.getCVSections);
@@ -62,7 +62,7 @@ router.get("/videos", MainController.getVideos);
 router.get("/web-sites", MainController.getWebsites);
 router.post("/login", MainController.login);
 
-// Update
+/* Update */
 router.put(
   "/album/:id",
   [md_auth.ensureAuth, md_admin.isAdmin],
@@ -104,7 +104,7 @@ router.put(
   MainController.updateWebsite
 );
 
-// Delete
+/* Delete */
 router.delete(
   "/album/:id",
   [md_auth.ensureAuth, md_admin.isAdmin],
@@ -141,7 +141,7 @@ router.delete(
   MainController.deleteWebsite
 );
 
-// Files
+/* Files */
 router.post(
   "/upload-file-album/:id",
   [md_auth.ensureAuth, md_admin.isAdmin, md_upload],

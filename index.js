@@ -8,7 +8,7 @@ var port = 6164;
 mongoose.Promise = global.Promise;
 
 mongoose
-  .connect("mongodb://localhost:27017/lynx_portfolio", {
+  .connect("mongodb://127.0.0.1:27017/lynx_portfolio", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -17,7 +17,7 @@ mongoose
       "la conexión a la base de datos de Lynx Pardelle se ha realizado correctamente."
     );
 
-    // Crear servidor y escuchar peticiones http
+    /* Crear servidor y escuchar peticiones http */
     var server = app.listen(port, () => {
       console.log("Servidor corriendo en https://lynxpardelle.com.");
     });
