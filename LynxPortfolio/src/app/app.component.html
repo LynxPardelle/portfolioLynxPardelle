@@ -1,34 +1,20 @@
-<ng-container
+<div
   *ngIf="
     main && main.backgroundImg && main.backgroundImg.location;
     else elseBGMainTemplate
   "
->
-  <div
-    class="BGCustom position-fixed top-0 start-0 bef bef-wmn-100vw bef-hmn-100vh"
-    [ngStyle]="{
-      background:
-        'url(' +
-        urlMain +
-        'get-file/' +
-        main.backgroundImg.location +
-        ') center center no-repeat',
-      'background-size': 'cover'
-    }"
-  ></div>
-</ng-container>
+  class="position-fixed top-0 start-0 bef bef-wmn-100vw bef-hmn-100vh bef-z-MIN20 bef-backgroundColor-abyss bef-backgroundSize-cover bef-backgroundPosition-center__center bef-backgroundRepeat-noMINrepeat"
+  [ngClass]="
+    'bef-backgroundImage-' +
+    befysize('url(' + urlMain + 'get-file/' + main.backgroundImg.location + ')')
+  "
+></div>
 <ng-template #elseBGMainTemplate>
   <div
-    class="BGdefault1 position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh"
-  ></div>
-  <div
-    class="imgBGdefault1 position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh"
-  ></div>
-  <div
-    class="imgBGdefault2 position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh"
-  ></div>
-  <div
-    class="BGdefault2 position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh"
+    *ngFor="let BGDC of bgDefaultClasses; let last$ = last"
+    [exist]="last$"
+    (ngInit)="cssCreate()"
+    [ngClass]="BGDC"
   ></div>
 </ng-template>
 
@@ -37,25 +23,23 @@
     class="d-flex flex-wrap bef bef-bg-tdark__OPA__0_5 justify-content-evenly align-items-center px-2 py-3 w-100"
   >
     <!-- Icon -->
-    <a href="/" [routerLink]="['/']" class="text-center iconLynx w-max-15">
-      <ng-container
-        *ngIf="
-          main && main.logo && main.logo.location;
-          else elseLogoIconTemplate
-        "
-      >
-        <img
-          src="{{ urlMain + 'get-file/' + main.logo.location }}"
-          alt="{{ lang === 'es' ? main.logo.title : main.logo.titleEng }}"
-          title="{{
-            lang === 'es'
-              ? main.logo.title
-              : main.logo.titleEng
-              ? main.logo.titleEng
-              : main.logo.title
-          }}"
-        />
-      </ng-container>
+    <a
+      href="/"
+      [routerLink]="['/']"
+      class="text-center bef bef-wmx-15per bef-wSEL__img-45px bef-hSEL__img-45px"
+    >
+      <img
+        *ngIf="main?.logo?.location; else elseLogoIconTemplate"
+        src="{{ urlMain + 'get-file/' + main.logo.location }}"
+        alt="{{ lang === 'es' ? main.logo.title : main.logo.titleEng }}"
+        title="{{
+          lang === 'es'
+            ? main.logo.title
+            : main.logo.titleEng
+            ? main.logo.titleEng
+            : main.logo.title
+        }}"
+      />
       <ng-template #elseLogoIconTemplate>
         <img
           src="../assets/images/Lince.png"
@@ -102,7 +86,7 @@
         id="button-basic"
         dropdownToggle
         type="button"
-        class="btn btn-fullRed dropdown-toggle bef bef-text-tdark border-0 bef-boxShadow-0__0__0__transparent"
+        class="btn bef bef-btn-fullRed dropdown-toggle bef bef-text-tdark border-0 bef-boxShadow-0__0__0__transparent"
         aria-controls="dropdown-basic"
       >
         <ng-container *ngIf="lang === 'es'; else elseTemplate">
@@ -222,8 +206,7 @@
             {{ "app.cv" | translate }}
           </a>
         </li>
-        <!--
-          <li class="text-center my-4 h3">
+        <li class="text-center my-4 h3">
           <a
             class="d-block mx-auto bef bef-text-fullYellow text-decoration-none"
             href="/blog"
@@ -233,7 +216,6 @@
             {{ "app.blog" | translate }}
           </a>
         </li>
-        -->
       </ul>
     </div>
   </div>
@@ -295,7 +277,8 @@
       </button>
       <a
         href="{{ currentSong.link }}"
-        target="_blank" rel="noopener noreferrer"
+        target="_blank"
+        rel="noopener noreferrer"
         class="btn bef bef-w-80per m-0 text-left bef-text-fullRed"
       >
         {{ currentSong.title }}

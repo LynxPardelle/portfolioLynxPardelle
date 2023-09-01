@@ -1,48 +1,37 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
-/* Main */
-import { InicioComponent } from './components/main/inicio/inicio.component';
-import { WebsitesComponent } from './components/websites/websites.component';
-import { DemoreelComponent } from './components/demoreel/demoreel.component';
-import { BookComponent } from './components/book/book.component';
-import { MusicComponent } from './components/music/music.component';
-import { CvComponent } from './components/cv/cv.component';
-import { LoginComponent } from './components/login/login.component';
-import { ErrorComponent } from './components/main/error/error.component';
-
-/* Blog */
-import { BlogComponent } from './components/blog/blog/blog.component';
-import { ArticleComponent } from './components/blog/article/article.component';
-
+/* Components */
+import { InicioComponent } from './core/components/inicio/inicio.component';
+import { WebsitesComponent } from './core/components/websites/websites.component';
+import { DemoreelComponent } from './core/components/demoreel/demoreel.component';
+import { BookComponent } from './core/components/book/book.component';
+import { MusicComponent } from './core/components/music/music.component';
+import { CvComponent } from './core/components/cv/cv.component';
+import { ErrorComponent } from './core/components/error/error.component';
 const routes: Routes = [
   { path: '', component: InicioComponent },
-
-  // Main
+  /* Core */
   { path: 'inicio', component: InicioComponent },
   { path: 'webs', component: WebsitesComponent },
   { path: 'reel', component: DemoreelComponent },
   { path: 'book', component: BookComponent },
   { path: 'music', component: MusicComponent },
   { path: 'cv', component: CvComponent },
-  { path: 'login', component: LoginComponent },
-
-  // Blog
-  { path: 'blog', component: BlogComponent },
-  { path: 'blog/:page', component: BlogComponent },
-  { path: 'blog/:cat', component: BlogComponent },
-  { path: 'blog/:cat/:page', component: BlogComponent },
-  { path: 'blog/:subcat', component: BlogComponent },
-  { path: 'blog/:subcat/:page', component: BlogComponent },
-  { path: 'article', component: ArticleComponent },
-  { path: 'article/:id', component: ArticleComponent },
-
-  // Error
+  /* Blog */
+  {
+    path: 'blog',
+    loadChildren: () => import('./blog/blog.module').then((m) => m.BlogModule),
+  },
+  /* Auth */
+  {
+    path: 'login',
+    loadChildren: () => import('./auth/auth.module').then((m) => m.AuthModule),
+  },
+  /* Error */
   { path: '**', component: ErrorComponent },
 ];
-
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

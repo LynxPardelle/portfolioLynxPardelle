@@ -1,6 +1,6 @@
 "use strict";
 
-// modulos
+/* modulos */
 var validator = require("validator");
 var bcrypt = require("bcrypt");
 var fs = require("fs");
@@ -25,10 +25,10 @@ var populateSong = ["song", "coverArt"];
 var populateVideo = ["video"];
 var populateWebsite = ["desktopImg", "tabletImg", "mobileImg"];
 
-// Main jwt
+/* Main jwt */
 var jwt = require("../services/jwt");
 
-// Key
+/* Key */
 var secret = require("../keys/secret");
 
 var controller = {
@@ -39,12 +39,12 @@ var controller = {
     });
   },
 
-  // Create
+  /* Create */
   async createAlbum(req, res) {
-    // Recoger parametros por post
+    /* Recoger parametros por post */
     var body = req.body;
 
-    // Validar datos (validator)
+    /* Validar datos (validator) */
     try {
       var validate_title = !validator.isEmpty(body.title);
     } catch (err) {
@@ -56,19 +56,19 @@ var controller = {
     }
 
     if (validate_title) {
-      // Si todo es válido, crear el album a guardar
+      /* Si todo es válido, crear el album a guardar */
       var album = new Album();
 
-      // Asignar valores
+      /* Asignar valores */
       album.title = body.title;
       album.img = body.img ? body.img : null;
       album.spotify = body.spotify;
       album.tidal = body.tidal;
 
       let nError = 500;
-      // Guardar el articulo
+      /* Guardar el articulo */
       try {
-        // Buscar albums
+        /* Buscar albums */
         const albums = await Album.find().populate(populateAlbum).sort("order");
 
         if (!albums) {
@@ -103,7 +103,7 @@ var controller = {
         });
       }
     } else {
-      // Devolver una respuesta si no es válido
+      /* Devolver una respuesta si no es válido */
       return res.status(500).send({
         status: "error",
         message: "Los datos no son válidos, por lo que no se ha guardado.",
@@ -112,10 +112,10 @@ var controller = {
   },
 
   async createBookImg(req, res) {
-    // Recoger parametros por post
+    /* Recoger parametros por post */
     var body = req.body;
 
-    // Validar datos (validator)
+    /* Validar datos (validator) */
     try {
       var validate_title = !validator.isEmpty(body.title);
       var validate_titleEng = !validator.isEmpty(body.titleEng);
@@ -129,18 +129,18 @@ var controller = {
     }
 
     if (validate_title && validate_titleEng) {
-      // Si todo es válido, crear el bookImg a guardar
+      /* Si todo es válido, crear el bookImg a guardar */
       var bookImg = new BookImg();
 
-      // Asignar valores
+      /* Asignar valores */
       bookImg.title = body.title;
       bookImg.titleEng = body.titleEng;
       bookImg.img = body.img ? body.img : null;
 
       let nError = 500;
-      // Guardar el articulo
+      /* Guardar el articulo */
       try {
-        // Buscar bookImgs
+        /* Buscar bookImgs */
         const bookImgs = await BookImg.find()
           .populate(populateBookImg)
           .sort("order");
@@ -177,7 +177,7 @@ var controller = {
         });
       }
     } else {
-      // Devolver una respuesta si no es válido
+      /* Devolver una respuesta si no es válido */
       return res.status(500).send({
         status: "error",
         message: "Los datos no son válidos, por lo que no se ha guardado.",
@@ -186,10 +186,10 @@ var controller = {
   },
 
   async createCVSection(req, res) {
-    // Recoger parametros por post
+    /* Recoger parametros por post */
     var body = req.body;
 
-    // Validar datos (validator)
+    /* Validar datos (validator) */
     try {
       var validate_title = !validator.isEmpty(body.title);
       var validate_titleEng = !validator.isEmpty(body.titleEng);
@@ -203,10 +203,10 @@ var controller = {
     }
 
     if (validate_title && validate_titleEng) {
-      // Si todo es válido, crear la cvSection a guardar
+      /* Si todo es válido, crear la cvSection a guardar */
       var cvSection = new CVSection();
 
-      // Asignar valores
+      /* Asignar valores */
       cvSection.title = body.title;
       cvSection.titleEng = body.titleEng;
       cvSection.text = body.text;
@@ -219,9 +219,9 @@ var controller = {
       cvSection.insertions = body.insertions ? body.insertions : [];
 
       let nError = 500;
-      // Guardar el articulo
+      /* Guardar el articulo */
       try {
-        // Buscar cvSections
+        /* Buscar cvSections */
         const cvSections = await CVSection.find()
           .populate(populateCVSection)
           .sort("order");
@@ -258,7 +258,7 @@ var controller = {
         });
       }
     } else {
-      // Devolver una respuesta si no es válido
+      /* Devolver una respuesta si no es válido */
       return res.status(500).send({
         status: "error",
         message: "Los datos no son válidos, por lo que no se ha guardado.",
@@ -267,10 +267,10 @@ var controller = {
   },
 
   async createCVSubSection(req, res) {
-    // Recoger parametros por post
+    /* Recoger parametros por post */
     var body = req.body;
 
-    // Validar datos (validator)
+    /* Validar datos (validator) */
     try {
       var validate_title = !validator.isEmpty(body.title);
       var validate_titleEng = !validator.isEmpty(body.titleEng);
@@ -288,10 +288,10 @@ var controller = {
     }
 
     if (validate_title && validate_titleEng) {
-      // Si todo es válido, crear la cvSubSection a guardar
+      /* Si todo es válido, crear la cvSubSection a guardar */
       var cvSubSection = new CVSubSection();
 
-      // Asignar valores
+      /* Asignar valores */
       cvSubSection.title = body.title;
       cvSubSection.titleEng = body.titleEng;
       cvSubSection.text = body.text;
@@ -304,9 +304,9 @@ var controller = {
       cvSubSection.insertions = body.insertions ? body.insertions : [];
 
       let nError = 500;
-      // Guardar el articulo
+      /* Guardar el articulo */
       try {
-        // Buscar cvSubSections
+        /* Buscar cvSubSections */
         const cvSubSections = await CVSubSection.find().sort("order");
 
         if (!cvSubSections) {
@@ -341,7 +341,7 @@ var controller = {
         });
       }
     } else {
-      // Devolver una respuesta si no es válido
+      /* Devolver una respuesta si no es válido */
       return res.status(500).send({
         status: "error",
         message: "Los datos no son válidos, por lo que no se ha guardado.",
@@ -350,10 +350,10 @@ var controller = {
   },
 
   async createSong(req, res) {
-    // Recoger parametros por post
+    /* Recoger parametros por post */
     var body = req.body;
 
-    // Validar datos (validator)
+    /* Validar datos (validator) */
     try {
       var validate_title = !validator.isEmpty(body.title);
     } catch (err) {
@@ -365,10 +365,10 @@ var controller = {
     }
 
     if (validate_title) {
-      // Si todo es válido, crear la song a guardar
+      /* Si todo es válido, crear la song a guardar */
       var song = new Song();
 
-      // Asignar valores
+      /* Asignar valores */
       song.title = body.title;
       song.song = body.song ? body.song : null;
       song.duration = body.duration;
@@ -376,9 +376,9 @@ var controller = {
       song.coverArt = body.coverArt ? body.coverArt : null;
 
       let nError = 500;
-      // Guardar el articulo
+      /* Guardar el articulo */
       try {
-        // Buscar songs
+        /* Buscar songs */
         const songs = await Song.find().populate(populateSong).sort("order");
 
         if (!songs) {
@@ -413,7 +413,7 @@ var controller = {
         });
       }
     } else {
-      // Devolver una respuesta si no es válido
+      /* Devolver una respuesta si no es válido */
       return res.status(500).send({
         status: "error",
         message: "Los datos no son válidos, por lo que no se ha guardado.",
@@ -422,10 +422,10 @@ var controller = {
   },
 
   async createVideo(req, res) {
-    // Recoger parametros por post
+    /* Recoger parametros por post */
     var body = req.body;
 
-    // Validar datos (validator)
+    /* Validar datos (validator) */
     try {
       var validate_title = !validator.isEmpty(body.title);
       var validate_titleEng = !validator.isEmpty(body.titleEng);
@@ -439,10 +439,10 @@ var controller = {
     }
 
     if (validate_title && validate_titleEng) {
-      // Si todo es válido, crear el video a guardar
+      /* Si todo es válido, crear el video a guardar */
       var video = new Video();
 
-      // Asignar valores
+      /* Asignar valores */
       video.title = body.title;
       video.titleEng = body.titleEng;
       video.link = body.link;
@@ -450,9 +450,9 @@ var controller = {
       video.video = body.video ? body.video : null;
 
       let nError = 500;
-      // Guardar el articulo
+      /* Guardar el articulo */
       try {
-        // Buscar videos
+        /* Buscar videos */
         const videos = await Video.find().populate(populateVideo).sort("order");
 
         if (!videos) {
@@ -487,7 +487,7 @@ var controller = {
         });
       }
     } else {
-      // Devolver una respuesta si no es válido
+      /* Devolver una respuesta si no es válido */
       return res.status(500).send({
         status: "error",
         message: "Los datos no son válidos, por lo que no se ha guardado.",
@@ -496,10 +496,10 @@ var controller = {
   },
 
   async createWebsite(req, res) {
-    // Recoger parametros por post
+    /* Recoger parametros por post */
     var body = req.body;
 
-    // Validar datos (validator)
+    /* Validar datos (validator) */
     try {
       var validate_title = !validator.isEmpty(body.title);
       var validate_titleEng = !validator.isEmpty(body.titleEng);
@@ -531,10 +531,10 @@ var controller = {
       validate_descEng &&
       validate_link
     ) {
-      // Si todo es válido, crear el website a guardar
+      /* Si todo es válido, crear el website a guardar */
       var website = new Website();
 
-      // Asignar valores
+      /* Asignar valores */
       website.title = body.title;
       website.titleEng = body.titleEng;
       website.type = body.type;
@@ -548,9 +548,9 @@ var controller = {
       website.mobileImg = body.mobileImg ? body.mobileImg : null;
 
       let nError = 500;
-      // Guardar el articulo
+      /* Guardar el articulo */
       try {
-        // Buscar websites
+        /* Buscar websites */
         const websites = await Website.find()
           .populate(populateWebsite)
           .sort("order");
@@ -587,7 +587,7 @@ var controller = {
         });
       }
     } else {
-      // Devolver una respuesta si no es válido
+      /* Devolver una respuesta si no es válido */
       return res.status(500).send({
         status: "error",
         message: "Los datos no son válidos, por lo que no se ha guardado.",
@@ -595,7 +595,7 @@ var controller = {
     }
   },
 
-  // Get
+  /* Get */
   async getAlbums(req, res) {
     var nError = 500;
     try {
@@ -675,7 +675,7 @@ var controller = {
       if (!mainOld) {
         var main = new Main();
 
-        // Asignar valores
+        /* Asignar valores */
         main.welcome = "Te doy la bienvenida.";
         main.welcomeEng = "Welcome";
         main.CVDesc =
@@ -691,7 +691,7 @@ var controller = {
         main.errorMessageEng = "Error 404:\n\nPage not found.";
         main.seoTags = "lynx pardelle, web developer, web designer";
 
-        // Cifrar llave
+        /* Cifrar llave */
         const hash = await new Promise((resolve, reject) => {
           bcrypt.hash(main.key, 10, (err, hash) => {
             if (err) reject(err);
@@ -733,7 +733,7 @@ var controller = {
         });
       }
     } catch (err) {
-      // Devolver una respuesta si no es válido
+      /* Devolver una respuesta si no es válido */
       return res.status(nError).send({
         status: "error",
         message: errMessage,
@@ -870,9 +870,9 @@ var controller = {
     }
   },
 
-  // Update
+  /* Update */
   async updateAlbum(req, res) {
-    // Recoger datos de "PUT"
+    /* Recoger datos de "PUT" */
     var update = req.body;
 
     var albumId = req.params.id;
@@ -885,7 +885,7 @@ var controller = {
         throw new Error("No hay el album.");
       }
 
-      // Buscar albums
+      /* Buscar albums */
       const albums = await Album.find().populate(populateAlbum).sort("order");
 
       if (albums) {
@@ -920,7 +920,7 @@ var controller = {
   },
 
   async updateBookImg(req, res) {
-    // Recoger datos de "PUT"
+    /* Recoger datos de "PUT" */
     var update = req.body;
 
     var bookImgId = req.params.id;
@@ -936,7 +936,7 @@ var controller = {
           throw new Error("No hay bookImg.");
         }
 
-        // Buscar bookImgs
+        /* Buscar bookImgs */
         const bookImgs = await BookImg.find()
           .populate(populateBookImg)
           .sort("order");
@@ -978,7 +978,7 @@ var controller = {
   },
 
   async updateCVSection(req, res) {
-    // Recoger datos de "PUT"
+    /* Recoger datos de "PUT" */
     var update = req.body;
 
     var cvSectionId = req.params.id;
@@ -993,7 +993,7 @@ var controller = {
         throw new Error("No hay el cvSection.");
       }
 
-      // Buscar cvSections
+      /* Buscar cvSections */
       const cvSections = await CVSection.find()
         .populate(populateCVSection)
         .sort("order");
@@ -1034,7 +1034,7 @@ var controller = {
   },
 
   async updateCVSubSection(req, res) {
-    // Recoger datos de "PUT"
+    /* Recoger datos de "PUT" */
     var update = req.body;
 
     var cvSubSectionId = req.params.id;
@@ -1047,7 +1047,7 @@ var controller = {
         throw new Error("No hay el cvSubSection.");
       }
 
-      // Buscar cvSubSections
+      /* Buscar cvSubSections */
       const cvSubSections = await CVSubSection.find().sort("order");
 
       if (cvSubSections) {
@@ -1086,7 +1086,7 @@ var controller = {
   },
 
   async updateMain(req, res) {
-    // Recoger datos de "PUT"
+    /* Recoger datos de "PUT" */
     var update = req.body;
 
     var nError = 500;
@@ -1170,7 +1170,7 @@ var controller = {
   },
 
   async updateSong(req, res) {
-    // Recoger datos de "PUT"
+    /* Recoger datos de "PUT" */
     var update = req.body;
 
     var songId = req.params.id;
@@ -1184,7 +1184,7 @@ var controller = {
           throw new Error("No hay song.");
         }
 
-        // Buscar songs
+        /* Buscar songs */
         const songs = await Song.find().populate(populateSong).sort("order");
 
         if (songs) {
@@ -1220,7 +1220,7 @@ var controller = {
   },
 
   async updateVideo(req, res) {
-    // Recoger datos de "PUT"
+    /* Recoger datos de "PUT" */
     var update = req.body;
 
     var videoId = req.params.id;
@@ -1234,7 +1234,7 @@ var controller = {
           throw new Error("No hay video.");
         }
 
-        // Buscar videos
+        /* Buscar videos */
         const videos = await Video.find().populate(populateVideo).sort("order");
 
         if (videos) {
@@ -1270,7 +1270,7 @@ var controller = {
   },
 
   async updateWebsite(req, res) {
-    // Recoger datos de "PUT"
+    /* Recoger datos de "PUT" */
     var update = req.body;
 
     var websiteId = req.params.id;
@@ -1286,7 +1286,7 @@ var controller = {
           throw new Error("No hay website.");
         }
 
-        // Buscar websites
+        /* Buscar websites */
         const websites = await Website.find()
           .populate(populateWebsite)
           .sort("order");
@@ -1327,12 +1327,12 @@ var controller = {
     })();
   },
 
-  // Delete
+  /* Delete */
   async deleteAlbum(req, res) {
-    // Recoger el id de la url
+    /* Recoger el id de la url */
     var albumId = req.params.id;
     let nError = 500;
-    // Buscar usuario
+    /* Buscar usuario */
     (async () => {
       try {
         const album = await Album.findById(albumId).populate(populateAlbum);
@@ -1386,10 +1386,10 @@ var controller = {
   },
 
   async deleteBookImg(req, res) {
-    // Recoger el id de la url
+    /* Recoger el id de la url */
     var bookImgId = req.params.id;
     let nError = 500;
-    // Buscar usuario
+    /* Buscar usuario */
     (async () => {
       try {
         const bookImg = await BookImg.findById(bookImgId).populate(
@@ -1447,10 +1447,10 @@ var controller = {
   },
 
   async deleteCVSection(req, res) {
-    // Recoger el id de la url
+    /* Recoger el id de la url */
     var cvSectionId = req.params.id;
     let nError = 500;
-    // Buscar usuario
+    /* Buscar usuario */
     try {
       const cvSection = await CVSection.findById(cvSectionId);
 
@@ -1479,10 +1479,10 @@ var controller = {
   },
 
   async deleteCVSubSection(req, res) {
-    // Recoger el id de la url
+    /* Recoger el id de la url */
     var cvSubSectionId = req.params.id;
     let nError = 500;
-    // Buscar usuario
+    /* Buscar usuario */
     try {
       const cvSubSection = await CVSubSection.findById(cvSubSectionId);
 
@@ -1513,10 +1513,10 @@ var controller = {
   },
 
   async deleteSong(req, res) {
-    // Recoger el id de la url
+    /* Recoger el id de la url */
     var songId = req.params.id;
     let nError = 500;
-    // Buscar usuario
+    /* Buscar usuario */
     (async () => {
       try {
         const song = await Song.findById(songId).populate("populateSong");
@@ -1595,10 +1595,10 @@ var controller = {
   },
 
   async deleteVideo(req, res) {
-    // Recoger el id de la url
+    /* Recoger el id de la url */
     var videoId = req.params.id;
     let nError = 500;
-    // Buscar usuario
+    /* Buscar usuario */
     (async () => {
       try {
         const video = await Video.findById(videoId).populate("populateVideo");
@@ -1654,10 +1654,10 @@ var controller = {
   },
 
   async deleteWebsite(req, res) {
-    // Recoger el id de la url
+    /* Recoger el id de la url */
     var websiteId = req.params.id;
     let nError = 500;
-    // Buscar usuario
+    /* Buscar usuario */
     (async () => {
       try {
         const website = await Website.findById(websiteId).populate(
@@ -1767,7 +1767,7 @@ var controller = {
     })();
   },
 
-  // Uploads
+  /* Uploads */
   async UploadFileAlbum(req, res) {
     console.log("uploading image...");
     let nError = 500;
@@ -1787,7 +1787,7 @@ var controller = {
           nError = 404;
         }
 
-        // Extensión y tamaño del fichero
+        /* Extensión y tamaño del fichero */
         var file_ext = req.files[0].mimetype.split("/")[1];
         var file_size = req.files[0].size;
         var file_path = req.files[0].path;
@@ -1798,7 +1798,7 @@ var controller = {
           file_ext != "jpg" &&
           file_ext != "jpeg"
         ) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -1808,7 +1808,7 @@ var controller = {
         }
 
         if (file_size > 50000000) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -1846,10 +1846,10 @@ var controller = {
           }
         });
 
-        // Crear el objeto a guardar
+        /* Crear el objeto a guardar */
         var file = await new File();
 
-        // Asignar valores
+        /* Asignar valores */
         if (fileOriginalsplit[0].includes("EnglishTitle")) {
           file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
           file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
@@ -1920,7 +1920,7 @@ var controller = {
           nError = 404;
         }
 
-        // Extensión y tamaño del fichero
+        /* Extensión y tamaño del fichero */
         var file_ext = req.files[0].mimetype.split("/")[1];
         var file_size = req.files[0].size;
         var file_path = req.files[0].path;
@@ -1931,7 +1931,7 @@ var controller = {
           file_ext != "jpg" &&
           file_ext != "jpeg"
         ) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -1941,7 +1941,7 @@ var controller = {
         }
 
         if (file_size > 50000000) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -1979,10 +1979,10 @@ var controller = {
           }
         });
 
-        // Crear el objeto a guardar
+        /* Crear el objeto a guardar */
         var file = await new File();
 
-        // Asignar valores
+        /* Asignar valores */
         if (fileOriginalsplit[0].includes("EnglishTitle")) {
           file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
           file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
@@ -2050,7 +2050,7 @@ var controller = {
         nError = 404;
       }
 
-      // Extensión y tamaño del fichero
+      /* Extensión y tamaño del fichero */
       var file_ext = req.files[0].mimetype.split("/")[1];
       var file_size = req.files[0].size;
       var file_path = req.files[0].path;
@@ -2061,7 +2061,7 @@ var controller = {
         file_ext != "jpg" &&
         file_ext != "jpeg"
       ) {
-        // Borrar el archivo
+        /* Borrar el archivo */
         await fs.unlink(file_path, (err) => {
           if (err) {
             throw new Error("Error al borrar archivo.");
@@ -2071,7 +2071,7 @@ var controller = {
       }
 
       if (file_size > 50000000) {
-        // Borrar el archivo
+        /* Borrar el archivo */
         await fs.unlink(file_path, (err) => {
           if (err) {
             throw new Error("Error al borrar archivo.");
@@ -2109,10 +2109,10 @@ var controller = {
         }
       });
 
-      // Crear el objeto a guardar
+      /* Crear el objeto a guardar */
       var file = await new File();
 
-      // Asignar valores
+      /* Asignar valores */
       if (fileOriginalsplit[0].includes("EnglishTitle")) {
         file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
         file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
@@ -2133,7 +2133,7 @@ var controller = {
         });
       }
 
-      // Actualizar main
+      /* Actualizar main */
       var option = req.params.id;
 
       await (() => {
@@ -2199,12 +2199,12 @@ var controller = {
           nError = 404;
         }
 
-        // Extensión y tamaño del fichero
+        /* Extensión y tamaño del fichero */
         var file_ext = req.files[0].mimetype.split("/")[1];
         var file_size = req.files[0].size;
         var file_path = req.files[0].path;
 
-        // Actualizar main
+        /* Actualizar main */
         var option = req.params.option;
 
         if (
@@ -2220,7 +2220,7 @@ var controller = {
             file_ext != "jpg" &&
             file_ext != "jpeg")
         ) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -2230,7 +2230,7 @@ var controller = {
         }
 
         if (file_size > 100000000) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -2268,10 +2268,10 @@ var controller = {
           }
         });
 
-        // Crear el objeto a guardar
+        /* Crear el objeto a guardar */
         var file = await new File();
 
-        // Asignar valores
+        /* Asignar valores */
         if (fileOriginalsplit[0].includes("EnglishTitle")) {
           file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
           file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
@@ -2349,13 +2349,13 @@ var controller = {
           nError = 404;
         }
 
-        // Extensión y tamaño del fichero
+        /* Extensión y tamaño del fichero */
         var file_ext = req.files[0].mimetype.split("/")[1];
         var file_size = req.files[0].size;
         var file_path = req.files[0].path;
 
         if (file_ext != "mp4" && file_ext != "webm") {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -2365,7 +2365,7 @@ var controller = {
         }
 
         if (file_size > 50000000) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -2403,10 +2403,10 @@ var controller = {
           }
         });
 
-        // Crear el objeto a guardar
+        /* Crear el objeto a guardar */
         var file = await new File();
 
-        // Asignar valores
+        /* Asignar valores */
         if (fileOriginalsplit[0].includes("EnglishTitle")) {
           file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
           file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
@@ -2477,7 +2477,7 @@ var controller = {
           nError = 404;
         }
 
-        // Extensión y tamaño del fichero
+        /* Extensión y tamaño del fichero */
         var file_ext = req.files[0].mimetype.split("/")[1];
         var file_size = req.files[0].size;
         var file_path = req.files[0].path;
@@ -2488,7 +2488,7 @@ var controller = {
           file_ext != "jpg" &&
           file_ext != "jpeg"
         ) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -2498,7 +2498,7 @@ var controller = {
         }
 
         if (file_size > 50000000) {
-          // Borrar el archivo
+          /* Borrar el archivo */
           await fs.unlink(file_path, (err) => {
             if (err) {
               throw new Error("Error al borrar archivo.");
@@ -2536,10 +2536,10 @@ var controller = {
           }
         });
 
-        // Crear el objeto a guardar
+        /* Crear el objeto a guardar */
         var file = await new File();
 
-        // Asignar valores
+        /* Asignar valores */
         if (fileOriginalsplit[0].includes("EnglishTitle")) {
           file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
           file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
@@ -2560,7 +2560,7 @@ var controller = {
           });
         }
 
-        // Actualizar main
+        /* Actualizar main */
         var option = req.params.option;
 
         await (() => {

@@ -1,6 +1,6 @@
 @import "./colors.scss";
-// @import "./sizes.scss";
-// @import "./shadows.scss";
+/* @import "./sizes.scss";
+    @import "./shadows.scss"; */
 
 html {
   overflow-x: hidden;
@@ -17,11 +17,8 @@ html {
     h4,
     h5,
     h6,
+    p,
     .iconMontano {
-      color: $ulight;
-    }
-
-    p {
       color: $ulight;
     }
 
@@ -44,46 +41,6 @@ html {
       li {
         list-style-type: none;
       }
-    }
-
-    .BGCustom {
-      background-color: $tdark;
-      z-index: -20;
-    }
-
-    .BGdefault1 {
-      background-color: $tdark;
-      mix-blend-mode: hue;
-      z-index: -20;
-    }
-
-    .imgBGdefault1 {
-      background: url("../images/image5DarkForest90deg.jpg") center center
-        no-repeat;
-      background-size: cover;
-      opacity: 0.5;
-      mix-blend-mode: lighten;
-      z-index: -15;
-    }
-
-    .imgBGdefault2 {
-      background: url("../images/image5DarkForest90deg.jpg") center center
-        no-repeat;
-      background-size: cover;
-      z-index: -10;
-      opacity: 0.5;
-      mix-blend-mode: lighten;
-      transform: scaleX(-1);
-      -webkit-transform: scaleX(-1);
-      -moz-transform: scaleX(-1);
-      -ms-transform: scaleX(-1);
-      -o-transform: scaleX(-1);
-    }
-
-    .BGdefault2 {
-      background-color: $midRed;
-      mix-blend-mode: hue;
-      z-index: -5;
     }
 
     .obj-fit-fill {

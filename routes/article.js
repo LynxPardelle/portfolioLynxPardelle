@@ -1,6 +1,6 @@
 "use strict";
 
-// Modules
+/* Modules */
 const [express, ArticleController, md_auth, md_admin, multer] = [
   require("express"),
   require("../controllers/article"),
@@ -11,10 +11,10 @@ const [express, ArticleController, md_auth, md_admin, multer] = [
 const router = express.Router();
 const md_upload = multer({ dest: "./uploads/article" }).any();
 
-// Rutas de prueba
+/* Rutas de prueba */
 router.get("/datos-autor", ArticleController.datosAutor);
 
-// Create
+/* Create */
 router.post(
   "/article",
   [md_auth.ensureAuth, md_admin.isAdmin],
@@ -36,7 +36,7 @@ router.post(
   ArticleController.createArticleSubCat
 );
 
-// Read
+/* Read */
 router.get("/article/:id", ArticleController.getArticle);
 router.get("/article-cats", ArticleController.getArticlesCats);
 router.get(
@@ -44,7 +44,7 @@ router.get(
   ArticleController.getArticles
 );
 
-// Put
+/* Put */
 router.put(
   "/article/:id",
   [md_auth.ensureAuth, md_admin.isAdmin],
@@ -66,13 +66,13 @@ router.put(
   ArticleController.updateArticleSection
 );
 
-// Delete
+/* Delete */
 router.delete("/article/:id", ArticleController.deleteArticle);
 router.delete("/articleSection/:id", ArticleController.deleteArticleSection);
 router.delete("/articleCat/:id", ArticleController.deleteArticleCat);
 router.delete("/articleSubCat/:id", ArticleController.deleteArticleSubCat);
 
-// Files
+/* Files */
 router.post(
   "/upload-file-article/:id",
   [md_auth.ensureAuth, md_admin.isAdmin, md_upload],

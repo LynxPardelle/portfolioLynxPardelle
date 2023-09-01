@@ -7,20 +7,20 @@ var http = require("http");
 var bodyParser = require("body-parser");
 var cors = require("cors");
 
-// Ejecutar express (http)
+/* Ejecutar express (http) */
 var app = express();
 
-// Cargar rutas
+/* Cargar rutas */
 var main_routes = require("./routes/main");
 var article_routes = require("./routes/article");
 
-// Middlewares de body-parser
+/* Middlewares de body-parser */
 app.use(express.json({ limit: "50mb" }));
 app.use(
   express.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 })
 );
 
-// Config cabeceras y CORS
+/* Config cabeceras y CORS */
 var allowedDomains = [
   "http://localhost:4200",
   "http://localhost:6164",
@@ -30,7 +30,7 @@ var allowedDomains = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // bypass the requests with no origin (like curl requests, mobile apps, etc )
+      /* bypass the requests with no origin (like curl requests, mobile apps, etc ) */
       if (!origin) return callback(null, true);
 
       if (allowedDomains.indexOf(origin) === -1) {
@@ -43,7 +43,7 @@ app.use(
   })
 );
 
-// rutas body-parser
+/* rutas body-parser */
 app.use("/", express.static("client", { redirect: false }));
 app.use("/api/main", main_routes);
 app.use("/api/article", article_routes);
@@ -52,7 +52,7 @@ app.get("*", function (req, res, next) {
   res.sendFile(path.resolve("client/index.html"));
 });
 
-// Ruta o método de prueba para el API
+/* Ruta o método de prueba para el API */
 app.get("/datos-autor", (req, res) => {
   console.log("Hola mundo");
   return res.status(200).send({
