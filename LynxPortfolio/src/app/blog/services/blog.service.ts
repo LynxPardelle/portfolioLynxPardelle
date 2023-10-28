@@ -80,6 +80,9 @@ export class BlogService {
   getArticleCats(): Observable<any> {
     return this._http.get(`${this.urlBlog}article-cats`);
   }
+  getArticleSubCats(): Observable<any> {
+    return this._http.get(`${this.urlBlog}article-sub-cats`);
+  }
   getArticle(id: string): Observable<any> {
     return this._http.get(`${this.urlBlog}article/${id}`);
   }

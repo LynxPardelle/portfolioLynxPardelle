@@ -7,22 +7,22 @@ export interface IArticle {
   subtitle: string;
   subtitleEng: string;
   insertions: string[];
-  cat: IArticleCat | string | any;
-  subCats: IArticleSubCat[] | string[];
+  cat?: IArticleCat | string | any;
+  subCats: (IArticleSubCat | string | any)[];
   intro: string;
   introEng: string;
   outro: string;
   outroEng: string;
-  sections: IArticleSection[] | string[];
+  sections: (IArticleSection | string)[];
   tags: string;
   urltitle: string;
-  coverImg: IFile[] | string[];
+  coverImg: (IFile | string)[];
   titleColor: string;
   textColor: string;
   linkColor: string;
   bgColor: string;
   langs: string[];
-  show: Boolean;
+  show: boolean;
   create_at: Date;
 }
 
@@ -38,7 +38,7 @@ export interface IArticleCat {
   bgColor: string;
   bgColor2: string;
   buttonColor: string;
-  subcats: IArticleSubCat[] | string[];
+  subcats: (IArticleSubCat | string)[];
   show: boolean;
   create_at: Date;
 }
@@ -49,7 +49,7 @@ export interface IArticleSubCat {
   titleEng: string;
   titleColor: string;
   buttonColor: string;
-  cat: IArticleCat | string | any;
+  cat?: IArticleCat | string;
   show: boolean;
   create_at: Date;
 }
@@ -60,14 +60,14 @@ export interface IArticleSection {
   titleEng: string;
   text: string;
   textEng: string;
-  article: IArticle | string;
-  principalFile: IFile | string | undefined;
-  files: IFile[] | string[];
-  order: Number;
+  article?: IArticle | string;
+  principalFile?: IFile | string;
+  files: (IFile | string)[];
+  order: number;
   titleColor: string;
   textColor: string;
   linkColor: string;
   bgColor: string;
-  show: Boolean;
+  show: boolean;
   insertions: string[];
 }

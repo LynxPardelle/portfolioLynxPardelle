@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 /* RxJs */
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 /* Environment */
 import { environment } from 'src/environments/environment';
 /* Interfaces */
@@ -59,33 +59,8 @@ export class ArticleComponent implements OnInit {
     create_at: new Date(),
   };
   public cats: IArticleCat[] = [];
-  public cat: IArticleCat = {
-    _id: '',
-    title: '',
-    titleEng: '',
-    titleColor: '',
-    textColor: '',
-    textColor2: '',
-    linkColor: '',
-    linkColor2: '',
-    bgColor: '',
-    bgColor2: '',
-    buttonColor: '',
-    subcats: [],
-    show: true,
-    create_at: new Date(),
-  };
   public allSubCats: IArticleSubCat[] = [];
-  public subCat: IArticleSubCat = {
-    _id: '',
-    title: '',
-    titleEng: '',
-    titleColor: '',
-    buttonColor: '',
-    cat: '',
-    show: true,
-    create_at: new Date(),
-  };
+  public availableSubCats: IArticleSubCat[] = [];
   public articleSection: IArticleSection = {
     _id: '',
     title: '',
@@ -189,6 +164,7 @@ export class ArticleComponent implements OnInit {
       }
     });
     this.getCats();
+    this.getSubCats();
   }
   /* State */
   getMain() {
@@ -206,13 +182,16 @@ export class ArticleComponent implements OnInit {
   getArticle() {
     this._blogService.getArticle(this.article._id).subscribe({
       next: (a) => {
-        if (a !== undefined) {
+        if (!!a?.article) {
           this._webService.consoleLog(
             a,
             this.document + ' 165',
             this.customConsoleCSS
           );
+        } else {
+          this.article = a.article;
         }
+        this.bringSubCatsFromSelectedCat();
       },
       error: (e) => {
         this._webService.consoleLog(
@@ -233,7 +212,39 @@ export class ArticleComponent implements OnInit {
             this.document + ' 165',
             this.customConsoleCSS
           );
+          if (c.articleCats) {
+            this.cats = c.articleCats;
+          } else {
+            this.cats = [];
+          }
         }
+        this.bringSubCatsFromSelectedCat();
+      },
+      error: (e) => {
+        this._webService.consoleLog(
+          e,
+          this.document + ' 165',
+          this.customConsoleCSS
+        );
+      },
+    });
+  }
+  getSubCats() {
+    this._blogService.getArticleSubCats().subscribe({
+      next: (c) => {
+        if (c !== undefined) {
+          this._webService.consoleLog(
+            c,
+            this.document + ' 165',
+            this.customConsoleCSS
+          );
+          if (c.articleSubCats) {
+            this.allSubCats = c.articleSubCats;
+          } else {
+            this.allSubCats = [];
+          }
+        }
+        this.bringSubCatsFromSelectedCat();
       },
       error: (e) => {
         this._webService.consoleLog(
@@ -266,9 +277,9 @@ export class ArticleComponent implements OnInit {
           tooltip: bt.title,
         });
       } else {
-        this.buttonsToEdit = this.buttonsToEdit.filter(
+        /* this.buttonsToEdit = this.buttonsToEdit.filter(
           (be) => be.type !== bt.type
-        );
+        ); */
       }
     });
   }
@@ -302,20 +313,42 @@ export class ArticleComponent implements OnInit {
   }
 
   onClickIsEdit() {
-    this.isEdit = !this.canEdit
-      ? false
-      : !this.article._id
+    this.isEdit = !this.article._id
       ? true
+      : !this.canEdit
+      ? false
       : !this.isEdit;
     this.edits =
-      !this.canEdit || !this.isEdit
+      (!this.canEdit || !this.isEdit) && this.article._id !== undefined
         ? []
         : ['title', 'ytvideo', 'int', 'out', 'stitle', 'sp', 'syoutube'];
+    console.log(this.edits);
+    console.log(this.isEdit);
     this.createButtons();
   }
 
   checkIfCanEdit() {
     this.canEdit = this.identity && this.identity.role === 'ROLE_ADMIN';
+  }
+
+  bringSubCatsFromSelectedCat(): void {
+    if (!!this.article.cat) {
+      let cat = this.cats.find((c: IArticleCat) => {
+        return typeof this.article.cat !== 'string' && !!this.article.cat._id
+          ? c._id === this.article.cat._id
+          : c._id === this.article.cat;
+      }) as IArticleCat;
+      this.availableSubCats = cat.subcats.map((sc) => {
+        if (typeof sc === 'string' || !sc._id) {
+          sc = this.allSubCats.find((s) => {
+            return typeof s === 'string' || !s._id ? s === sc : s._id === sc;
+          }) as IArticleSubCat;
+        }
+        return sc;
+      }) as IArticleSubCat[];
+    } else {
+      this.availableSubCats = [];
+    }
   }
   cssCreate() {
     this._befService.cssCreate();

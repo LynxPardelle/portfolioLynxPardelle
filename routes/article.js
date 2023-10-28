@@ -39,6 +39,7 @@ router.post(
 /* Read */
 router.get("/article/:id", ArticleController.getArticle);
 router.get("/article-cats", ArticleController.getArticlesCats);
+router.get("/article-sub-cats", ArticleController.getArticlesSubCats);
 router.get(
   "/articles/:page?/:ipp?/:sort?/:rootAccess?/:type?/:search?",
   ArticleController.getArticles

@@ -16,22 +16,36 @@
 >
   {{ article.create_at | amLocale : "es" | amDateFormat : "LL" }}
 </p>
-<!-- Cats -->
+<!-- Cat -->
 <blog-cat-badgets
   *ngIf="!!article.cat && !!article.cat._id"
   [cats]="[article.cat]"
   [lang]="lang"
 >
 </blog-cat-badgets>
+<!-- Cat Edit -->
+<blog-cat-edit
+  [article]="article"
+  [cats]="cats"
+  (getArticleCats)="getCats(); getSubCats()"
+  (catSelected)="bringSubCatsFromSelectedCat()"
+></blog-cat-edit>
 <!-- SubCats -->
 <blog-subcat-badgets
   *ngIf="
     !!article.cat &&
     !!article.cat._id &&
     !!article.cat.subCats &&
-    !!article.cat.subCats[0]._id
+    !!article.cat.subCats[0]?._id
   "
   [subcats]="[article.cat.subCats]"
   [lang]="lang"
 >
 </blog-subcat-badgets>
+<!-- SubCats Edit -->
+<blog-subcat-edit
+  *ngIf="!!article.cat"
+  [article]="article"
+  [subCats]="this.availableSubCats"
+  (getArticleSubCats)="getCats(); getSubCats()"
+></blog-subcat-edit>
