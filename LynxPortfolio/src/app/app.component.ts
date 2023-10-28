@@ -203,7 +203,7 @@ export class AppComponent implements OnInit, DoCheck {
         ' position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh bef-backgroundSize-cover bef-o-0_5 bef-mixBlendMode-lighten bef-z-MIN10 bef-backgroundPosition-center__center bef-backgroundRepeat-noMINrepeat bef-transform-scaleXSDMIN1ED',
       'position-fixed top-0 start-0 bef bef-w-100vw bef-h-100vh bef-backgroundColor-HASHDD5555 bef-mixBlendMode-hue bef-z-MIN5',
     ];
-    this._befService.changeDebugOption();
+    // this._befService.changeDebugOption();
     this.cssCreate();
   }
 

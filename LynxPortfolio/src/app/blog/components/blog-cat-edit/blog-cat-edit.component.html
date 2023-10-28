@@ -1,1 +1,138 @@
-<p>blog-cat-edit works!</p>
+<h3 class="text-center bef-my-1_5rem bef-text-tlight">
+  Selecciona la categoría del artículo
+</h3>
+<div class="d-flex justify-content-evenly align-items-center flex-wrap">
+  <div
+    *ngFor="let cat of cats; let i = index; let last$ = last"
+    [exist]="last$"
+    (ngInit)="cssCreate()"
+    class="p-2 text-center bef bef-lh-1_5 bef-bw-0_25rem bef-bs-solid bef-r-25px"
+    [ngClass]="{
+      'bef-bc-success': !!catBringer(cat, true),
+      'bef-bc-transparent': !catBringer(cat, true)
+    }"
+  >
+    <label
+      (click)="onClickChangeCat(cats[i]._id)"
+      class="d-block badge rounded-pill bef bef-mb-1rem bef-p-0_5rem__1rem bef-bg-{{
+      !!cat.buttonColor ? befisize(cat.buttonColor) : 'dark'
+    }} bef-text-{{ !!cat.titleColor ? befisize(cat.titleColor) : 'light' }}"
+    >
+      {{ cat.title }}
+    </label>
+    <!-- Edit/Delete Buttons Cat -->
+    <generic-group-buttons
+      [buttonComboClass]="'d-flex justify-content-center'"
+      [buttons]="[
+        {
+          type: 'edit┼cat┼' + cats[i]._id,
+          classButton:
+            'bef-btn-fullYellow bef-cursor-pointer mx-2 bef-w-50px bef-h-50px',
+          customHtml: 'edit┼cat┼' + cats[i]._id,
+          tooltip: 'Editar'
+        },
+        {
+          type: 'delete┼cat┼' + cats[i]._id,
+          classButton:
+            'bef-btn-fullYellow bef-cursor-pointer mx-2 bef-w-50px bef-h-50px',
+          customHtml: 'delete┼cat┼' + cats[i]._id,
+          tooltip: 'Borrar'
+        }
+      ]"
+      (clicked)="onClickButton($event)"
+    ></generic-group-buttons>
+  </div>
+</div>
+<!-- Crear o editar Categoría -->
+<div class="d-block my-3">
+  <generic-input
+    class="d-block w-75 mx-auto my-3"
+    [thingFather]="cat"
+    [thing]="'title'"
+    [type]="'text'"
+    [labelTitle]="'Categoría'"
+    [placeholder]="'Categoría'"
+    [spans]="[
+      {
+        text: 'La categoría no es válida.',
+        evalThing: 'required',
+        spanClass: 'bef-text-fullRed'
+      }
+    ]"
+    [labelClasses]="'bef-text-tlight'"
+    [inputClasses]="'bef-text-fullYellow w-100 border-0 bg-transparent'"
+    [inputContainerClasses]="'d-flex bef bef-w-100per align-items-center'"
+    [hrClasses]="'bef-bg-tlight'"
+    (changesInput)="(null)"
+  ></generic-input>
+  <!-- Color fondo -->
+  <label
+    for="cat.buttonColor"
+    class="btn d-block w-75 mx-auto my-2 bef bef-bg-{{
+      !!cat.buttonColor ? befisize(cat.buttonColor) : 'dark'
+    }} bef-text-{{ !!cat.titleColor ? befisize(cat.titleColor) : 'light' }}"
+  >
+    Color del fondo de la categoría
+    <input
+      type="color"
+      id="cat.buttonColor"
+      name="cat.buttonColor"
+      value="cat.buttonColor"
+      [(ngModel)]="cat.buttonColor"
+      (ngModelChange)="cssCreate()"
+    />
+  </label>
+  <!-- Color texto -->
+  <label
+    for="cat.titleColor"
+    class="btn d-block w-75 mx-auto my-2 bef bef-bg-{{
+      !!cat.buttonColor ? befisize(cat.buttonColor) : 'dark'
+    }} bef-text-{{ !!cat.titleColor ? befisize(cat.titleColor) : 'light' }}"
+  >
+    Color de las letras de la categoría
+    <input
+      type="color"
+      id="cat.titleColor"
+      name="cat.titleColor"
+      value="cat.titleColor"
+      [(ngModel)]="cat.titleColor"
+      (ngModelChange)="cssCreate()"
+    />
+  </label>
+  <generic-group-buttons
+    [buttonComboClass]="'d-flex justify-content-center'"
+    [buttons]="
+      !!cat._id
+        ? [
+            {
+              type: 'cancel┼cat┼' + cat._id,
+              classButton:
+                'bef-btn-fullYellow bef-cursor-pointer mx-3 bef-w-50px bef-h-50px',
+              customHtml: 'cancel┼cat┼' + cat._id,
+              tooltip: 'Cancelar'
+            },
+            {
+              type: 'aceptCat',
+              classButton:
+                'bef-btn-fullYellow bef-cursor-pointer mx-3 bef-w-50px bef-h-50px',
+              disabledClassButton: 'mx-3 bef-w-50px bef-h-50px',
+              customHtml: 'aceptCat',
+              tooltip: 'Aceptar',
+              disabled: !cat.title
+            }
+          ]
+        : [
+            {
+              type: 'aceptCat',
+              classButton:
+                'bef-btn-fullYellow bef-cursor-pointer mx-3 bef-w-50px bef-h-50px',
+              disabledClassButton: 'mx-3 bef-w-50px bef-h-50px',
+              customHtml: 'aceptCat',
+              tooltip: 'Aceptar',
+              disabled: !cat.title
+            }
+          ]
+    "
+    (clicked)="onClickButton($event)"
+  ></generic-group-buttons>
+</div>

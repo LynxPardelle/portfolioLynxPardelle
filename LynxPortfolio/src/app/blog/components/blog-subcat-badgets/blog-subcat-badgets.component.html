@@ -6,7 +6,10 @@
     [exist]="last$"
     (ngInit)="cssCreate()"
     class="btn text-center bef-lh-1_5 badge rounded-pill px-3 py-1 {{
-      'bef-text-' + subcat.titleColor + ' bef-bg-' + subcat.buttonColor
+      'bef-text-' +
+        subcat.titleColor.replace('#', 'HASH') +
+        ' bef-bg-' +
+        subcat.buttonColor.replace('#', 'HASH')
     }}"
     [routerLink]="['/blog/list-subcat/', subcat._id, '1']"
     href="/blog/list-subcat/{{ subcat._id }}/1"

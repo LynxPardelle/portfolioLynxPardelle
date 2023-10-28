@@ -77,7 +77,7 @@ const controller = {
       article.langs = body.langs;
       article.create_at = body.create_at;
       const articleStored = await article.save();
-      if (articleStored) {
+      if (!articleStored) {
         nError = 404;
         throw new Error("No se guardó el artículo.");
       }
@@ -164,11 +164,12 @@ const controller = {
       articleCat.linkColor2 = body.linkColor2;
       articleCat.bgColor = body.bgColor;
       articleCat.bgColor2 = body.bgColor2;
+      articleCat.buttonColor = body.buttonColor;
       articleCat.subCats = body.subCats;
       articleCat.show = body.show;
       articleCat.create_at = body.create_at;
       const articleCatStored = await articleCat.save();
-      if (articleCatStored) {
+      if (!articleCatStored) {
         nError = 404;
         throw new Error("No se guardó la categoría de artículo.");
       }
@@ -212,10 +213,34 @@ const controller = {
       articleSubCat.cat = body.cat;
       articleSubCat.show = body.show;
       articleSubCat.create_at = body.create_at;
+      if (!articleSubCat.cat) {
+        nError = 404;
+        throw new Error("No se asignó la categoría de artículo.");
+      }
       const articleSubCatStored = await articleSubCat.save();
-      if (articleSubCatStored) {
+      if (!articleSubCatStored) {
         nError = 404;
         throw new Error("No se guardó la sub-categoría de artículo.");
+      }
+      const cat = await ArticleCat.findById(articleSubCat.cat);
+      if (!cat) {
+        nError = 404;
+        throw new Error("No se encontró la categoría de artículo.");
+      }
+      if (!!cat.subcats) {
+        cat.subcats.push(articleSubCatStored._id);
+      } else {
+        cat.subcats = [articleSubCatStored._id];
+      }
+      console.log(cat);
+      const catUpdated = await ArticleCat.findByIdAndUpdate(
+        { _id: cat._id },
+        cat,
+        { new: true }
+      );
+      if (!catUpdated) {
+        nError = 404;
+        throw new Error("No se actualizó la categoría de artículo.");
       }
       return res.status(200).send({
         status: "success",
@@ -321,6 +346,30 @@ const controller = {
       return res.status(nError).send({
         status: "error",
         message: "Error al devolver las categorías de artículos.",
+        errorMessage: err.message,
+        err: err,
+      });
+    }
+  },
+
+  async getArticlesSubCats(req, res) {
+    var nError = 500;
+    try {
+      const articleSubCats = await ArticleSubCat.find()
+        .populate(populate.articleSubCat)
+        .sort("order");
+      if (!articleSubCats) {
+        nError = 404;
+        throw new Error("No hay sub-categorías de artículos.");
+      }
+      return res.status(200).send({
+        status: "success",
+        articleSubCats: articleSubCats,
+      });
+    } catch (err) {
+      return res.status(nError).send({
+        status: "error",
+        message: "Error al devolver las sub-categorías de artículos.",
         errorMessage: err.message,
         err: err,
       });
