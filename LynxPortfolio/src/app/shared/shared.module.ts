@@ -32,6 +32,7 @@ import { GenericButtonComponent } from './components/generic-button/generic-butt
 import { GenericInputComponent } from './components/generic-input/generic-input.component';
 import { GenericDropdownComponent } from './components/generic-dropdown/generic-dropdown.component';
 import { GenericGroupButtonsComponent } from './components/generic-group-buttons/generic-group-buttons.component';
+import { LinkifyPipe } from './pipes/linkify.pipe';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { GenericGroupButtonsComponent } from './components/generic-group-buttons
     /* Pipes */
     SafeHtmlPipe,
     HarshifyPipe,
+    LinkifyPipe,
 
     /* Components */
     FileUploaderComponent,
@@ -104,6 +106,7 @@ import { GenericGroupButtonsComponent } from './components/generic-group-buttons
     /* Pipes */
     SafeHtmlPipe,
     HarshifyPipe,
+    LinkifyPipe,
 
     /* Components */
     FileUploaderComponent,

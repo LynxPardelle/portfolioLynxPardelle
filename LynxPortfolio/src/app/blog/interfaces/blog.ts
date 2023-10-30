@@ -13,10 +13,10 @@ export interface IArticle {
   introEng: string;
   outro: string;
   outroEng: string;
-  sections: (IArticleSection | string)[];
+  sections: (IArticleSection | string | any)[];
   tags: string;
   urltitle: string;
-  coverImg: (IFile | string)[];
+  coverImg: (IFile | string | any)[];
   titleColor: string;
   textColor: string;
   linkColor: string;
@@ -38,7 +38,7 @@ export interface IArticleCat {
   bgColor: string;
   bgColor2: string;
   buttonColor: string;
-  subcats: (IArticleSubCat | string)[];
+  subcats: (IArticleSubCat | string | any)[];
   show: boolean;
   create_at: Date;
 }
@@ -49,7 +49,7 @@ export interface IArticleSubCat {
   titleEng: string;
   titleColor: string;
   buttonColor: string;
-  cat?: IArticleCat | string;
+  cat?: IArticleCat | string | any;
   show: boolean;
   create_at: Date;
 }
@@ -60,9 +60,9 @@ export interface IArticleSection {
   titleEng: string;
   text: string;
   textEng: string;
-  article?: IArticle | string;
-  principalFile?: IFile | string;
-  files: (IFile | string)[];
+  article?: IArticle | string | any;
+  principalFile?: IFile | string | any;
+  files: (IFile | string | any)[];
   order: number;
   titleColor: string;
   textColor: string;
