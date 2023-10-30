@@ -10,6 +10,7 @@ import { BlogCatBadgetsComponent } from './components/blog-cat-badgets/blog-cat-
 import { BlogSubCatBadgetsComponent } from './components/blog-subcat-badgets/blog-subcat-badgets.component';
 import { BlogCatEditComponent } from './components/blog-cat-edit/blog-cat-edit.component';
 import { BlogSubcatEditComponent } from './components/blog-subcat-edit/blog-subcat-edit.component';
+import { ArticleSectionsComponent } from './components/article-sections/article-sections.component';
 @NgModule({
   declarations: [
     BlogComponent,
@@ -18,6 +19,7 @@ import { BlogSubcatEditComponent } from './components/blog-subcat-edit/blog-subc
     BlogSubCatBadgetsComponent,
     BlogCatEditComponent,
     BlogSubcatEditComponent,
+    ArticleSectionsComponent,
   ],
   imports: [CommonModule, BlogRoutingModule, SharedModule],
   exports: [

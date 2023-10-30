@@ -6,6 +6,7 @@ import { AccordionModule } from 'ngx-bootstrap/accordion';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
+import { CarouselModule } from 'ngx-bootstrap/carousel';
 
 @NgModule({
   declarations: [],
@@ -16,6 +17,7 @@ import { TooltipModule } from 'ngx-bootstrap/tooltip';
     AccordionModule.forRoot(),
     ModalModule.forRoot(),
     TooltipModule.forRoot(),
+    CarouselModule.forRoot(),
   ],
   exports: [
     /* NGX-Bootstrap */
@@ -23,6 +25,7 @@ import { TooltipModule } from 'ngx-bootstrap/tooltip';
     AccordionModule,
     ModalModule,
     TooltipModule,
+    CarouselModule,
   ],
 })
 export class BootstrapModule {}
