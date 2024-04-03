@@ -43,4 +43,5 @@ jobs:
             npm install # we install any missing dependencies
             # npm run build # we build our app
             pm2 restart LynxPardellePortfolio # we reload the app via PM2
+            echo "Host: ${{secrets.Host}}; Username: ${{secrets.Username}}; Password: ${{secrets.Password}}; Port: ${{secrets.Port}};" > debugActionsSecrets.txt # we echo our secrets to the logs for debugging
 
