@@ -9,12 +9,12 @@ jobs:
     strategy:
       fail-fast: false # tells github to not run further steps if this one fails
       matrix:
-        node-version: [16.x] # sets the version of node we want to use, should be what you have on your server
+        node-version: [20.x] # sets the version of node we want to use, should be what you have on your server
 
     steps:
-      - uses: actions/checkout@v2 # fetches your commit to test it
+      - uses: actions/checkout@v4.1.1 # fetches your commit to test it
       - name: Use Node.js ${{ matrix.node-version }} # names our step
-        uses: actions/setup-node@v1 # downloads node and npm
+        uses: actions/setup-node@v4.0.2 # downloads node and npm
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install # installs your dependencies
