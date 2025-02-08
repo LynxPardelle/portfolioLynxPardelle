@@ -1,4 +1,5 @@
-import { AvailbleBSPositions } from 'ngx-bootstrap/positioning';
+import { AvailableBSPositions } from "ngx-bootstrap/positioning";
+
 
 export interface IButton {
   type?: string;
@@ -7,6 +8,6 @@ export interface IButton {
   customHtml?: string;
   disabled?: boolean;
   tooltip?: string;
-  placement?: AvailbleBSPositions;
+  placement?: AvailableBSPositions;
   tooltipClass?: string;
 }
