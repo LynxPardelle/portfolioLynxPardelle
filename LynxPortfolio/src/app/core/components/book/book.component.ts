@@ -23,10 +23,11 @@ import { MainMainSelector } from 'src/app/state/selectors/main.selector';
 import { LoadMain } from 'src/app/state/actions/main.actions';
 
 @Component({
-  selector: 'book',
-  templateUrl: './book.component.html',
-  styleUrls: ['./book.component.scss'],
-  providers: [WebService, TranslateService],
+    selector: 'book',
+    templateUrl: './book.component.html',
+    styleUrls: ['./book.component.scss'],
+    providers: [WebService, TranslateService],
+    standalone: false
 })
 export class BookComponent implements OnInit {
   public identity: any;

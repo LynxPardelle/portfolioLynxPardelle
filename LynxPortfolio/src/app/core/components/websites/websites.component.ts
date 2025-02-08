@@ -22,10 +22,11 @@ import { AppState } from 'src/app/state/app.state';
 import { MainMainSelector } from 'src/app/state/selectors/main.selector';
 import { LoadMain } from 'src/app/state/actions/main.actions';
 @Component({
-  selector: 'websites',
-  templateUrl: './websites.component.html',
-  styleUrls: ['./websites.component.scss'],
-  providers: [WebService, TranslateService],
+    selector: 'websites',
+    templateUrl: './websites.component.html',
+    styleUrls: ['./websites.component.scss'],
+    providers: [WebService, TranslateService],
+    standalone: false
 })
 export class WebsitesComponent implements OnInit {
   public identity: any;

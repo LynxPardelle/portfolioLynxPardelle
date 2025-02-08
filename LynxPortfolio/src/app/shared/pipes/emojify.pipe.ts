@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'emojify',
+    name: 'emojify',
+    standalone: false
 })
 export class EmojifyPipe implements PipeTransform {
   transform(

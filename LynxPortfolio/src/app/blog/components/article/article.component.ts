@@ -26,9 +26,10 @@ import { LoadMain } from 'src/app/state/actions/main.actions';
 import { IButton } from 'src/app/shared/interfaces/button';
 
 @Component({
-  selector: 'app-article',
-  templateUrl: './article.component.html',
-  styleUrls: ['./article.component.scss'],
+    selector: 'app-article',
+    templateUrl: './article.component.html',
+    styleUrls: ['./article.component.scss'],
+    standalone: false
 })
 export class ArticleComponent implements OnInit {
   public identity: any;

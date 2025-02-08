@@ -23,10 +23,11 @@ import { MainMainSelector } from 'src/app/state/selectors/main.selector';
 import { LoadMain } from 'src/app/state/actions/main.actions';
 
 @Component({
-  selector: 'music',
-  templateUrl: './music.component.html',
-  styleUrls: ['./music.component.scss'],
-  providers: [WebService, TranslateService],
+    selector: 'music',
+    templateUrl: './music.component.html',
+    styleUrls: ['./music.component.scss'],
+    providers: [WebService, TranslateService],
+    standalone: false
 })
 export class MusicComponent implements OnInit {
   public identity: any;

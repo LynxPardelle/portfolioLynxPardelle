@@ -4,9 +4,10 @@ import { SharedService } from '../../services/shared.service';
 import { NgxBootstrapExpandedFeaturesService } from 'ngx-bootstrap-expanded-features';
 
 @Component({
-  selector: 'generic-group-buttons',
-  templateUrl: './generic-group-buttons.component.html',
-  styleUrls: ['./generic-group-buttons.component.scss'],
+    selector: 'generic-group-buttons',
+    templateUrl: './generic-group-buttons.component.html',
+    styleUrls: ['./generic-group-buttons.component.scss'],
+    standalone: false
 })
 export class GenericGroupButtonsComponent implements OnInit {
   @Input() buttons: IButton[] = [];

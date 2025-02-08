@@ -22,13 +22,14 @@ export function getAlertConfig(
   });
 }
 @Component({
-  selector: 'generic-button',
-  templateUrl: './generic-button.component.html',
-  styleUrls: ['./generic-button.component.scss'],
-  providers: [
-    { provide: TooltipConfig, useFactory: getAlertConfig },
-    HarshifyPipe,
-  ],
+    selector: 'generic-button',
+    templateUrl: './generic-button.component.html',
+    styleUrls: ['./generic-button.component.scss'],
+    providers: [
+        { provide: TooltipConfig, useFactory: getAlertConfig },
+        HarshifyPipe,
+    ],
+    standalone: false
 })
 export class GenericButtonComponent implements OnInit {
   public randomId: string = '';

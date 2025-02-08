@@ -22,17 +22,18 @@ import { Observable } from 'rxjs';
 import { IMain } from './core/interfaces/main';
 import { IdentitySelector } from './state/selectors/sesion.selector';
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
-  providers: [
-    WebService,
-    TranslateService,
-    {
-      provide: BsDropdownConfig,
-      useValue: { isAnimated: true, autoClose: true },
-    },
-  ],
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    providers: [
+        WebService,
+        TranslateService,
+        {
+            provide: BsDropdownConfig,
+            useValue: { isAnimated: true, autoClose: true },
+        },
+    ],
+    standalone: false
 })
 export class AppComponent implements OnInit, DoCheck {
   public identity: any;
