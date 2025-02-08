@@ -22,10 +22,11 @@ import { AppState } from 'src/app/state/app.state';
 import { MainMainSelector } from 'src/app/state/selectors/main.selector';
 import { LoadMain } from 'src/app/state/actions/main.actions';
 @Component({
-  selector: 'app-demoreel',
-  templateUrl: './demoreel.component.html',
-  styleUrls: ['./demoreel.component.scss'],
-  providers: [WebService, TranslateService],
+    selector: 'app-demoreel',
+    templateUrl: './demoreel.component.html',
+    styleUrls: ['./demoreel.component.scss'],
+    providers: [WebService, TranslateService],
+    standalone: false
 })
 export class DemoreelComponent implements OnInit {
   public identity: any;

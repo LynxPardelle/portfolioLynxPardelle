@@ -12,14 +12,14 @@
   "private": true,
   "dependencies": {
     "@angular-ex/uploader": "^16.0.1",
-    "@angular/animations": "^18.2.13",
-    "@angular/common": "^18.2.13",
-    "@angular/compiler": "^18.2.13",
-    "@angular/core": "^18.2.13",
-    "@angular/forms": "^18.2.13",
-    "@angular/platform-browser": "^18.2.13",
-    "@angular/platform-browser-dynamic": "^18.2.13",
-    "@angular/router": "^18.2.13",
+    "@angular/animations": "^19.1.5",
+    "@angular/common": "^19.1.5",
+    "@angular/compiler": "^19.1.5",
+    "@angular/core": "^19.1.5",
+    "@angular/forms": "^19.1.5",
+    "@angular/platform-browser": "^19.1.5",
+    "@angular/platform-browser-dynamic": "^19.1.5",
+    "@angular/router": "^19.1.5",
     "@angular/youtube-player": "^16.2.10",
     "@ngrx/effects": "^16.3.0",
     "@ngrx/store": "^16.3.0",
@@ -35,12 +35,12 @@
     "sweetalert2": "^11.7.32",
     "tldts": "^6.0.17",
     "tslib": "^2.6.2",
-    "zone.js": "^0.14.10"
+    "zone.js": "^0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^18.2.14",
-    "@angular/cli": "^18.2.14",
-    "@angular/compiler-cli": "^18.2.13",
+    "@angular-devkit/build-angular": "^19.1.6",
+    "@angular/cli": "^19.1.6",
+    "@angular/compiler-cli": "^19.1.5",
     "@ngrx/schematics": "^16.3.0",
     "@types/jasmine": "^4.6.1",
     "@types/node": "^20.8.9",
@@ -50,6 +50,6 @@
     "karma-coverage": "^2.2.1",
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.7.3"
   }
 }

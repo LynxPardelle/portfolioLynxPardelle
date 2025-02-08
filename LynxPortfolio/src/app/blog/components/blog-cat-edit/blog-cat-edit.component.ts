@@ -8,9 +8,10 @@ import Swal from 'sweetalert2';
 import { NgxBootstrapExpandedFeaturesService } from 'ngx-bootstrap-expanded-features';
 import { WebService } from 'src/app/shared/services/web.service';
 @Component({
-  selector: 'blog-cat-edit',
-  templateUrl: './blog-cat-edit.component.html',
-  styleUrls: ['./blog-cat-edit.component.scss'],
+    selector: 'blog-cat-edit',
+    templateUrl: './blog-cat-edit.component.html',
+    styleUrls: ['./blog-cat-edit.component.scss'],
+    standalone: false
 })
 export class BlogCatEditComponent implements OnInit {
   // Models

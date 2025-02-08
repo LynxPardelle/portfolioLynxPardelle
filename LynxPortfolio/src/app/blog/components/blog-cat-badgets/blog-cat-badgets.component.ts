@@ -5,9 +5,10 @@ import { IArticleCat } from '../../interfaces/blog';
 import { NgxBootstrapExpandedFeaturesService } from 'ngx-bootstrap-expanded-features';
 
 @Component({
-  selector: 'blog-cat-badgets',
-  templateUrl: './blog-cat-badgets.component.html',
-  styleUrls: ['./blog-cat-badgets.component.scss'],
+    selector: 'blog-cat-badgets',
+    templateUrl: './blog-cat-badgets.component.html',
+    styleUrls: ['./blog-cat-badgets.component.scss'],
+    standalone: false
 })
 export class BlogCatBadgetsComponent {
   @Input() cats!: IArticleCat[] | any[];

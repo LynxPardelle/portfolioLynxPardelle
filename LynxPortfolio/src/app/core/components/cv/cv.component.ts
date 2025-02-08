@@ -23,10 +23,11 @@ import { MainMainSelector } from 'src/app/state/selectors/main.selector';
 import { LoadMain } from 'src/app/state/actions/main.actions';
 
 @Component({
-  selector: 'cv',
-  templateUrl: './cv.component.html',
-  styleUrls: ['./cv.component.scss'],
-  providers: [WebService, TranslateService],
+    selector: 'cv',
+    templateUrl: './cv.component.html',
+    styleUrls: ['./cv.component.scss'],
+    providers: [WebService, TranslateService],
+    standalone: false
 })
 export class CvComponent implements OnInit, DoCheck {
   public identity: any;

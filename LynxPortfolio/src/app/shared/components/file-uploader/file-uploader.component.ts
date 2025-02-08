@@ -32,10 +32,11 @@ import {
 import Swal from 'sweetalert2';
 
 @Component({
-  selector: 'app-file-uploader',
-  templateUrl: './file-uploader.component.html',
-  styleUrls: ['./file-uploader.component.scss'],
-  providers: [WebService],
+    selector: 'app-file-uploader',
+    templateUrl: './file-uploader.component.html',
+    styleUrls: ['./file-uploader.component.scss'],
+    providers: [WebService],
+    standalone: false
 })
 export class FileUploaderComponent implements OnInit {
   /* Identity */

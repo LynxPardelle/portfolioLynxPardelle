@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'harshify',
+    name: 'harshify',
+    standalone: false
 })
 export class HarshifyPipe implements PipeTransform {
   transform(

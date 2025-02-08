@@ -6,9 +6,10 @@ import Swal from 'sweetalert2';
 import { NgxBootstrapExpandedFeaturesService } from 'ngx-bootstrap-expanded-features';
 
 @Component({
-  selector: 'article-sections',
-  templateUrl: './article-sections.component.html',
-  styleUrls: ['./article-sections.component.scss'],
+    selector: 'article-sections',
+    templateUrl: './article-sections.component.html',
+    styleUrls: ['./article-sections.component.scss'],
+    standalone: false
 })
 export class ArticleSectionsComponent {
   public section: IArticleSection = {

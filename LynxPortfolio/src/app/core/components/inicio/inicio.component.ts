@@ -23,10 +23,11 @@ import { MainMainSelector } from 'src/app/state/selectors/main.selector';
 import { LoadMain } from 'src/app/state/actions/main.actions';
 
 @Component({
-  selector: 'inicio',
-  templateUrl: './inicio.component.html',
-  styleUrls: ['./inicio.component.scss'],
-  providers: [WebService, TranslateService],
+    selector: 'inicio',
+    templateUrl: './inicio.component.html',
+    styleUrls: ['./inicio.component.scss'],
+    providers: [WebService, TranslateService],
+    standalone: false
 })
 export class InicioComponent implements OnInit, DoCheck {
   public identity: any;

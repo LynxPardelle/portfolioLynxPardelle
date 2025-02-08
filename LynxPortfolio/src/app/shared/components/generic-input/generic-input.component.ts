@@ -7,9 +7,10 @@ import { IButton } from '../../interfaces/button';
 import { SharedService } from '../../services/shared.service';
 import { NgxBootstrapExpandedFeaturesService } from 'ngx-bootstrap-expanded-features';
 @Component({
-  selector: 'generic-input',
-  templateUrl: './generic-input.component.html',
-  styleUrls: ['./generic-input.component.scss'],
+    selector: 'generic-input',
+    templateUrl: './generic-input.component.html',
+    styleUrls: ['./generic-input.component.scss'],
+    standalone: false
 })
 export class GenericInputComponent implements OnInit {
   @Input() hasBeenTouched: boolean = false;

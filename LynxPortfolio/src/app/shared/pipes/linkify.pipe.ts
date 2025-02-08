@@ -4,7 +4,8 @@ import { HarshifyPipe } from './harshify.pipe';
 import { WebService } from '../services/web.service';
 
 @Pipe({
-  name: 'linkify',
+    name: 'linkify',
+    standalone: false
 })
 export class LinkifyPipe implements PipeTransform {
   public Harshify: HarshifyPipe = new HarshifyPipe();

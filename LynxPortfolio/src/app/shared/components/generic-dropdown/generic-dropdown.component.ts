@@ -9,10 +9,11 @@ import { HarshifyPipe } from '../../pipes/harshify.pipe';
 import { NgxBootstrapExpandedFeaturesService } from 'ngx-bootstrap-expanded-features';
 import { WebService } from '../../services/web.service';
 @Component({
-  selector: 'generic-dropdown',
-  templateUrl: './generic-dropdown.component.html',
-  styleUrls: ['./generic-dropdown.component.scss'],
-  providers: [HarshifyPipe],
+    selector: 'generic-dropdown',
+    templateUrl: './generic-dropdown.component.html',
+    styleUrls: ['./generic-dropdown.component.scss'],
+    providers: [HarshifyPipe],
+    standalone: false
 })
 export class GenericDropdownComponent implements OnInit {
   public buttonId: string = '';
