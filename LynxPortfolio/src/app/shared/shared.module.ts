@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 /* Modules */
 import { BootstrapModule } from './bootstrap.module';
@@ -34,89 +34,70 @@ import { GenericDropdownComponent } from './components/generic-dropdown/generic-
 import { GenericGroupButtonsComponent } from './components/generic-group-buttons/generic-group-buttons.component';
 import { LinkifyPipe } from './pipes/linkify.pipe';
 
-@NgModule({
-  declarations: [
-    /* Directives */
-    NgInitDirective,
-
-    /* Pipes */
-    SafeHtmlPipe,
-    HarshifyPipe,
-    LinkifyPipe,
-
-    /* Components */
-    FileUploaderComponent,
-    GenericButtonComponent,
-    GenericInputComponent,
-    GenericGroupButtonsComponent,
-    GenericDropdownComponent,
-    GenericGroupButtonsComponent,
-  ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    BootstrapModule,
-    HttpClientModule,
-
-    /* NGX-Uploader */
-    NgxUploaderModule,
-
-    /* Moment */
-    MomentModule.forRoot({
-      relativeTimeThresholdOptions: {
-        m: 59,
-      },
-    }),
-
-    /* YoutubePlayer */
-    YouTubePlayerModule,
-
-    /* configure the imports */
-    TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
-        deps: [HttpClient],
-      },
-    }),
-  ],
-  exports: [
-    /* Modules */
-    FormsModule,
-    ReactiveFormsModule,
-    HttpClientModule,
-    BootstrapModule,
-
-    /* NGX-Uploader */
-    NgxUploaderModule,
-
-    /* Moment */
-    MomentModule,
-
-    /* YoutubePlayer */
-    YouTubePlayerModule,
-
-    /* Translatemodule */
-    TranslateModule,
-
-    /* Directives */
-    NgInitDirective,
-
-    /* Pipes */
-    SafeHtmlPipe,
-    HarshifyPipe,
-    LinkifyPipe,
-
-    /* Components */
-    FileUploaderComponent,
-    GenericButtonComponent,
-    GenericInputComponent,
-    GenericGroupButtonsComponent,
-    GenericDropdownComponent,
-    GenericGroupButtonsComponent,
-  ],
-})
+@NgModule({ declarations: [
+        /* Directives */
+        NgInitDirective,
+        /* Pipes */
+        SafeHtmlPipe,
+        HarshifyPipe,
+        LinkifyPipe,
+        /* Components */
+        FileUploaderComponent,
+        GenericButtonComponent,
+        GenericInputComponent,
+        GenericGroupButtonsComponent,
+        GenericDropdownComponent,
+        GenericGroupButtonsComponent,
+    ],
+    exports: [
+        /* Modules */
+        FormsModule,
+        ReactiveFormsModule,
+        HttpClientModule,
+        BootstrapModule,
+        /* NGX-Uploader */
+        NgxUploaderModule,
+        /* Moment */
+        MomentModule,
+        /* YoutubePlayer */
+        YouTubePlayerModule,
+        /* Translatemodule */
+        TranslateModule,
+        /* Directives */
+        NgInitDirective,
+        /* Pipes */
+        SafeHtmlPipe,
+        HarshifyPipe,
+        LinkifyPipe,
+        /* Components */
+        FileUploaderComponent,
+        GenericButtonComponent,
+        GenericInputComponent,
+        GenericGroupButtonsComponent,
+        GenericDropdownComponent,
+        GenericGroupButtonsComponent,
+    ], imports: [CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        BootstrapModule,
+        /* NGX-Uploader */
+        NgxUploaderModule,
+        /* Moment */
+        MomentModule.forRoot({
+            relativeTimeThresholdOptions: {
+                m: 59,
+            },
+        }),
+        /* YoutubePlayer */
+        YouTubePlayerModule,
+        /* configure the imports */
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient],
+            },
+        })], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class SharedModule {}
 
 /* required for AOT compilation */

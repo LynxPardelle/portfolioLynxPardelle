@@ -6,14 +6,7 @@ import {
   TemplateRef,
   EventEmitter,
 } from '@angular/core';
-import {
-  HttpClient,
-  HttpRequest,
-  HttpHeaders,
-  HttpResponse,
-  HttpHeaderResponse,
-  HttpEventType,
-} from '@angular/common/http';
+import { HttpClient, HttpRequest, HttpHeaders, HttpResponse, HttpHeaderResponse, HttpEventType } from '@angular/common/http';
 
 /* Environment */
 import { environment } from 'src/environments/environment';
