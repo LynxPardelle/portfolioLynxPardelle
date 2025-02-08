@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  api: 'http://localhost:6164/api',
+  api: 
+  'http://localhost:6164/api',
   /*
   'https://lynxpardelle.com/api',
   */

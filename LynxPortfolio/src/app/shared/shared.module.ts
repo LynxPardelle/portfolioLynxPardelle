@@ -34,7 +34,8 @@ import { GenericDropdownComponent } from './components/generic-dropdown/generic-
 import { GenericGroupButtonsComponent } from './components/generic-group-buttons/generic-group-buttons.component';
 import { LinkifyPipe } from './pipes/linkify.pipe';
 
-@NgModule({ declarations: [
+@NgModule({
+    declarations: [
         /* Directives */
         NgInitDirective,
         /* Pipes */
@@ -49,11 +50,32 @@ import { LinkifyPipe } from './pipes/linkify.pipe';
         GenericDropdownComponent,
         GenericGroupButtonsComponent,
     ],
+    imports: [CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        BootstrapModule,
+        /* NGX-Uploader */
+        NgxUploaderModule,
+        /* Moment */
+        MomentModule.forRoot({
+            relativeTimeThresholdOptions: {
+                m: 59,
+            },
+        }),
+        /* YoutubePlayer */
+        YouTubePlayerModule,
+        /* configure the imports */
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient],
+            },
+        })],
     exports: [
         /* Modules */
         FormsModule,
         ReactiveFormsModule,
-        HttpClientModule,
         BootstrapModule,
         /* NGX-Uploader */
         NgxUploaderModule,
@@ -76,31 +98,12 @@ import { LinkifyPipe } from './pipes/linkify.pipe';
         GenericGroupButtonsComponent,
         GenericDropdownComponent,
         GenericGroupButtonsComponent,
-    ], imports: [CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        BootstrapModule,
-        /* NGX-Uploader */
-        NgxUploaderModule,
-        /* Moment */
-        MomentModule.forRoot({
-            relativeTimeThresholdOptions: {
-                m: 59,
-            },
-        }),
-        /* YoutubePlayer */
-        YouTubePlayerModule,
-        /* configure the imports */
-        TranslateModule.forRoot({
-            loader: {
-                provide: TranslateLoader,
-                useFactory: HttpLoaderFactory,
-                deps: [HttpClient],
-            },
-        })], providers: [provideHttpClient(withInterceptorsFromDi())] })
-export class SharedModule {}
+    ],
+    providers: [provideHttpClient(withInterceptorsFromDi())]
+})
+export class SharedModule { }
 
 /* required for AOT compilation */
 export function HttpLoaderFactory(http: HttpClient) {
-  return new TranslateHttpLoader(http);
+    return new TranslateHttpLoader(http);
 }

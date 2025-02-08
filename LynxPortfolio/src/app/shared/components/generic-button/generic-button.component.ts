@@ -10,10 +10,10 @@ import { HarshifyPipe } from 'src/app/shared/pipes/harshify.pipe';
 /* NGX-Bootstrap */
 import { TooltipConfig } from 'ngx-bootstrap/tooltip';
 
-import { AvailbleBSPositions } from 'ngx-bootstrap/positioning';
+import { AvailableBSPositions } from 'ngx-bootstrap/positioning';
 
 export function getAlertConfig(
-  placement: AvailbleBSPositions,
+  placement: AvailableBSPositions,
   container: string
 ): TooltipConfig {
   return Object.assign(new TooltipConfig(), {
@@ -40,7 +40,7 @@ export class GenericButtonComponent implements OnInit {
   @Input() disabled: boolean = false;
   @Input() disabledClassButton: string = '';
   @Input() tooltip: string = '';
-  @Input() placement: AvailbleBSPositions = 'auto';
+  @Input() placement: AvailableBSPositions = 'auto';
   @Input() tooltipClass: string = '';
 
   /* Output */
