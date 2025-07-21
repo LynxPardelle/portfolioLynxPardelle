@@ -38,11 +38,6 @@ jobs:
           script: |
             # create a folder to store our secrets
             mkdir -p /home/secrets
-            # save all the secrets to the server
-            echo "${{ secrets.HOST }}" > /home/secrets/host
-            echo "${{ secrets.USERNAME }}" > /home/secrets/username
-            echo "${{ secrets.PASSWORD }}" > /home/secrets/password
-            echo "${{ secrets.PORT }}" > /home/secrets/port
             cd /home/LynxPardelle/portfolioLynxPardelle # we move into our app's folder
             git reset --hard
             git pull git@github.com:LynxPardelle/portfolioLynxPardelle.git # we pull any changes from git

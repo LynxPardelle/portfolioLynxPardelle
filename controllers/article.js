@@ -26,9 +26,6 @@ const populate = require("../populate/populate");
 /* jwt */
 const jwt = require("../services/jwt");
 
-/* Key */
-const secret = require("../keys/secret");
-
 const controller = {
   datosAutor: (req, res) => {
     return res.status(200).send({

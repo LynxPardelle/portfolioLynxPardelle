@@ -28,9 +28,6 @@ var populateWebsite = ["desktopImg", "tabletImg", "mobileImg"];
 /* Main jwt */
 var jwt = require("../services/jwt");
 
-/* Key */
-var secret = require("../keys/secret");
-
 var controller = {
   datosAutor: (req, res) => {
     return res.status(200).send({
@@ -675,6 +672,11 @@ var controller = {
       if (!mainOld) {
         var main = new Main();
 
+        if(!process.env.JWT_SECRET) {
+          nError = 500;
+          throw new Error("JWT_SECRET environment variable is required");
+        }
+
         /* Asignar valores */
         main.welcome = "Te doy la bienvenida.";
         main.welcomeEng = "Welcome";
@@ -686,7 +688,7 @@ var controller = {
           "Valores y actitudes\n\nResponsabilidad Orden Puntualidad Creatividad Proactividad";
         main.CVDesc2Eng =
           "Values and attitudes\n\nResponsbility Order Puntuality Creativity Proactivity";
-        main.key = secret;
+        main.key = process.env.JWT_SECRET;
         main.errorMessage = "Error 404:\n\nPágina no encontrada.";
         main.errorMessageEng = "Error 404:\n\nPage not found.";
         main.seoTags = "lynx pardelle, web developer, web designer";

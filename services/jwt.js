@@ -2,7 +2,6 @@
 
 var jwt = require('jwt-simple');
 var moment = require('moment');
-var secret = require("../keys/secret");
 
 exports.createToken = function (user) {
   var payload = {
@@ -13,6 +12,12 @@ exports.createToken = function (user) {
     iat: moment().unix(),
     exp: moment().add(30, "days").unix,
   };
+
+  // Use JWT_SECRET from environment variables with fallback
+  var secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required');
+  }
 
   return jwt.encode(payload, secret);
 };

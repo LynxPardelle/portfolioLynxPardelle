@@ -1,10 +1,11 @@
 "use strict";
 
+// Load environment variables first
+require('dotenv').config();
+
 //Cargar modulos de node para crear servidos
 var path = require("path");
 var express = require("express");
-var http = require("http");
-var bodyParser = require("body-parser");
 var cors = require("cors");
 
 /* Ejecutar express (http) */
@@ -21,12 +22,7 @@ app.use(
 );
 
 /* Config cabeceras y CORS */
-var allowedDomains = [
-  "http://localhost:4200",
-  "http://localhost:6164",
-  "https://lynxpardelle.com",
-  "https://lynxpardelle.com",
-];
+const allowedDomains = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
 app.use(
   cors({
     origin: function (origin, callback) {
