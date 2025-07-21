@@ -1,21 +1,19 @@
 "use strict";
 
-var mongoose = require("mongoose");
-var express = require("express");
-var app = require("./app");
-var port = 6164;
+const mongoose = require("mongoose");
+const express = require("express");
+const app = require("./app");
 
 mongoose.Promise = global.Promise;
-
 mongoose
-  .connect("mongodb://127.0.0.1:27017/lynx_portfolio")
+  .connect(process.env.DATABASE_URL || "mongodb://127.0.0.1:27017/lynx_portfolio")
   .then(() => {
     console.log(
       "la conexión a la base de datos de Lynx Pardelle se ha realizado correctamente."
     );
 
     /* Crear servidor y escuchar peticiones http */
-    var server = app.listen(port, () => {
+    app.listen(process.env.PORT || 6164, () => {
       console.log("Servidor corriendo en https://lynxpardelle.com.");
     });
 

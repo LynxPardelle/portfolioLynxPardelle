@@ -1,0 +1,239 @@
+# =============================================================================
+# Docker Compose Configuration for Node.js Template
+# =============================================================================
+# This compose file provides multiple deployment profiles:
+# - create: Project creation and initialization
+# - dev: Development environment with hot-reload
+# - prod: Production environment
+# - prod-pm2: Production with PM2 process manager
+# - nginx: Nginx reverse proxy only
+# - prod-nginx: Production with nginx reverse proxy
+# - test: Testing environment
+# =============================================================================
+
+name: ${APP_NAME:-my-node-app}
+
+# Define reusable configuration
+x-common-variables: &common-variables
+  UID: ${UID:-1000}
+  GID: ${GID:-1000}
+  NODE_ENV: ${NODE_ENV:-development}
+
+x-common-environment: &common-environment
+  NODE_ENV: ${NODE_ENV:-development}
+  PORT: ${PORT:-3000}
+  DATABASE_URL: ${DATABASE_URL:-}
+  REDIS_URL: ${REDIS_URL:-}
+  JWT_SECRET: ${JWT_SECRET:-your-jwt-secret}
+  CORS_ORIGIN: ${CORS_ORIGIN:-*}
+  NGINX_HOST: ${NGINX_HOST:-localhost}
+  NGINX_PORT: ${NGINX_PORT:-80}
+
+services:
+  # Development service with hot-reload
+  dev:
+    build: 
+      context: .
+      target: development
+      args:
+        <<: *common-variables
+    container_name: ${APP_NAME:-my-node-app}-dev
+    ports:
+      - "${DEV_PORT:-3000}:${DEV_PORT:-3000}"
+    volumes:
+      # Mount source code for hot-reload (excludes node_modules for performance)
+      - .:/app:cached
+      - /app/node_modules
+      - node_logs:/app/logs
+    environment:
+      <<: *common-environment
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-false}
+    # Health check for development container
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${DEV_PORT:-3000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Restart policy
+    restart: unless-stopped
+    profiles: ["dev"]
+
+  # Production service
+  prod:
+    build: 
+      context: .
+      target: production
+      args:
+        <<: *common-variables
+        NODE_ENV: production
+      cache_from:
+        - node:22-alpine
+    container_name: ${APP_NAME:-my-node-app}-prod
+    ports:
+      - "${PROD_PORT:-8000}:${PROD_PORT:-8000}"
+    volumes:
+      - node_logs:/app/logs
+      - node_uploads:/app/uploads
+    environment:
+      <<: *common-environment
+      NODE_ENV: production
+    # Health check for production container
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PROD_PORT:-8000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    # Restart policy for production
+    restart: unless-stopped
+    profiles: ["prod"]
+
+  # Production service with PM2
+  prod-pm2:
+    build: 
+      context: .
+      target: production-pm2
+      args:
+        <<: *common-variables
+        NODE_ENV: production
+    container_name: ${APP_NAME:-my-node-app}-prod-pm2
+    ports:
+      - "${PROD_PORT:-8000}:${PROD_PORT:-8000}"
+    volumes:
+      - node_logs:/app/logs
+      - node_uploads:/app/uploads
+    environment:
+      <<: *common-environment
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PROD_PORT:-8000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    profiles: ["prod-pm2"]
+
+  # Testing service
+  test:
+    build: 
+      context: .
+      target: testing
+      args:
+        <<: *common-variables
+        NODE_ENV: test
+    container_name: ${APP_NAME:-my-node-app}-test
+    volumes:
+      - .:/app:cached
+      - /app/node_modules
+    environment:
+      <<: *common-environment
+      NODE_ENV: test
+      CI: true
+    profiles: ["test"]
+
+  # Nginx reverse proxy service (standalone)
+  nginx:
+    build:
+      context: .
+      target: nginx
+    container_name: ${APP_NAME:-my-node-app}-nginx
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    depends_on:
+      - app
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
+    environment:
+      - NGINX_HOST=${NGINX_HOST:-localhost}
+      - NGINX_PORT=${NGINX_PORT:-80}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/nginx-status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    profiles: ["nginx"]
+
+  # Backend app service for nginx proxy
+  app:
+    build:
+      context: .
+      target: production
+      args:
+        <<: *common-variables
+        NODE_ENV: production
+    container_name: ${APP_NAME:-my-node-app}-app
+    expose:
+      - "3000"
+    volumes:
+      - node_logs:/app/logs
+      - node_uploads:/app/uploads
+    environment:
+      <<: *common-environment
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${DEV_PORT:-3000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    profiles: ["nginx"]
+
+  # Production service with integrated nginx
+  prod-nginx:
+    build:
+      context: .
+      target: production-nginx
+      args:
+        <<: *common-variables
+        NODE_ENV: production
+    container_name: ${APP_NAME:-my-node-app}-prod-nginx
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - node_logs:/app/logs
+      - node_uploads:/app/uploads
+      - nginx_logs:/var/log/nginx
+      - supervisor_logs:/var/log/supervisor
+    environment:
+      <<: *common-environment
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    profiles: ["prod-nginx"]
+
+# Named volumes for better performance and persistence
+volumes:
+  # Logs volume for persistent logging
+  node_logs:
+    driver: local
+  
+  # Uploads volume for file uploads
+  node_uploads:
+    driver: local
+  
+  # Nginx logs volume
+  nginx_logs:
+    driver: local
+  
+  # Supervisor logs volume (for prod-nginx)
+  supervisor_logs:
+    driver: local
+
+# Network configuration (optional - Docker creates default network)
+networks:
+  default:
+    name: ${APP_NAME:-my-node-app}-network
+    driver: bridge

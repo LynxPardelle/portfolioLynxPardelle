@@ -2,7 +2,6 @@
 
 var jwt = require("jwt-simple");
 var moment = require("moment");
-var secret = require("../keys/secret");
 
 exports.ensureAuth = function (req, res, next) {
   if (!req.headers.authorization) {
@@ -12,6 +11,11 @@ exports.ensureAuth = function (req, res, next) {
   var token = req.headers.authorization.replace(/['"]+/g, "");
 
   try {
+    var secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(500).send({ message: "JWT_SECRET environment variable is required" });
+    }
+    
     var payload = jwt.decode(token, secret);
     if (payload.exp <= moment().unix()) {
       return res.status(401).send({
@@ -34,6 +38,11 @@ exports.optionalAuth = function (req, res, next) {
     var token = req.headers.authorization.replace(/['"]+/g, "");
 
     try {
+      var secret = process.env.JWT_SECRET;
+      if (!secret) {
+        return res.status(500).send({ message: "JWT_SECRET environment variable is required" });
+      }
+      
       var payload = jwt.decode(token, secret);
       if (payload.exp <= moment().unix()) {
         return res.status(401).send({

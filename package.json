@@ -1,10 +1,11 @@
 {
   "name": "portfoliolynxpardelle",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Lynx Pardelle Portfolio",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,9 +16,22 @@
     "portfolio",
     "lynx",
     "pardelle",
-    "lynx"
+    "nodejs",
+    "express",
+    "mongodb",
+    "backend",
+    "api",
+    "authentication",
+    "jwt",
+    "bcrypt",
+    "nodemailer",
+    "multer",
+    "cors",
+    "validator",
+    "moment",
+    "api"
   ],
-  "author": "Lynx Pardelle",
+  "author": "Lynx Pardelle <lynxpardelle@lynxpardelle.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/LynxPardelle/portfolioLynxPardelle/issues"
@@ -25,8 +39,8 @@
   "homepage": "https://github.com/LynxPardelle/portfolioLynxPardelle#readme",
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "body-parser": "^1.20.3",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.21.2",
     "jwt-simple": "^0.5.6",
     "moment": "^2.30.1",
