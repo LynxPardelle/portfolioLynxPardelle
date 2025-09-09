@@ -19,39 +19,104 @@ x-common-variables: &common-variables
   GID: ${GID:-1000}
   NODE_ENV: ${NODE_ENV:-development}
 
-x-common-environment: &common-environment
+x-common-env: &common-env
   NODE_ENV: ${NODE_ENV:-development}
-  PORT: ${PORT:-3000}
-  DATABASE_URL: ${DATABASE_URL:-}
-  REDIS_URL: ${REDIS_URL:-}
-  JWT_SECRET: ${JWT_SECRET:-your-jwt-secret}
   CORS_ORIGIN: ${CORS_ORIGIN:-*}
+  JWT_SECRET: ${JWT_SECRET:-your-jwt-secret}
   NGINX_HOST: ${NGINX_HOST:-localhost}
   NGINX_PORT: ${NGINX_PORT:-80}
+  REDIS_URL: ${REDIS_URL:-}
+  MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio}
+  MONGO_APP_TEST_DB: ${MONGO_APP_TEST_DB:-lynx_portfolio_test}
+  MONGO_APP_USER: ${MONGO_APP_USER:-portfolio}
+  MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-portfolio_pass}
 
 services:
-  # Development service with hot-reload
+  mongo-backup:
+    build:
+      context: .
+      dockerfile: Dockerfile.mongo-backup
+    container_name: ${APP_NAME:-my-node-app}-mongo-backup
+    depends_on:
+      - mongo
+    environment:
+      MONGO_HOST: mongo
+      MONGO_PORT: ${MONGO_PORT:-27017}
+      MONGO_DB: ${MONGO_APP_DB:-lynx_portfolio}
+      MONGO_USER: ${MONGO_APP_USER:-portfolio}
+      MONGO_PASS: ${MONGO_APP_PASSWORD:-portfolio_pass}
+      S3_BUCKET: ${S3_BUCKET_NAME}
+      S3_PATH: backups
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${S3_REGION}
+      TZ: UTC
+    volumes:
+      - mongo_data:/data/db:ro
+      - ./scripts:/scripts:ro
+      - ./mongo_backups:/mongo_backups
+    healthcheck:
+        # Security: Enforce strong passwords in production
+        # Set MONGO_INITDB_ROOT_PASSWORD and MONGO_APP_PASSWORD to long, random values
+        # Optionally set MONGO_TLS_MODE and MONGO_TLS_CERT/KEY for SSL
+      test: ["CMD", "bash", "-c", "ls /mongo_backups/mongo_backup_*.gz 2>/dev/null | tail -n 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 3m
+    restart: unless-stopped
+    profiles: ["backup"]
+  mongo:
+    build:
+      context: .
+      dockerfile: Dockerfile.mongo
+    image: ${APP_NAME:-my-node-app}-mongo-initialized:latest
+    container_name: ${APP_NAME:-my-node-app}-mongo
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    environment:
+      MONGO_PORT: ${MONGO_PORT:-27017}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_APP_DB: ${MONGO_APP_DB}
+      MONGO_APP_TEST_DB: ${MONGO_APP_TEST_DB}
+      MONGO_APP_USER: ${MONGO_APP_USER}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
+      MONGO_RESTORE_ON_INIT: ${MONGO_RESTORE_ON_INIT:-true}
+    command: ["--bind_ip_all", "--port", "27017", "--wiredTigerCacheSizeGB=1"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
   dev:
-    build: 
+    build:
       context: .
       target: development
       args:
         <<: *common-variables
     container_name: ${APP_NAME:-my-node-app}-dev
+    depends_on:
+      - mongo
     ports:
-      - "${DEV_PORT:-3000}:${DEV_PORT:-3000}"
+      - "${DEV_PORT}:${DEV_PORT}"
+    environment:
+      <<: *common-env
+      PORT: ${DEV_PORT}
+      DATABASE_URL: mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_APP_DB}?authSource=admin
+      CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-false}
     volumes:
       # Mount source code for hot-reload (excludes node_modules for performance)
       - .:/app:cached
       - /app/node_modules
       - node_logs:/app/logs
-    environment:
-      <<: *common-environment
-      NODE_ENV: development
-      CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-false}
-    # Health check for development container
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${DEV_PORT:-3000}/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:${DEV_PORT}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -60,28 +125,31 @@ services:
     restart: unless-stopped
     profiles: ["dev"]
 
-  # Production service
   prod:
-    build: 
+    build:
       context: .
       target: production
       args:
         <<: *common-variables
         NODE_ENV: production
       cache_from:
+        # To run weekly backup: docker compose --profile backup up mongo-backup
         - node:22-alpine
     container_name: ${APP_NAME:-my-node-app}-prod
+    depends_on:
+      - mongo
     ports:
-      - "${PROD_PORT:-8000}:${PROD_PORT:-8000}"
+      - "${PROD_PORT}:${PROD_PORT}"
+    environment:
+      <<: *common-env
+      NODE_ENV: production
+      PORT: ${PROD_PORT}
+      DATABASE_URL: mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_APP_DB}?authSource=admin
     volumes:
       - node_logs:/app/logs
       - node_uploads:/app/uploads
-    environment:
-      <<: *common-environment
-      NODE_ENV: production
-    # Health check for production container
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${PROD_PORT:-8000}/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:${PROD_PORT}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -92,23 +160,27 @@ services:
 
   # Production service with PM2
   prod-pm2:
-    build: 
+    build:
       context: .
       target: production-pm2
       args:
         <<: *common-variables
         NODE_ENV: production
     container_name: ${APP_NAME:-my-node-app}-prod-pm2
+    depends_on:
+      - mongo
     ports:
-      - "${PROD_PORT:-8000}:${PROD_PORT:-8000}"
+      - "${PROD_PORT}:${PROD_PORT}"
+    environment:
+      <<: *common-env
+      NODE_ENV: production
+      PORT: ${PROD_PORT}
+      DATABASE_URL: mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_APP_DB}?authSource=admin
     volumes:
       - node_logs:/app/logs
       - node_uploads:/app/uploads
-    environment:
-      <<: *common-environment
-      NODE_ENV: production
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${PROD_PORT:-8000}/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:${PROD_PORT}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -118,46 +190,25 @@ services:
 
   # Testing service
   test:
-    build: 
+    build:
       context: .
       target: testing
       args:
         <<: *common-variables
         NODE_ENV: test
     container_name: ${APP_NAME:-my-node-app}-test
+    depends_on:
+      - mongo
+    environment:
+      <<: *common-env
+      NODE_ENV: test
+      CI: "true"
+      PORT: ${DEV_PORT}
+      DATABASE_URL: mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_APP_TEST_DB}?authSource=admin
     volumes:
       - .:/app:cached
       - /app/node_modules
-    environment:
-      <<: *common-environment
-      NODE_ENV: test
-      CI: true
     profiles: ["test"]
-
-  # Nginx reverse proxy service (standalone)
-  nginx:
-    build:
-      context: .
-      target: nginx
-    container_name: ${APP_NAME:-my-node-app}-nginx
-    ports:
-      - "${NGINX_PORT:-80}:80"
-    depends_on:
-      - app
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - nginx_logs:/var/log/nginx
-    environment:
-      - NGINX_HOST=${NGINX_HOST:-localhost}
-      - NGINX_PORT=${NGINX_PORT:-80}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/nginx-status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    restart: unless-stopped
-    profiles: ["nginx"]
 
   # Backend app service for nginx proxy
   app:
@@ -168,16 +219,45 @@ services:
         <<: *common-variables
         NODE_ENV: production
     container_name: ${APP_NAME:-my-node-app}-app
+    depends_on:
+      - mongo
     expose:
-      - "3000"
+      - "6165"
+    environment:
+      <<: *common-env
+      NODE_ENV: production
+      PORT: ${DEV_PORT}
+      DATABASE_URL: mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_APP_DB}?authSource=admin
     volumes:
       - node_logs:/app/logs
       - node_uploads:/app/uploads
-    environment:
-      <<: *common-environment
-      NODE_ENV: production
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${DEV_PORT:-3000}/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:${DEV_PORT}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    profiles: ["nginx"]
+
+  # Nginx reverse proxy service (standalone)
+  nginx:
+    build:
+      context: .
+      target: nginx
+    container_name: ${APP_NAME:-my-node-app}-nginx
+    depends_on:
+      - app
+    ports:
+      - "${NGINX_PORT}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
+    environment:
+      NGINX_HOST: ${NGINX_HOST}
+      NGINX_PORT: ${NGINX_PORT}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/nginx-status"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -194,17 +274,21 @@ services:
         <<: *common-variables
         NODE_ENV: production
     container_name: ${APP_NAME:-my-node-app}-prod-nginx
+    depends_on:
+      - mongo
     ports:
-      - "${NGINX_PORT:-80}:80"
+      - "${NGINX_PORT}:80"
+    environment:
+      <<: *common-env
+      NODE_ENV: production
+      PORT: ${PROD_PORT}
+      DATABASE_URL: mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_APP_DB}?authSource=admin
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - node_logs:/app/logs
       - node_uploads:/app/uploads
       - nginx_logs:/var/log/nginx
       - supervisor_logs:/var/log/supervisor
-    environment:
-      <<: *common-environment
-      NODE_ENV: production
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
@@ -230,6 +314,10 @@ volumes:
   
   # Supervisor logs volume (for prod-nginx)
   supervisor_logs:
+    driver: local
+
+  # MongoDB data volume
+  mongo_data:
     driver: local
 
 # Network configuration (optional - Docker creates default network)
