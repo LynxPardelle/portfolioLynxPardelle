@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.6
 # =============================================================================
 # Multi-stage Dockerfile for Node.js Application
 # =============================================================================
@@ -5,6 +6,17 @@
 # 1. Development environment with hot-reload and debugging
 # 2. Production environment with minimal footprint and security hardening
 # 3. Testing environment with all testing dependencies
+#
+# Dokploy / .env Handling:
+# -----------------------------------------------------------------------------
+# The application uses `dotenv` (see app.js) so any .env file present at runtime
+# will be loaded automatically. Dokploy typically injects environment variables
+# directly (recommended for secrets). For convenience we also COPY the project
+# .env file into the image so that local builds and default Dokploy deployments
+# work out-of-the-box. If you do NOT want secrets baked into the image, either:
+#   1. Add `.env` to `.dockerignore`, or
+#   2. Build with `--build-arg INCLUDE_DOTENV=false`.
+# The build arg below allows you to toggle inclusion without editing this file.
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -20,10 +32,13 @@ ARG GID=1000
 RUN apk update
 RUN apk upgrade
 RUN apk add --no-cache \
-        dumb-init \
-        curl \
-        bash \
-        git
+    dumb-init \
+    curl \
+    bash \
+    git \
+    python3 \
+    make \
+    g++
 RUN rm -rf /var/cache/apk/*
 
 # Create application directory
@@ -47,8 +62,14 @@ RUN set -e; \
 RUN mkdir -p logs tmp uploads
 RUN chown -R appuser:appgroup /app
 
+ARG INCLUDE_DOTENV=true
+
 # Copy package files for dependency caching
 COPY --chown=appuser:appgroup package*.json ./
+
+# Optionally copy .env early so that dependency install scripts (if any)
+# could read env values. Keep this minimal; only copy when requested.
+RUN if [ "$INCLUDE_DOTENV" = "true" ] && [ -f .env ]; then echo "(base) .env not yet available; will be copied later"; fi
 
 # -----------------------------------------------------------------------------
 # Dependencies Stage - Production dependencies only
@@ -90,18 +111,22 @@ ENV NODE_ENV=development
 ENV NPM_CONFIG_LOGLEVEL=warn
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-# Copy source code with proper ownership
+# Copy source code with proper ownership (includes .env if present and not in .dockerignore)
 COPY --chown=appuser:appgroup . .
+
+# If .env was excluded via .dockerignore but you still want it inside the dev
+# container, you can mount it or pass INCLUDE_DOTENV=true with BuildKit secret.
+RUN if [ "$INCLUDE_DOTENV" != "true" ]; then echo "[development] Skipping embedded .env (INCLUDE_DOTENV=$INCLUDE_DOTENV)"; else if [ -f .env ]; then echo "[development] .env file bundled"; else echo "[development] .env file missing"; fi; fi
 
 # Switch to non-root user for security
 USER appuser
 
-# Expose development port
-EXPOSE 3000
+# Expose development port (matches DEV_PORT/PORT from env)
+EXPOSE 6164
 
 # Health check for development container
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:3000/health || exit 1
+    CMD curl -f http://localhost:6164/health || exit 1
 
 # Use dumb-init to handle signals properly and start development server
 ENTRYPOINT ["dumb-init", "--"]
@@ -134,8 +159,12 @@ FROM dependencies AS build
 ENV NODE_ENV=production
 ENV NPM_CONFIG_LOGLEVEL=error
 
-# Copy source code
+# Copy source code (includes .env unless excluded). If you do not want .env in
+# your final image, build with:  docker build --build-arg INCLUDE_DOTENV=false .
 COPY --chown=appuser:appgroup . .
+
+# Optional: explicitly remove .env if not requested
+RUN if [ "$INCLUDE_DOTENV" != "true" ] && [ -f .env ]; then echo "[build] Removing .env (INCLUDE_DOTENV=false)" && rm .env; fi
 
 # Remove development files to minimize size
 RUN rm -rf \
@@ -181,6 +210,9 @@ WORKDIR /app
 # Copy built application from build stage
 COPY --from=build --chown=appuser:appgroup /app .
 
+# Safety: if INCLUDE_DOTENV=false make sure .env isn't present accidentally
+RUN if [ "$INCLUDE_DOTENV" != "true" ] && [ -f .env ]; then echo "[production] Stripping .env" && rm .env; fi
+
 # Create necessary directories for runtime
 RUN mkdir -p logs tmp uploads
 RUN chown -R appuser:appgroup /app
@@ -193,12 +225,12 @@ ENV NODE_ENV=production
 ENV NPM_CONFIG_LOGLEVEL=error
 ENV NODE_OPTIONS="--max-old-space-size=1024"
 
-# Expose production port
-EXPOSE 3000
+# Expose production port (matches PROD_PORT/PORT from env)
+EXPOSE 6164
 
 # Health check for production container
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:3000/health || exit 1
+    CMD curl -f http://localhost:6164/health || exit 1
 
 # Start production server with proper signal handling
 ENTRYPOINT ["dumb-init", "--"]
@@ -291,6 +323,9 @@ WORKDIR /app
 # Copy built application from build stage
 COPY --from=build --chown=appuser:appgroup /app .
 
+# Safety: remove .env if not requested
+RUN if [ "$INCLUDE_DOTENV" != "true" ] && [ -f .env ]; then echo "[production-nginx] Stripping .env" && rm .env; fi
+
 # Copy nginx configuration
 COPY --chown=appuser:appgroup nginx.conf /etc/nginx/nginx.conf
 
@@ -337,7 +372,7 @@ ENV NODE_ENV=production
 ENV NPM_CONFIG_LOGLEVEL=error
 ENV NODE_OPTIONS="--max-old-space-size=1024"
 
-# Expose HTTP port (nginx will proxy to Node.js on 3000)
+# Expose HTTP port (nginx will proxy to Node.js on 6165)
 EXPOSE 80
 
 # Health check for the combined container

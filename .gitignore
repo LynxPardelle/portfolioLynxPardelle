@@ -137,3 +137,7 @@ secrets/
 *.db
 *.sqlite
 *.sqlite3
+
+# MongoDB
+mongo_backups/*
+!mongo_backups/.gitkeep

@@ -1,0 +1,66 @@
+# syntax=docker/dockerfile:1.6
+# =============================================================================
+# Dockerfile for MongoDB Container (Production, Dokploy-ready)
+# =============================================================================
+# This Dockerfile builds a secure MongoDB container for production use with Dokploy.
+# It uses environment variables from .env/.example.env for configuration.
+# =============================================================================
+
+FROM mongo:8.0.13
+
+## Using default MongoDB user; no custom user/group creation required
+
+# Create data and backup directories
+RUN mkdir -p /data/db /data/backups
+
+# Expose MongoDB port (default 27017)
+EXPOSE 27017
+
+# Healthcheck for Dokploy readiness (honors MONGO_PORT if set)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD mongo --host 127.0.0.1 --port ${MONGO_PORT:-27017} --eval "db.adminCommand('ping')" || exit 1
+
+# Environment variables for Dokploy (set via Dokploy envs, not baked in)
+# These should be set in Dokploy, not in the image:
+#   MONGO_PORT
+#   MONGO_ROOT_USERNAME
+#   MONGO_ROOT_PASSWORD
+#   MONGO_APP_DB
+#   MONGO_APP_USER
+#   MONGO_APP_PASSWORD
+#   DATABASE_URL
+#   MONGO_APP_TEST_DB
+#   S3_BUCKET_NAME (for backup)
+#   S3_REGION
+#   S3_ACCESS_KEY_ID
+#   S3_SECRET_ACCESS_KEY
+#   S3_ENDPOINT
+#   S3_UPLOAD_PREFIX
+#   MONGO_BACKUP_CRON
+#   MONGO_BACKUP_KEEP
+
+# Security notes:
+# - Always set strong passwords for root and app users in production.
+# - To enable TLS/SSL, mount certs and set MONGO_TLS_MODE, MONGO_TLS_CERTIFICATE_KEY_FILE, etc.
+# - Disable REST interface and unused features.
+# - Use --auth to enforce authentication.
+# - Restrict network exposure (bind_ip).
+
+
+# Copy database_init BSON/metadata files
+COPY database_init/ /database_init/
+# Copy all init scripts (including z_restore_db_if_needed.sh which runs last)
+COPY mongo-init/ /docker-entrypoint-initdb.d/
+# Enforce deterministic ordering: user creation before restore
+RUN mv /docker-entrypoint-initdb.d/create-app-user.js /docker-entrypoint-initdb.d/01-create-app-user.js \
+    && chmod +x /docker-entrypoint-initdb.d/z_restore_db_if_needed.sh
+
+# Set default command (MongoDB server)
+CMD ["mongod"]
+
+# Metadata labels
+LABEL maintainer="LynxPardelle <lynxpardelle@lynxpardelle.com>"
+LABEL version="1.0.0"
+LABEL description="MongoDB Docker Template for Dokploy Production"
+LABEL org.opencontainers.image.title="MongoDB Docker Template"
+LABEL org.opencontainers.image.licenses="MIT"

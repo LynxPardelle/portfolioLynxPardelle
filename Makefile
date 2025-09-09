@@ -13,8 +13,8 @@ endif
 
 # Set default values for environment variables
 APP_NAME ?= my-node-app
-DEV_PORT ?= 3000
-PROD_PORT ?= 8000
+DEV_PORT ?= 6164
+PROD_PORT ?= 6165
 UID ?= 1000
 GID ?= 1000
 
@@ -346,22 +346,28 @@ security-fix: ## Fix security vulnerabilities automatically
 # Backup & Restore Commands
 # =============================================================================
 
-backup: ## Backup project data and configuration
-	@echo "$(CYAN)💾 Creating backup...$(NC)"
-	@mkdir -p backups
-	@echo "$(YELLOW)Backing up configuration files...$(NC)"
-	@tar -czf backups/config-backup-$$(date +%Y%m%d-%H%M%S).tar.gz \
-		package.json docker-compose.yml Dockerfile .env ecosystem.config.js 2>/dev/null || true
-	@if [ -d "src" ]; then \
-		tar -czf backups/src-backup-$$(date +%Y%m%d-%H%M%S).tar.gz src/ 2>/dev/null || true; \
-	fi
-	@echo "$(GREEN)✅ Backup completed in backups/ directory$(NC)"
+backup: ## Run mongo-backup service for automated backups
+	@echo "$(CYAN)💾 Running mongo-backup service...$(NC)"
+	docker compose -p $(APP_NAME) --profile backup up --build mongo-backup
 
-restore: ## Restore from backup (interactive)
-	@echo "$(CYAN)📂 Available backups:$(NC)"
-	@ls -la backups/*.tar.gz 2>/dev/null || echo "No backups found"
-	@echo "$(YELLOW)To restore config: tar -xzf backups/config-backup-file.tar.gz$(NC)"
-	@echo "$(YELLOW)To restore source: tar -xzf backups/src-backup-file.tar.gz$(NC)"
+backup-detached: ## Run mongo-backup service in background
+	@echo "$(CYAN)💾 Running mongo-backup service (background)...$(NC)"
+	docker compose -p $(APP_NAME) --profile backup up --build -d mongo-backup
+	@echo "$(GREEN)✅ Mongo-backup service started$(NC)"
+
+backup-logs: ## Show mongo-backup container logs
+	@echo "$(CYAN)📋 Mongo-backup container logs:$(NC)"
+	docker compose -p $(APP_NAME) logs -f mongo-backup
+
+restore: ## Restore MongoDB from S3 backup
+	@echo "$(CYAN)📂 Restoring MongoDB from S3 backup...$(NC)"
+	docker compose -p $(APP_NAME) exec mongo-backup bash /scripts/restore_mongo_from_s3.sh
+	@echo "$(GREEN)✅ Restore script executed$(NC)"
+
+weekly-backup-cron: ## Run weekly backup cron script manually
+	@echo "$(CYAN)🕒 Running weekly backup cron script...$(NC)"
+	docker compose -p $(APP_NAME) exec mongo-backup bash /scripts/weekly_backup_cron.sh
+	@echo "$(GREEN)✅ Weekly backup cron script executed$(NC)"
 
 # =============================================================================
 # API Testing Commands
@@ -413,4 +419,4 @@ perf: ## Show container performance stats
         nginx nginx-detached prod-nginx prod-nginx-detached nginx-logs nginx-status nginx-reload \
         stop restart clean rebuild prune install install-dev update status logs health debug inspect \
         test test-watch test-coverage lint lint-fix security security-fix backup restore api-test \
-        check-tools env-info perf
+        check-tools env-info perf backup backup-detached backup-logs restore weekly-backup-cron

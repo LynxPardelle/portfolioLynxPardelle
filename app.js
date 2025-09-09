@@ -44,9 +44,12 @@ app.use("/", express.static("client", { redirect: false }));
 app.use("/api/main", main_routes);
 app.use("/api/article", article_routes);
 
-app.get("*", function (req, res, next) {
-  res.sendFile(path.resolve("client/index.html"));
+// Health endpoint (moved here so it's not shadowed by the catch-all route)
+app.get('/health', (req, res) => {
+  // Upstream index.js attaches dynamic status, but in case it's hit here we just return basic ok.
+  res.json({ status: 'ok', app: process.env.APP_NAME || 'lynx-portfolio-back', timestamp: new Date().toISOString() });
 });
+
 
 /* Ruta o método de prueba para el API */
 app.get("/datos-autor", (req, res) => {
