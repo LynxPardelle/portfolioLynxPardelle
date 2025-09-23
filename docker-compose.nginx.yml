@@ -1,0 +1,41 @@
+# =============================================================================
+# Docker Compose - Nginx Reverse Proxy (Standalone for Dokploy)
+# =============================================================================
+# Deploy this if you want a separate nginx container to proxy to the app
+# service. Ensure the 'app' stack is deployed and healthy first.
+# =============================================================================
+
+name: ${APP_NAME:-lynx-portfolio-back}-nginx
+
+services:
+  nginx:
+    build:
+      context: .
+      target: nginx
+    image: ${APP_NAME:-lynx-portfolio-back}-nginx:latest
+    container_name: ${APP_NAME:-lynx-portfolio-back}-nginx
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
+    environment:
+      NGINX_HOST: ${NGINX_HOST:-localhost}
+      NGINX_PORT: ${NGINX_PORT:-80}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/nginx-status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+networks:
+  default:
+    external: true
+    name: ${APP_NAME:-lynx-portfolio-back}-network
+
+volumes:
+  nginx_logs:
+    name: ${APP_NAME:-lynx-portfolio-back}-nginx-logs
+    driver: local
