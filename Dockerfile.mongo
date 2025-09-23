@@ -14,7 +14,7 @@ FROM mongo:8.0.13
 RUN mkdir -p /data/db /data/backups
 
 # Expose MongoDB port (default 27017)
-EXPOSE 27017
+EXPOSE ${MONGO_PORT:-27017}
 
 # Healthcheck for Dokploy readiness (honors MONGO_PORT if set)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
