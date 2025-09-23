@@ -1,0 +1,55 @@
+# =============================================================================
+# Docker Compose - MongoDB (Standalone for Dokploy)
+# =============================================================================
+# Deploy this stack first. It creates the MongoDB service and its persistent
+# volume. Other stacks (app, backup) will connect over the shared network.
+#
+# Shared external network:
+#   APP_NETWORK (default: lynx-portfolio-network)
+#
+# Important env vars to set in Dokploy:
+#   - MONGO_PORT
+#   - MONGO_ROOT_USERNAME, MONGO_ROOT_PASSWORD
+#   - MONGO_APP_DB, MONGO_APP_TEST_DB, MONGO_APP_USER, MONGO_APP_PASSWORD
+# =============================================================================
+
+name: ${APP_NAME:-lynx-portfolio-back}-mongo
+
+services:
+  mongo:
+    build:
+      context: .
+      dockerfile: Dockerfile.mongo
+    image: ${APP_NAME:-lynx-portfolio-back}-mongo-initialized:latest
+    container_name: ${APP_NAME:-lynx-portfolio-back}-mongo
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    environment:
+      MONGO_PORT: ${MONGO_PORT:-27017}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio}
+      MONGO_APP_TEST_DB: ${MONGO_APP_TEST_DB:-lynx_portfolio_test}
+      MONGO_APP_USER: ${MONGO_APP_USER:-portfolio}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-portfolio_pass}
+      MONGO_RESTORE_ON_INIT: ${MONGO_RESTORE_ON_INIT:-true}
+    command: ["--bind_ip_all", "--port", "27017", "--wiredTigerCacheSizeGB=1"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+networks:
+  default:
+    external: true
+    name: ${APP_NAME:-lynx-portfolio}-network
+
+volumes:
+  mongo_data:
+    name: ${APP_NAME:-lynx-portfolio}-mongo-data
+    driver: local

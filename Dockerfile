@@ -226,11 +226,11 @@ ENV NPM_CONFIG_LOGLEVEL=error
 ENV NODE_OPTIONS="--max-old-space-size=1024"
 
 # Expose production port (matches PROD_PORT/PORT from env)
-EXPOSE 6164
+EXPOSE 6165
 
 # Health check for production container
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:6164/health || exit 1
+    CMD curl -f http://localhost:6165/health || exit 1
 
 # Start production server with proper signal handling
 ENTRYPOINT ["dumb-init", "--"]

@@ -1,0 +1,58 @@
+# =============================================================================
+# Docker Compose - Production App (Standalone for Dokploy)
+# =============================================================================
+# Use this for Dokploy: deploy this stack along with docker-compose.mongo.yml.
+# No nginx is required; the service exposes the app on ${PROD_PORT} externally
+# while the app continues to listen on 6164 internally.
+# =============================================================================
+
+name: ${APP_NAME:-lynx-portfolio-back}-prod
+
+services:
+  app:
+    build:
+      context: .
+      target: production
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        NODE_ENV: production
+    image: ${APP_NAME:-lynx-portfolio-back}-app:latest
+    container_name: ${APP_NAME:-lynx-portfolio-back}-app
+    hostname: ${APP_NAME:-lynx-portfolio-back}-app
+    ports:
+      - "${PROD_PORT:-6165}:6165"
+    environment:
+      NODE_ENV: production
+      # Keep internal app port at 6165 for consistency with Dockerfile healthcheck
+      PORT: 6165
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret}
+      MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio}
+      MONGO_APP_USER: ${MONGO_APP_USER:-portfolio}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-portfolio_pass}
+      MONGO_AUTH_SOURCE: ${MONGO_AUTH_SOURCE:-admin}
+      DATABASE_URL: ${DATABASE_URL}
+    volumes:
+      - node_logs:/app/logs
+      - node_uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6165/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+networks:
+  default:
+    external: true
+    name: ${APP_NAME:-lynx-portfolio-back}-network
+
+volumes:
+  node_logs:
+    name: ${APP_NAME:-lynx-portfolio-back}-logs
+    driver: local
+  node_uploads:
+    name: ${APP_NAME:-lynx-portfolio-back}-uploads
+    driver: local
