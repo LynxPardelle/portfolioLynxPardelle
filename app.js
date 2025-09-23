@@ -4,7 +4,6 @@
 require('dotenv').config();
 
 //Cargar modulos de node para crear servidos
-var path = require("path");
 var express = require("express");
 var cors = require("cors");
 
@@ -40,7 +39,14 @@ app.use(
 );
 
 /* rutas body-parser */
-app.use("/", express.static("client", { redirect: false }));
+/* Ruta o método de prueba para el API */
+app.get("/", (req, res) => {
+  console.log("Hello world from Lynx Portfolio API.");
+  return res.status(200).send({
+    author: "Lynx Pardelle",
+    url: "https://www.lynxpardelle.com",
+  });
+});
 app.use("/api/main", main_routes);
 app.use("/api/article", article_routes);
 
@@ -48,16 +54,6 @@ app.use("/api/article", article_routes);
 app.get('/health', (req, res) => {
   // Upstream index.js attaches dynamic status, but in case it's hit here we just return basic ok.
   res.json({ status: 'ok', app: process.env.APP_NAME || 'lynx-portfolio-back', timestamp: new Date().toISOString() });
-});
-
-
-/* Ruta o método de prueba para el API */
-app.get("/datos-autor", (req, res) => {
-  console.log("Hola mundo");
-  return res.status(200).send({
-    autor: "Lynx Pardelle",
-    url: "https://www.lynxpardelle.com",
-  });
 });
 
 module.exports = app;

@@ -20,7 +20,20 @@ const models = [
 ];
 
 async function main() {
-  await mongoose.connect(process.env.DATABASE_URL, {
+  let uri = process.env.DATABASE_URL;
+  const wantAuthSource = process.env.MONGO_AUTH_SOURCE || 'admin';
+  try {
+    const hasCreds = /:\/\//.test(uri) && /@/.test(uri);
+    const hasDbName = /:\/\/.+\/.+/.test(uri);
+    const hasAuthSource = /[?&]authSource=/.test(uri);
+    if (hasCreds && hasDbName && !hasAuthSource) {
+      const sep = uri.includes('?') ? '&' : '?';
+      uri = `${uri}${sep}authSource=${encodeURIComponent(wantAuthSource)}`;
+      console.warn(`MongoDB URI missing authSource; appended authSource=${wantAuthSource}.`);
+    }
+  } catch (_) { /* no-op */ }
+
+  await mongoose.connect(uri, {
     autoIndex: true,
     serverSelectionTimeoutMS: 5000,
   });

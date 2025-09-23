@@ -21,8 +21,25 @@ app.get('/health', (_req, res) => {
 mongoose.Promise = global.Promise;
 
 const DEFAULT_URI = "mongodb://127.0.0.1:27017/lynx_portfolio";
-const MONGO_URI = process.env.DATABASE_URL || DEFAULT_URI;
+let MONGO_URI = process.env.DATABASE_URL || DEFAULT_URI;
+
+// Normalize Mongo URI: if credentials + db present but no authSource, default to admin (or MONGO_AUTH_SOURCE)
+try {
+  const wantAuthSource = process.env.MONGO_AUTH_SOURCE || 'admin';
+  const hasCreds = /:\/\//.test(MONGO_URI) && /@/.test(MONGO_URI);
+  const hasDbName = /:\/\/.+\/.+/.test(MONGO_URI); // there's a "/<db>" part
+  const hasAuthSource = /[?&]authSource=/.test(MONGO_URI);
+  if (hasCreds && hasDbName && !hasAuthSource) {
+    const sep = MONGO_URI.includes('?') ? '&' : '?';
+    MONGO_URI = `${MONGO_URI}${sep}authSource=${encodeURIComponent(wantAuthSource)}`;
+    console.warn(`MongoDB URI missing authSource; appended authSource=${wantAuthSource}.`);
+  }
+} catch (e) {
+  // non-fatal; continue with provided URI
+}
+
 console.log("MongoDB URI:", MONGO_URI.replace(/\/\/(.*):(.*)@/, '//***:***@'));
+console.log("MongoDB URI_Clean:", MONGO_URI);
 const MAX_RETRIES = parseInt(process.env.MONGO_MAX_RETRIES || '10', 10);
 const RETRY_DELAY_MS = parseInt(process.env.MONGO_RETRY_DELAY_MS || '3000', 10);
 
