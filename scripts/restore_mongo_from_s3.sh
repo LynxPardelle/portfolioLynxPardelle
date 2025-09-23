@@ -16,17 +16,23 @@ MONGO_PASS="${MONGO_PASS}" # optional
 S3_BUCKET="$S3_BUCKET"
 S3_PATH="${S3_PATH:-backups}" # optional
 
+# Optional custom S3 endpoint (for S3-compatible providers)
+AWS_ARGS=""
+if [ -n "$S3_ENDPOINT" ]; then
+  AWS_ARGS="--endpoint-url $S3_ENDPOINT"
+fi
+
 mkdir -p "$BACKUP_DIR"
 
 # Find the latest backup in S3
-LATEST_BACKUP=$(aws s3 ls "s3://$S3_BUCKET/$S3_PATH/" | sort | tail -n 1 | awk '{print $4}')
+LATEST_BACKUP=$(aws s3 $AWS_ARGS ls "s3://$S3_BUCKET/$S3_PATH/" | sort | tail -n 1 | awk '{print $4}')
 if [ -z "$LATEST_BACKUP" ]; then
   echo "No backups found in S3."
   exit 1
 fi
 
 # Download the latest backup
-aws s3 cp "s3://$S3_BUCKET/$S3_PATH/$LATEST_BACKUP" "$BACKUP_DIR/$LATEST_BACKUP"
+aws s3 $AWS_ARGS cp "s3://$S3_BUCKET/$S3_PATH/$LATEST_BACKUP" "$BACKUP_DIR/$LATEST_BACKUP"
 
 # Build mongorestore command
 RESTORE_CMD="mongorestore --host $MONGO_HOST --port $MONGO_PORT --db $MONGO_DB --archive=$BACKUP_DIR/$LATEST_BACKUP --gzip --drop"

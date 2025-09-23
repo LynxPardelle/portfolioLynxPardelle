@@ -19,6 +19,12 @@ MONGO_PASS="${MONGO_PASS}" # optional
 S3_BUCKET="$S3_BUCKET"
 S3_PATH="${S3_PATH:-backups}" # optional
 
+# Optional custom S3 endpoint (for S3-compatible providers)
+AWS_ARGS=""
+if [ -n "$S3_ENDPOINT" ]; then
+  AWS_ARGS="--endpoint-url $S3_ENDPOINT"
+fi
+
 mkdir -p "$BACKUP_DIR"
 
 # Build mongodump command
@@ -32,16 +38,16 @@ fi
 $DUMP_CMD
 
 
-# AWS credential guard
-if [ -n "$S3_BUCKET" ] && [ "$S3_ACCESS_KEY_ID" != "your-access-key" ] && [ "$S3_SECRET_ACCESS_KEY" != "your-secret-key" ]; then
-  aws s3 cp "$BACKUP_DIR/$BACKUP_NAME" "s3://$S3_BUCKET/$S3_PATH/$BACKUP_NAME"
+# AWS credential guard (prefer AWS_* env vars used by AWS CLI)
+if [ -n "$S3_BUCKET" ] && [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+  aws s3 $AWS_ARGS cp "$BACKUP_DIR/$BACKUP_NAME" "s3://$S3_BUCKET/$S3_PATH/$BACKUP_NAME"
   echo "Backup uploaded to S3: s3://$S3_BUCKET/$S3_PATH/$BACKUP_NAME"
 
   # Retention logic: keep only last N backups in S3
   if [ -n "$MONGO_BACKUP_KEEP" ]; then
-    BACKUPS_TO_DELETE=$(aws s3 ls "s3://$S3_BUCKET/$S3_PATH/" | sort | head -n -$MONGO_BACKUP_KEEP | awk '{print $4}')
+    BACKUPS_TO_DELETE=$(aws s3 $AWS_ARGS ls "s3://$S3_BUCKET/$S3_PATH/" | sort | head -n -$MONGO_BACKUP_KEEP | awk '{print $4}')
     for OLD_BACKUP in $BACKUPS_TO_DELETE; do
-      aws s3 rm "s3://$S3_BUCKET/$S3_PATH/$OLD_BACKUP"
+      aws s3 $AWS_ARGS rm "s3://$S3_BUCKET/$S3_PATH/$OLD_BACKUP"
       echo "Deleted old backup from S3: $OLD_BACKUP"
     done
   fi
