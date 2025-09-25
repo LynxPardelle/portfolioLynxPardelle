@@ -5,7 +5,7 @@ This document describes the key environment variables for the Lynx Pardelle Port
 ## Database
 
 - `MONGO_PORT`: MongoDB port (default: 27017)
-- `DATABASE_URL`: MongoDB connection string
+- `MONGO_URI`: MongoDB connection string
 - `MONGO_AUTH_SOURCE`: Authentication database to validate credentials against (default: `admin`).
 
 Notes on MongoDB connection string:

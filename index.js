@@ -21,7 +21,7 @@ app.get('/health', (_req, res) => {
 mongoose.Promise = global.Promise;
 
 const DEFAULT_URI = "mongodb://127.0.0.1:27017/lynx_portfolio";
-let MONGO_URI = process.env.DATABASE_URL || DEFAULT_URI;
+let MONGO_URI = process.env.MONGO_URI || DEFAULT_URI;
 
 // Normalize Mongo URI: if credentials + db present but no authSource, default to admin (or MONGO_AUTH_SOURCE)
 try {
@@ -68,7 +68,7 @@ async function connectWithRetry(attempt = 1) {
 }
 
 // Start server immediately; health endpoint reflects readiness
-const PORT = process.env.PORT || 6164;
+const PORT = process.env.NODE_ENV === 'production' ? process.env.PROD_PORT || 6165 : process.env.DEV_PORT || 6164;
 const server = app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}.`);
 });

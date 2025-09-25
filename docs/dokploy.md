@@ -31,7 +31,6 @@ This project provides per-service docker-compose files suited for Dokploy. Each 
 
 ## Key environment variables (set in Dokploy)
 
-- APP_NAME=lynx-portfolio-back
 - APP_NETWORK=lynx-portfolio-network
 - DEV_PORT=6164
 - PROD_PORT=6165
@@ -43,14 +42,14 @@ This project provides per-service docker-compose files suited for Dokploy. Each 
 - MONGO_APP_USER=portfolio
 - MONGO_APP_PASSWORD=portfolio_pass
 - MONGO_AUTH_SOURCE=admin
-- DATABASE_URL=mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_APP_DB}?authSource=${MONGO_AUTH_SOURCE}
+- MONGO_URI=mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_APP_DB}?authSource=${MONGO_AUTH_SOURCE}
 - JWT_SECRET=your-super-secret
 - CORS_ORIGIN=<http://lynxpardelle.com>,<https://www.lynxpardelle.com>
 - S3_BUCKET_NAME, S3_REGION, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, S3_ENDPOINT (for backups)
 
 ## Volumes
 
-- Mongo data volume is named via ${APP_NAME:-lynx-portfolio}-mongo-data (default lynx-portfolio-mongo-data) so it can be reused by the backup stack. Create it automatically on first run or manually: docker volume create lynx-portfolio-mongo-data.
+- Mongo data volume is named via lynx-portfolio-back-mongo-data (default lynx-portfolio-mongo-data) so it can be reused by the backup stack. Create it automatically on first run or manually: docker volume create lynx-portfolio-mongo-data.
 - App logs/uploads volumes are defined per stack and retained across updates.
 
 ## Health checks
@@ -69,4 +68,4 @@ This project provides per-service docker-compose files suited for Dokploy. Each 
 ## Troubleshooting
 
 - If nginx returns 502, check that the app’s /health endpoint returns 200 and that the containers are on the same network (docker inspect).
-- If the app cannot reach Mongo, verify DATABASE_URL host is mongo with the correct port and credentials, and that the mongo stack is up.
+- If the app cannot reach Mongo, verify MONGO_URI host is mongo with the correct port and credentials, and that the mongo stack is up.

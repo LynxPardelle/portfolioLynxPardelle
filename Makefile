@@ -12,7 +12,6 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Set default values for environment variables
-APP_NAME ?= my-node-app
 DEV_PORT ?= 6164
 PROD_PORT ?= 6165
 UID ?= 1000
@@ -95,7 +94,6 @@ help: ## Show this help message with all available commands
 	@echo "  restore           - Restore from backup"
 	@echo ""
 	@echo "$(YELLOW)💡 Environment Variables (from .env):$(NC)"
-	@echo "  APP_NAME: $(APP_NAME)"
 	@echo "  DEV_PORT: $(DEV_PORT)"
 	@echo "  PROD_PORT: $(PROD_PORT)"
 	
@@ -106,8 +104,8 @@ help: ## Show this help message with all available commands
 create: ## Create new Node.js project structure
 	@echo "$(CYAN)🎯 Creating Node.js project structure...$(NC)"
 	@if [ ! -d "./src" ]; then \
-		echo "$(YELLOW)Initializing new project: $(APP_NAME)$(NC)"; \
-		UID=$$(id -u) GID=$$(id -g) COMPOSE_DOCKER_CLI_BUILD=1 docker compose -p $(APP_NAME) --profile create up --build; \
+		echo "$(YELLOW)Initializing new project: lynx-portfolio-back$(NC)"; \
+		UID=$$(id -u) GID=$$(id -g) COMPOSE_DOCKER_CLI_BUILD=1 docker compose -p lynx-portfolio-back --profile create up --build; \
 		echo "$(GREEN)✅ Project created successfully$(NC)"; \
 	else \
 		echo "$(YELLOW)⚠️ Project already exists. Delete src/ folder to recreate$(NC)"; \
@@ -119,21 +117,21 @@ create: ## Create new Node.js project structure
 
 dev: ## Start development server with hot-reload
 	@echo "$(CYAN)🚀 Starting development server...$(NC)"
-	@echo "$(YELLOW)Port: $(DEV_PORT) | Container: $(APP_NAME)-dev$(NC)"
-	docker compose -p $(APP_NAME) --profile dev up --build
+	@echo "$(YELLOW)Port: $(DEV_PORT) | Container: lynx-portfolio-back-dev$(NC)"
+	docker compose -p lynx-portfolio-back --profile dev up --build
 
 dev-detached: ## Start development server in background
 	@echo "$(CYAN)🚀 Starting development server (background)...$(NC)"
-	docker compose -p $(APP_NAME) --profile dev up --build -d
+	docker compose -p lynx-portfolio-back --profile dev up --build -d
 	@echo "$(GREEN)✅ Development server started on port $(DEV_PORT)$(NC)"
 
 dev-logs: ## Show development container logs
 	@echo "$(CYAN)📋 Development container logs:$(NC)"
-	docker compose -p $(APP_NAME) logs -f dev
+	docker compose -p lynx-portfolio-back logs -f dev
 
 dev-shell: ## Access development container shell
 	@echo "$(CYAN)🔧 Accessing development container shell...$(NC)"
-	docker compose -p $(APP_NAME) exec dev sh
+	docker compose -p lynx-portfolio-back exec dev sh
 
 # =============================================================================
 # Production Commands
@@ -141,31 +139,31 @@ dev-shell: ## Access development container shell
 
 prod: ## Start production server
 	@echo "$(CYAN)🏗️ Starting production server...$(NC)"
-	@echo "$(YELLOW)Port: $(PROD_PORT) | Container: $(APP_NAME)-prod$(NC)"
-	docker compose -p $(APP_NAME) --profile prod up --build
+	@echo "$(YELLOW)Port: $(PROD_PORT) | Container: lynx-portfolio-back-prod$(NC)"
+	docker compose -p lynx-portfolio-back --profile prod up --build
 
 prod-detached: ## Start production server in background
 	@echo "$(CYAN)🏗️ Starting production server (background)...$(NC)"
-	docker compose -p $(APP_NAME) --profile prod up --build -d
+	docker compose -p lynx-portfolio-back --profile prod up --build -d
 	@echo "$(GREEN)✅ Production server started on port $(PROD_PORT)$(NC)"
 
 prod-pm2: ## Start production server with PM2
 	@echo "$(CYAN)🏗️ Starting production server with PM2...$(NC)"
-	@echo "$(YELLOW)Port: $(PROD_PORT) | Container: $(APP_NAME)-prod-pm2$(NC)"
-	docker compose -p $(APP_NAME) --profile prod-pm2 up --build
+	@echo "$(YELLOW)Port: $(PROD_PORT) | Container: lynx-portfolio-back-prod-pm2$(NC)"
+	docker compose -p lynx-portfolio-back --profile prod-pm2 up --build
 
 prod-pm2-detached: ## Start production server with PM2 in background
 	@echo "$(CYAN)🏗️ Starting production server with PM2 (background)...$(NC)"
-	docker compose -p $(APP_NAME) --profile prod-pm2 up --build -d
+	docker compose -p lynx-portfolio-back --profile prod-pm2 up --build -d
 	@echo "$(GREEN)✅ Production server with PM2 started on port $(PROD_PORT)$(NC)"
 
 prod-logs: ## Show production container logs
 	@echo "$(CYAN)📋 Production container logs:$(NC)"
-	docker compose -p $(APP_NAME) logs -f prod
+	docker compose -p lynx-portfolio-back logs -f prod
 
 prod-shell: ## Access production container shell
 	@echo "$(CYAN)🔧 Accessing production container shell...$(NC)"
-	docker compose -p $(APP_NAME) exec prod sh
+	docker compose -p lynx-portfolio-back exec prod sh
 
 # =============================================================================
 # Nginx Commands
@@ -173,43 +171,43 @@ prod-shell: ## Access production container shell
 
 nginx: ## Start nginx reverse proxy with backend
 	@echo "$(CYAN)🌐 Starting nginx reverse proxy with backend...$(NC)"
-	@echo "$(YELLOW)Port: ${NGINX_PORT:-80} | Containers: $(APP_NAME)-nginx, $(APP_NAME)-app$(NC)"
-	docker compose -p $(APP_NAME) --profile nginx up --build
+	@echo "$(YELLOW)Port: ${NGINX_PORT:-80} | Containers: lynx-portfolio-back-nginx, lynx-portfolio-back-app$(NC)"
+	docker compose -p lynx-portfolio-back --profile nginx up --build
 
 nginx-detached: ## Start nginx reverse proxy in background
 	@echo "$(CYAN)🌐 Starting nginx reverse proxy (background)...$(NC)"
-	docker compose -p $(APP_NAME) --profile nginx up --build -d
+	docker compose -p lynx-portfolio-back --profile nginx up --build -d
 	@echo "$(GREEN)✅ Nginx reverse proxy started on port ${NGINX_PORT:-80}$(NC)"
 
 prod-nginx: ## Start production with nginx reverse proxy
 	@echo "$(CYAN)🏗️ Starting production with nginx reverse proxy...$(NC)"
-	@echo "$(YELLOW)Port: ${NGINX_PORT:-80} | Container: $(APP_NAME)-prod-nginx$(NC)"
-	docker compose -p $(APP_NAME) --profile prod-nginx up --build
+	@echo "$(YELLOW)Port: ${NGINX_PORT:-80} | Container: lynx-portfolio-back-prod-nginx$(NC)"
+	docker compose -p lynx-portfolio-back --profile prod-nginx up --build
 
 prod-nginx-detached: ## Start production with nginx in background
 	@echo "$(CYAN)🏗️ Starting production with nginx (background)...$(NC)"
-	docker compose -p $(APP_NAME) --profile prod-nginx up --build -d
+	docker compose -p lynx-portfolio-back --profile prod-nginx up --build -d
 	@echo "$(GREEN)✅ Production with nginx started on port ${NGINX_PORT:-80}$(NC)"
 
 nginx-logs: ## Show nginx container logs
 	@echo "$(CYAN)📋 Nginx container logs:$(NC)"
-	docker compose -p $(APP_NAME) logs -f nginx
+	docker compose -p lynx-portfolio-back logs -f nginx
 
 nginx-status: ## Check nginx status and configuration
 	@echo "$(CYAN)📊 Nginx status and configuration:$(NC)"
-	@if docker compose -p $(APP_NAME) ps nginx | grep -q "Up"; then \
+	@if docker compose -p lynx-portfolio-back ps nginx | grep -q "Up"; then \
 		echo "$(GREEN)✅ Nginx container is running$(NC)"; \
-		docker compose -p $(APP_NAME) exec nginx nginx -t; \
+		docker compose -p lynx-portfolio-back exec nginx nginx -t; \
 		echo "$(CYAN)Nginx processes:$(NC)"; \
-		docker compose -p $(APP_NAME) exec nginx ps aux | grep nginx; \
+		docker compose -p lynx-portfolio-back exec nginx ps aux | grep nginx; \
 	else \
 		echo "$(RED)❌ Nginx container is not running$(NC)"; \
 	fi
 
 nginx-reload: ## Reload nginx configuration
 	@echo "$(CYAN)🔄 Reloading nginx configuration...$(NC)"
-	@if docker compose -p $(APP_NAME) ps nginx | grep -q "Up"; then \
-		docker compose -p $(APP_NAME) exec nginx nginx -s reload; \
+	@if docker compose -p lynx-portfolio-back ps nginx | grep -q "Up"; then \
+		docker compose -p lynx-portfolio-back exec nginx nginx -s reload; \
 		echo "$(GREEN)✅ Nginx configuration reloaded$(NC)"; \
 	else \
 		echo "$(RED)❌ Nginx container is not running$(NC)"; \
@@ -221,7 +219,7 @@ nginx-reload: ## Reload nginx configuration
 
 stop: ## Stop all containers
 	@echo "$(CYAN)🛑 Stopping all containers...$(NC)"
-	docker compose -p $(APP_NAME) down
+	docker compose -p lynx-portfolio-back down
 
 restart: ## Restart containers
 	@echo "$(CYAN)🔄 Restarting containers...$(NC)"
@@ -230,7 +228,7 @@ restart: ## Restart containers
 
 clean: ## Clean containers, volumes, and build cache
 	@echo "$(CYAN)🧹 Cleaning containers, volumes, and cache...$(NC)"
-	docker compose -p $(APP_NAME) down --volumes --remove-orphans
+	docker compose -p lynx-portfolio-back down --volumes --remove-orphans
 	@if [ -d "node_modules" ]; then rm -rf node_modules; fi
 	@if [ -f "package-lock.json" ]; then rm -f package-lock.json; fi
 	@if [ -d "logs" ]; then rm -rf logs; fi
@@ -240,7 +238,7 @@ clean: ## Clean containers, volumes, and build cache
 rebuild: ## Rebuild containers from scratch
 	@echo "$(CYAN)🔧 Rebuilding containers from scratch...$(NC)"
 	$(MAKE) clean
-	docker compose -p $(APP_NAME) build --no-cache
+	docker compose -p lynx-portfolio-back build --no-cache
 	@echo "$(GREEN)✅ Rebuild completed$(NC)"
 
 prune: ## Remove unused Docker resources
@@ -259,7 +257,7 @@ ifndef pkg
 	@exit 1
 endif
 	@echo "$(CYAN)📦 Installing package: $(pkg)$(NC)"
-	docker compose -p $(APP_NAME) exec dev npm install $(pkg)
+	docker compose -p lynx-portfolio-back exec dev npm install $(pkg)
 	@echo "$(GREEN)✅ Package $(pkg) installed$(NC)"
 
 install-dev: ## Install dev package (use: make install-dev pkg=package-name)
@@ -268,12 +266,12 @@ ifndef pkg
 	@exit 1
 endif
 	@echo "$(CYAN)📦 Installing dev package: $(pkg)$(NC)"
-	docker compose -p $(APP_NAME) exec dev npm install --save-dev $(pkg)
+	docker compose -p lynx-portfolio-back exec dev npm install --save-dev $(pkg)
 	@echo "$(GREEN)✅ Dev package $(pkg) installed$(NC)"
 
 update: ## Update all packages to latest versions
 	@echo "$(CYAN)🔄 Updating all packages...$(NC)"
-	docker compose -p $(APP_NAME) exec dev npm update
+	docker compose -p lynx-portfolio-back exec dev npm update
 	@echo "$(GREEN)✅ Packages updated$(NC)"
 
 # =============================================================================
@@ -282,29 +280,29 @@ update: ## Update all packages to latest versions
 
 status: ## Show container status and health
 	@echo "$(CYAN)📊 Container Status:$(NC)"
-	docker compose -p $(APP_NAME) ps
+	docker compose -p lynx-portfolio-back ps
 	@echo ""
 	@echo "$(CYAN)🏥 Health Status:$(NC)"
-	@docker ps --filter "name=$(APP_NAME)" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+	@docker ps --filter "name=lynx-portfolio-back" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
 logs: ## Show container logs (all services)
 	@echo "$(CYAN)📋 Container logs:$(NC)"
-	docker compose -p $(APP_NAME) logs -f
+	docker compose -p lynx-portfolio-back logs -f
 
 health: ## Check container health status
 	@echo "$(CYAN)🏥 Checking container health...$(NC)"
-	@for container in $$(docker ps --filter "name=$(APP_NAME)" --format "{{.Names}}"); do \
+	@for container in $$(docker ps --filter "name=lynx-portfolio-back" --format "{{.Names}}"); do \
 		echo "$(BLUE)Checking $$container...$(NC)"; \
 		docker inspect $$container --format='{{.State.Health.Status}}' 2>/dev/null || echo "No health check configured"; \
 	done
 
 debug: ## Debug application in development mode
 	@echo "$(CYAN)🐛 Debug mode - starting development container with debugging...$(NC)"
-	docker compose -p $(APP_NAME) exec dev npm run dev
+	docker compose -p lynx-portfolio-back exec dev npm run dev
 
 inspect: ## Inspect container configuration
 	@echo "$(CYAN)🔍 Container inspection:$(NC)"
-	@for container in $$(docker ps --filter "name=$(APP_NAME)" --format "{{.Names}}"); do \
+	@for container in $$(docker ps --filter "name=lynx-portfolio-back" --format "{{.Names}}"); do \
 		echo "$(BLUE)Inspecting $$container...$(NC)"; \
 		docker inspect $$container | jq '.[] | {Name: .Name, Image: .Config.Image, Ports: .NetworkSettings.Ports}' 2>/dev/null || echo "jq not available - showing basic info"; \
 	done
@@ -315,32 +313,32 @@ inspect: ## Inspect container configuration
 
 test: ## Run unit tests in container
 	@echo "$(CYAN)🧪 Running unit tests...$(NC)"
-	docker compose -p $(APP_NAME) --profile test run --rm test npm test
+	docker compose -p lynx-portfolio-back --profile test run --rm test npm test
 
 test-watch: ## Run tests in watch mode
 	@echo "$(CYAN)🧪 Running tests in watch mode...$(NC)"
-	docker compose -p $(APP_NAME) exec dev npm run test:watch
+	docker compose -p lynx-portfolio-back exec dev npm run test:watch
 
 test-coverage: ## Run tests with coverage report
 	@echo "$(CYAN)🧪 Running tests with coverage...$(NC)"
-	docker compose -p $(APP_NAME) --profile test run --rm test npm run test:coverage
+	docker compose -p lynx-portfolio-back --profile test run --rm test npm run test:coverage
 
 lint: ## Run linting checks
 	@echo "$(CYAN)🔍 Running linting checks...$(NC)"
-	docker compose -p $(APP_NAME) exec dev npm run lint
+	docker compose -p lynx-portfolio-back exec dev npm run lint
 
 lint-fix: ## Run linting with auto-fix
 	@echo "$(CYAN)🔧 Running linting with auto-fix...$(NC)"
-	docker compose -p $(APP_NAME) exec dev npm run lint:fix
+	docker compose -p lynx-portfolio-back exec dev npm run lint:fix
 
 security: ## Run security audit
 	@echo "$(CYAN)🔒 Running security audit...$(NC)"
-	docker compose -p $(APP_NAME) exec dev npm audit
+	docker compose -p lynx-portfolio-back exec dev npm audit
 	@echo "$(YELLOW)For automatic fixes, run: make security-fix$(NC)"
 
 security-fix: ## Fix security vulnerabilities automatically
 	@echo "$(CYAN)🔧 Fixing security vulnerabilities...$(NC)"
-	docker compose -p $(APP_NAME) exec dev npm audit fix
+	docker compose -p lynx-portfolio-back exec dev npm audit fix
 
 # =============================================================================
 # Backup & Restore Commands
@@ -348,25 +346,25 @@ security-fix: ## Fix security vulnerabilities automatically
 
 backup: ## Run mongo-backup service for automated backups
 	@echo "$(CYAN)💾 Running mongo-backup service...$(NC)"
-	docker compose -p $(APP_NAME) --profile backup up --build mongo-backup
+	docker compose -p lynx-portfolio-back --profile backup up --build mongo-backup
 
 backup-detached: ## Run mongo-backup service in background
 	@echo "$(CYAN)💾 Running mongo-backup service (background)...$(NC)"
-	docker compose -p $(APP_NAME) --profile backup up --build -d mongo-backup
+	docker compose -p lynx-portfolio-back --profile backup up --build -d mongo-backup
 	@echo "$(GREEN)✅ Mongo-backup service started$(NC)"
 
 backup-logs: ## Show mongo-backup container logs
 	@echo "$(CYAN)📋 Mongo-backup container logs:$(NC)"
-	docker compose -p $(APP_NAME) logs -f mongo-backup
+	docker compose -p lynx-portfolio-back logs -f mongo-backup
 
 restore: ## Restore MongoDB from S3 backup
 	@echo "$(CYAN)📂 Restoring MongoDB from S3 backup...$(NC)"
-	docker compose -p $(APP_NAME) exec mongo-backup bash /scripts/restore_mongo_from_s3.sh
+	docker compose -p lynx-portfolio-back exec mongo-backup bash /scripts/restore_mongo_from_s3.sh
 	@echo "$(GREEN)✅ Restore script executed$(NC)"
 
 weekly-backup-cron: ## Run weekly backup cron script manually
 	@echo "$(CYAN)🕒 Running weekly backup cron script...$(NC)"
-	docker compose -p $(APP_NAME) exec mongo-backup bash /scripts/weekly_backup_cron.sh
+	docker compose -p lynx-portfolio-back exec mongo-backup bash /scripts/weekly_backup_cron.sh
 	@echo "$(GREEN)✅ Weekly backup cron script executed$(NC)"
 
 # =============================================================================
@@ -375,7 +373,7 @@ weekly-backup-cron: ## Run weekly backup cron script manually
 
 api-test: ## Test API endpoints
 	@echo "$(CYAN)🌐 Testing API endpoints...$(NC)"
-	@if docker ps --filter "name=$(APP_NAME)-dev" --format "{{.Names}}" | grep -q "$(APP_NAME)-dev"; then \
+	@if docker ps --filter "name=lynx-portfolio-back-dev" --format "{{.Names}}" | grep -q "lynx-portfolio-back-dev"; then \
 		echo "$(GREEN)Testing health endpoint...$(NC)"; \
 		curl -s http://localhost:$(DEV_PORT)/health | jq . || echo "jq not available - raw response:"; \
 		curl -s http://localhost:$(DEV_PORT)/health; \
@@ -402,7 +400,7 @@ check-tools: ## Check if required tools are installed
 # Environment information
 env-info: ## Display environment information
 	@echo "$(CYAN)🌍 Environment Information:$(NC)"
-	@echo "Project Name: $(APP_NAME)"
+	@echo "Project Name: lynx-portfolio-back"
 	@echo "Dev Port: $(DEV_PORT)"
 	@echo "Prod Port: $(PROD_PORT)"
 	@echo "UID: $(UID)"
@@ -412,7 +410,7 @@ env-info: ## Display environment information
 # Performance monitoring
 perf: ## Show container performance stats
 	@echo "$(CYAN)📈 Container Performance Stats:$(NC)"
-	@docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}" | grep $(APP_NAME) || echo "No containers running"
+	@docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}" | grep lynx-portfolio-back || echo "No containers running"
 
 # Mark all targets as PHONY to avoid conflicts with file names
 .PHONY: help create dev dev-detached dev-logs dev-shell prod prod-detached prod-pm2 prod-pm2-detached prod-logs prod-shell \

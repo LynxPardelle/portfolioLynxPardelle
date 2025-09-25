@@ -5,7 +5,7 @@
 - **MongoDB**: Used for persistent storage. Connection logic and health reporting in `index.js`. Models are in `models/`.
 - **Backup/Restore**: Automated MongoDB backup to S3 via `mongo-backup` service (see `docker-compose.yml`, `scripts/`). Retention and verification logic included.
 - **Nginx**: Reverse proxy for production, config in `nginx.conf`.
-- **Environment Variables**: Managed via `.env` and passed to containers/services. Key variables: `DATABASE_URL`, `MONGO_APP_DB`, `S3_BUCKET_NAME`, etc.
+- **Environment Variables**: Managed via `.env` and passed to containers/services. Key variables: `MONGO_URI`, `MONGO_APP_DB`, `S3_BUCKET_NAME`, etc.
 
 ## Developer Workflows
 - **Build/Run**: Use `Makefile` targets or Docker Compose profiles:

@@ -20,7 +20,7 @@ const models = [
 ];
 
 async function main() {
-  let uri = process.env.DATABASE_URL;
+  let uri = process.env.MONGO_URI;
   const wantAuthSource = process.env.MONGO_AUTH_SOURCE || 'admin';
   try {
     const hasCreds = /:\/\//.test(uri) && /@/.test(uri);
