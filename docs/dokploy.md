@@ -35,7 +35,7 @@ This project provides per-service docker-compose files suited for Dokploy. Each 
 - DEV_PORT=6164
 - PROD_PORT=6165
 - NGINX_PORT=80
-- MONGO_PORT=27017
+- MONGO_PORT=27519
 - MONGO_ROOT_USERNAME, MONGO_ROOT_PASSWORD
 - MONGO_APP_DB=lynx_portfolio
 - MONGO_APP_TEST_DB=lynx_portfolio_test

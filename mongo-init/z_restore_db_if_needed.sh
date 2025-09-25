@@ -11,7 +11,7 @@ set -e
 
 DB_NAME="${MONGO_APP_DB:-lynx_portfolio}"
 HOST="localhost"
-PORT=27017
+PORT=27519
 
 echo "[restore] Checking existing collections for database '$DB_NAME' (unauthenticated phase)."
 EXISTING=$(mongosh --quiet --host "$HOST" --port $PORT "$DB_NAME" --eval "db.getCollectionNames().filter(c => c !== 'init_marker')") || EXISTING=""

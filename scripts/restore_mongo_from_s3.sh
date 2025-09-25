@@ -9,7 +9,7 @@ fi
 
 BACKUP_DIR="../mongo_backups"
 MONGO_HOST="${MONGO_HOST:-mongo}"
-MONGO_PORT="${MONGO_PORT:-27017}"
+MONGO_PORT="${MONGO_PORT:-27519}"
 MONGO_DB="${MONGO_DB:-test}"
 MONGO_USER="${MONGO_USER}" # optional
 MONGO_PASS="${MONGO_PASS}" # optional
