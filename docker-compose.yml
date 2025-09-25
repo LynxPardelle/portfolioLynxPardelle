@@ -102,6 +102,7 @@ services:
       target: development
       args:
         <<: *common-variables
+        NODE_ENV: development
     container_name: lynx-portfolio-back-dev
     depends_on:
       - mongo
@@ -109,7 +110,6 @@ services:
       - "${DEV_PORT}:${DEV_PORT}"
     environment:
       <<: *common-env
-      PORT: ${DEV_PORT}
       MONGO_URI: ${MONGO_URI}
       CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-false}
     volumes:
@@ -145,7 +145,6 @@ services:
     environment:
       <<: *common-env
       NODE_ENV: production
-      PORT: ${PROD_PORT}
       MONGO_URI: ${MONGO_URI}
     volumes:
       - node_logs:/app/logs
@@ -176,7 +175,6 @@ services:
     environment:
       <<: *common-env
       NODE_ENV: production
-      PORT: ${PROD_PORT}
       MONGO_URI: ${MONGO_URI}
     volumes:
       - node_logs:/app/logs
@@ -205,7 +203,6 @@ services:
       <<: *common-env
       NODE_ENV: test
       CI: "true"
-      PORT: ${DEV_PORT}
       MONGO_URI: ${MONGO_URI}
     volumes:
       - .:/app:cached
@@ -228,7 +225,6 @@ services:
     environment:
       <<: *common-env
       NODE_ENV: production
-      PORT: ${DEV_PORT}
       MONGO_URI: ${MONGO_URI}
     volumes:
       - node_logs:/app/logs
@@ -283,7 +279,6 @@ services:
     environment:
       <<: *common-env
       NODE_ENV: production
-      PORT: ${PROD_PORT}
       MONGO_URI: ${MONGO_URI}
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
@@ -325,5 +320,5 @@ volumes:
 # Network configuration (optional - Docker creates default network)
 networks:
   default:
+    external: true
     name: lynx-portfolio-back-network
-    driver: bridge
