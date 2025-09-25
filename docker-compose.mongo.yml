@@ -47,9 +47,9 @@ services:
 networks:
   default:
     external: true
-    name: ${APP_NAME:-lynx-portfolio}-network
+    name: ${APP_NAME:-lynx-portfolio-back}-network
 
 volumes:
   mongo_data:
-    name: ${APP_NAME:-lynx-portfolio}-mongo-data
+    name: ${APP_NAME:-lynx-portfolio-back}-mongo-data
     driver: local
