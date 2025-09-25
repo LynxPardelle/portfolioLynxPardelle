@@ -20,7 +20,7 @@ app.get('/health', (_req, res) => {
 
 mongoose.Promise = global.Promise;
 
-const DEFAULT_URI = "mongodb://127.0.0.1:27017/lynx_portfolio";
+const DEFAULT_URI = "mongodb://127.0.0.1:27519/lynx_portfolio";
 let MONGO_URI = process.env.MONGO_URI || DEFAULT_URI;
 
 // Normalize Mongo URI: if credentials + db present but no authSource, default to admin (or MONGO_AUTH_SOURCE)

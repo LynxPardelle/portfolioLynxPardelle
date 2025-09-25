@@ -4,14 +4,14 @@ This document describes the key environment variables for the Lynx Pardelle Port
 
 ## Database
 
-- `MONGO_PORT`: MongoDB port (default: 27017)
+- `MONGO_PORT`: MongoDB port (default: 27519)
 - `MONGO_URI`: MongoDB connection string
 - `MONGO_AUTH_SOURCE`: Authentication database to validate credentials against (default: `admin`).
 
 Notes on MongoDB connection string:
 
 - If you connect using an application user created in the `admin` database and you include a database name in the URI (e.g., `.../lynx_portfolio`), MongoDB requires an `authSource` query parameter so it knows where to verify credentials. Example:
-  - `mongodb://user:pass@mongo:27017/lynx_portfolio?authSource=admin`
+  - `mongodb://user:pass@mongo:27519/lynx_portfolio?authSource=admin`
 - This project automatically appends `?authSource=admin` at runtime if it detects credentials and a DB name but no `authSource` is present. You can override the default by setting `MONGO_AUTH_SOURCE`.
 
 ## S3 Backup
