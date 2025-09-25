@@ -53,7 +53,7 @@ app.use("/api/article", article_routes);
 // Health endpoint (moved here so it's not shadowed by the catch-all route)
 app.get('/health', (req, res) => {
   // Upstream index.js attaches dynamic status, but in case it's hit here we just return basic ok.
-  res.json({ status: 'ok', app: process.env.APP_NAME || 'lynx-portfolio-back', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', app: 'lynx-portfolio-back', timestamp: new Date().toISOString() });
 });
 
 module.exports = app;

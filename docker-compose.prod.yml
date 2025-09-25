@@ -6,10 +6,10 @@
 # while the app continues to listen on 6164 internally.
 # =============================================================================
 
-name: ${APP_NAME:-lynx-portfolio-back}-prod
+name: lynx-portfolio-back-prod
 
 services:
-  app:
+  lynx-portfolio-back-prod:
     build:
       context: .
       target: production
@@ -17,9 +17,9 @@ services:
         UID: ${UID:-1000}
         GID: ${GID:-1000}
         NODE_ENV: production
-    image: ${APP_NAME:-lynx-portfolio-back}-app:latest
-    container_name: ${APP_NAME:-lynx-portfolio-back}-app
-    hostname: ${APP_NAME:-lynx-portfolio-back}-app
+    image: lynx-portfolio-back-app:latest
+    container_name: lynx-portfolio-back-app
+    hostname: lynx-portfolio-back-app
     ports:
       - "${PROD_PORT:-6165}:6165"
     environment:
@@ -32,7 +32,7 @@ services:
       MONGO_APP_USER: ${MONGO_APP_USER:-portfolio}
       MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-portfolio_pass}
       MONGO_AUTH_SOURCE: ${MONGO_AUTH_SOURCE:-admin}
-      DATABASE_URL: ${DATABASE_URL}
+      MONGO_URI: ${MONGO_URI}
     volumes:
       - node_logs:/app/logs
       - node_uploads:/app/uploads
@@ -47,12 +47,12 @@ services:
 networks:
   default:
     external: true
-    name: ${APP_NAME:-lynx-portfolio-back}-network
+    name: lynx-portfolio-back-network
 
 volumes:
   node_logs:
-    name: ${APP_NAME:-lynx-portfolio-back}-logs
+    name: lynx-portfolio-back-logs
     driver: local
   node_uploads:
-    name: ${APP_NAME:-lynx-portfolio-back}-uploads
+    name: lynx-portfolio-back-uploads
     driver: local

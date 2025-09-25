@@ -28,7 +28,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 #   MONGO_APP_DB
 #   MONGO_APP_USER
 #   MONGO_APP_PASSWORD
-#   DATABASE_URL
+#   MONGO_URI
 #   MONGO_APP_TEST_DB
 #   S3_BUCKET_NAME (for backup)
 #   S3_REGION

@@ -2,13 +2,13 @@
 # Docker Compose - Node.js App (Standalone for Dokploy)
 # =============================================================================
 # Deploy this stack after the MongoDB stack. The app connects to MongoDB using
-# DATABASE_URL which should reference the 'mongo' host on the shared network.
+# MONGO_URI which should reference the 'mongo' host on the shared network.
 #
-# Example DATABASE_URL in Dokploy envs:
+# Example MONGO_URI in Dokploy envs:
 #   mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_APP_DB}?authSource=${MONGO_AUTH_SOURCE:-admin}
 # =============================================================================
 
-name: ${APP_NAME:-lynx-portfolio-back}-app
+name: lynx-portfolio-back-app
 
 services:
   app:
@@ -19,9 +19,9 @@ services:
         UID: ${UID:-1000}
         GID: ${GID:-1000}
         NODE_ENV: production
-    image: ${APP_NAME:-lynx-portfolio-back}-app:latest
-    container_name: ${APP_NAME:-lynx-portfolio-back}-app
-    hostname: ${APP_NAME:-lynx-portfolio-back}-app
+    image: lynx-portfolio-back-app:latest
+    container_name: lynx-portfolio-back-app
+    hostname: lynx-portfolio-back-app
     # Expose the app port for direct access if needed; nginx will proxy to this
     ports:
       - "${PROD_PORT:-6165}:6165"
@@ -31,7 +31,7 @@ services:
       PORT: 6165
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
       JWT_SECRET: ${JWT_SECRET:-your-jwt-secret}
-      DATABASE_URL: ${DATABASE_URL}
+      MONGO_URI: ${MONGO_URI}
       MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio}
       MONGO_APP_USER: ${MONGO_APP_USER:-portfolio}
       MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-portfolio_pass}
@@ -50,12 +50,12 @@ services:
 networks:
   default:
     external: true
-    name: ${APP_NAME:-lynx-portfolio-back}-network
+    name: lynx-portfolio-back-network
 
 volumes:
   node_logs:
-    name: ${APP_NAME:-lynx-portfolio-back}-logs
+    name: lynx-portfolio-back-logs
     driver: local
   node_uploads:
-    name: ${APP_NAME:-lynx-portfolio-back}-uploads
+    name: lynx-portfolio-back-uploads
     driver: local
