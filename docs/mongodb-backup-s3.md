@@ -1,123 +1,143 @@
-# MongoDB Backups to S3
+# MongoDB Backup to S3
 
-This guide explains how this repository performs automated MongoDB backups to Amazon S3 (or S3‑compatible storage), how to set up the required environment variables, and how to run backups/restores manually.
+Automated MongoDB backup system that stores compressed database dumps to Amazon S3 with configurable retention policies.
 
-## Overview
+## How It Works
 
-- A dedicated container (service name: `mongo-backup`) runs the backup scripts found in `scripts/`.
-- The backup job creates a compressed dump using `mongodump` and uploads it to S3 using the AWS CLI.
-- Backups are kept locally in `mongo_backups/` and remotely in your S3 bucket under a configurable path (default: `backups/`).
-- Retention is handled both locally and in S3 by keeping only the latest N backups when `MONGO_BACKUP_KEEP` is set.
+**Backup Process:**
 
-See `docker-compose.yml` for how variables are injected into the backup container.
+- Dedicated `mongo-backup` container runs scheduled backups
+- Creates compressed MongoDB dumps using `mongodump`
+- Uploads backups to S3 bucket under `backups/` folder
+- Maintains local copies in `mongo_backups/` directory
+- Automatic cleanup of old backups (local and S3)
 
-## Environment Variables (S3 & Backup)
+**Scheduling:**
 
-Define these in `.env` (do not commit real secrets):
+- Default: Weekly backups every Sunday at 3 AM
+- Configurable via `MONGO_BACKUP_CRON` environment variable
+- Manual backup execution available
 
-- `S3_BUCKET_NAME`: Name of the S3 bucket that stores backups. Example: `lynx-portfolio`. Used as `S3_BUCKET` inside the backup container.
-- `S3_REGION`: AWS region of the bucket. Example: `us-east-1`. Mapped to `AWS_DEFAULT_REGION` for AWS CLI.
-- `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY`: IAM user access keys for programmatic access. Allow at least `s3:ListBucket` and `s3:GetObject`/`s3:PutObject`/`s3:DeleteObject` on the chosen prefix (e.g., `backups/*`).
-- `S3_ENDPOINT` (optional): Custom endpoint URL for S3‑compatible providers (MinIO, Wasabi, etc.). When set, the scripts pass `--endpoint-url` to the AWS CLI automatically.
-- `S3_UPLOAD_PREFIX` (optional): Reserved for future app uploads (not used by the backup scripts).
-- `MONGO_BACKUP_CRON`: Cron schedule for automated backups (used by the backup container).
-- `MONGO_BACKUP_KEEP`: Number of most‑recent backups to retain locally and in S3.
+## Required Configuration
 
-Additional variables used by the scripts (with defaults inside the container):
+**S3 Storage:**
 
-- `S3_PATH`: Folder/prefix inside the bucket where backups are stored. Default: `backups`.
-- `MONGO_HOST`, `MONGO_PORT`, `MONGO_DB`, `MONGO_USER`, `MONGO_PASS`: Mongo connection details used by `mongodump`/`mongorestore`.
+- `S3_BUCKET_NAME` - S3 bucket name for backup storage
+- `S3_REGION` - AWS region (e.g., `us-east-1`)
+- `S3_ACCESS_KEY_ID` - AWS access key with S3 permissions
+- `S3_SECRET_ACCESS_KEY` - AWS secret key
 
-For a concise catalog of all environment variables across the project, see `docs/env-configuration.md`.
+**Backup Settings:**
 
-## Create the S3 bucket and credentials
+- `MONGO_BACKUP_KEEP` - Number of backups to retain (default: 4)
+- `MONGO_BACKUP_CRON` - Cron schedule (default: weekly)
 
-1. Create a bucket
+**Optional:**
 
-  In AWS Console > S3 > Create bucket, choose a globally unique name and a region (e.g., `us-east-1`).
+- `S3_ENDPOINT` - Custom endpoint for S3-compatible services (MinIO, Wasabi)
 
-1. Create an IAM user with programmatic access
+All MongoDB connection details are automatically configured from the main database settings.
 
-  Go to AWS Console > IAM > Users > Create user (access type: programmatic). Attach a least‑privilege policy granting list/get/put/delete on your bucket prefix.
+## AWS S3 Setup
 
-  Policy example (replace `YOUR_BUCKET_NAME`):
+**Create S3 Bucket:**
 
-  ```json
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Action": ["s3:ListBucket"],
-        "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME"
-      },
-      {
-        "Effect": "Allow",
-        "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
-        "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/backups/*"
-      }
-    ]
-  }
-  ```
+1. Go to AWS Console > S3 > Create bucket
+2. Choose a globally unique name and region
+3. Enable versioning for backup protection (recommended)
 
-1. Capture the Access key ID and Secret access key
+**Create IAM User:**
 
-  Store them securely (password manager or secrets store) and add them to `.env`.
+1. Go to AWS Console > IAM > Users > Create user
+2. Select "Programmatic access"
+3. Attach the following policy (replace `YOUR_BUCKET_NAME`):
 
-## How the compose wiring works
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/backups/*"
+    }
+  ]
+}
+```
 
-In `docker-compose.yml`, the backup service injects variables as follows:
+1. Save the Access Key ID and Secret Access Key securely
+2. Add them to your `.env` file
 
-- `S3_BUCKET_NAME` → `S3_BUCKET`
-- `S3_REGION` → `AWS_DEFAULT_REGION` (for AWS CLI)
-- `S3_ACCESS_KEY_ID` → `AWS_ACCESS_KEY_ID`
-- `S3_SECRET_ACCESS_KEY` → `AWS_SECRET_ACCESS_KEY`
-- `S3_PATH` defaults to `backups`
-- `S3_ENDPOINT` is passed through for S3‑compatible providers
+## Manual Operations
 
-The scripts `scripts/backup_mongo_to_s3.sh` and `scripts/restore_mongo_from_s3.sh` read these environment variables to upload/list/copy from `s3://$S3_BUCKET/$S3_PATH/`.
-
-## Run a backup manually
-
-From the repository root (using the backup container):
-
-PowerShell (Windows):
+**Start Backup Service:**
 
 ```powershell
-# Ensure containers are up (or start only the backup profile when configured)
-# docker compose --profile backup up -d
+# Start automated backup service
+make backup
 
+# View backup logs
+make backup-logs
+```
+
+**Manual Backup:**
+
+```powershell
 docker compose exec mongo-backup bash /scripts/backup_mongo_to_s3.sh
 ```
 
-This creates a local gzip archive in `mongo_backups/` and, if credentials are valid, uploads it to S3 under `s3://<bucket>/backups/`.
-
-## Restore the latest backup from S3
+**Restore from S3:**
 
 ```powershell
 docker compose exec mongo-backup bash /scripts/restore_mongo_from_s3.sh
 ```
 
-This downloads the most recent `mongo_backup_*.gz` from `s3://<bucket>/backups/` and restores it using `mongorestore --drop`.
+**Note:** Manual operations require the backup container to be running.
 
-## Retention
+## Deployment Options
 
-- Set `MONGO_BACKUP_KEEP` in `.env` to a positive integer.
+**With Main Application:**
 
-The backup script removes older local archives in `mongo_backups/`, keeping only the latest N. It also lists objects at `s3://$S3_BUCKET/$S3_PATH/` and deletes older ones, keeping only the latest N.
+- Use `docker-compose.yml` with `--profile backup`
+- Backup service runs alongside other services
 
-## Optional: Custom S3 endpoint (S3‑compatible)
+**Standalone (Dokploy):**
 
-If you use a provider like MinIO or Wasabi, set `S3_ENDPOINT` in `.env`. The backup and restore scripts will automatically pass `--endpoint-url $S3_ENDPOINT` to the AWS CLI for all `cp`, `ls`, and `rm` operations.
+- Use `docker-compose.mongo-backup.yml`
+- Deploy as separate stack after MongoDB stack
 
-## Prerequisites and troubleshooting
+## Troubleshooting
 
-- The backup container image includes awscli, mongodump, and mongorestore (see `Dockerfile.mongo-backup`). If running scripts locally, ensure these tools are installed and credentials are set via environment variables or `aws configure`.
-- Check the `mongo-backup` container logs if an upload fails.
-- Confirm that `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_DEFAULT_REGION` are present in the container environment.
+**Backup Fails:**
 
-## Security best practices
+- Verify S3 credentials are correct
+- Check AWS permissions for bucket access
+- Ensure MongoDB connection from backup container
+- Review logs: `make backup-logs`
 
-- Never commit real `.env` secrets.
-- Use least‑privilege IAM policies and rotate keys regularly.
-- Consider enabling bucket versioning and lifecycle policies for cost control and recovery.
+**Restore Issues:**
+
+- Confirm backups exist in S3 bucket under `backups/` folder
+- Verify MongoDB service is running and accessible
+- Check database user permissions
+
+## Security Best Practices
+
+**Credentials:**
+
+- Store AWS keys securely (never commit to version control)
+- Use IAM roles instead of access keys when possible
+- Rotate credentials regularly
+- Apply least-privilege access policies
+
+**S3 Configuration:**
+
+- Enable bucket versioning for additional protection
+- Configure lifecycle policies for cost optimization
+- Enable server-side encryption
+- Restrict bucket access to backup operations only

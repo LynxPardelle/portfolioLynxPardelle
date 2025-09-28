@@ -9,7 +9,14 @@ const [express, ArticleController, md_auth, md_admin, multer] = [
   require("multer"),
 ];
 const router = express.Router();
-const md_upload = multer({ dest: "./uploads/article" }).any();
+// Use memory storage for direct S3 streaming uploads
+const md_upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { 
+    fileSize: 100 * 1024 * 1024, // 100MB max file size
+    files: 10 // Max 10 files per request
+  }
+}).any();
 
 /* Rutas de prueba */
 router.get("/datos-autor", ArticleController.datosAutor);

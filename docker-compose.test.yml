@@ -1,0 +1,186 @@
+# =============================================================================
+# Docker Compose - Enhanced Testing Environment
+# =============================================================================
+# Comprehensive testing setup with LocalStack, MongoDB, and test services
+# =============================================================================
+
+name: lynx-portfolio-back-testing
+
+services:
+  # Test database (isolated from development)
+  test-mongo:
+    image: mongo:8.0
+    container_name: lynx-portfolio-test-mongo
+    ports:
+      - "27520:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: testroot
+      MONGO_INITDB_ROOT_PASSWORD: testpass
+      MONGO_INITDB_DATABASE: test_portfolio
+    volumes:
+      - test-mongo-data:/data/db
+    command: ["mongod", "--bind_ip_all", "--port", "27017"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # LocalStack for AWS services simulation
+  localstack:
+    image: localstack/localstack:3.0
+    container_name: lynx-portfolio-localstack
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    environment:
+      DEBUG: ${DEBUG:-0}
+      SERVICES: s3,cloudfront,iam,sts,cloudwatch
+      DATA_DIR: /tmp/localstack/data
+      HOST_TMP_FOLDER: ./tmp/localstack
+      S3_ENDPOINT_STRATEGY: path
+      S3_SKIP_SIGNATURE_VALIDATION: 1
+      CLOUDFRONT_REQUIRE_AUTH: 0
+      PERSISTENCE: 1
+      AWS_DEFAULT_REGION: us-east-1
+      SKIP_SSL_CERT_DOWNLOAD: 1
+    volumes:
+      - "./tmp/localstack:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./tests/localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Unit tests (mocked AWS services)
+  unit-tests:
+    build:
+      context: .
+      target: testing
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        NODE_ENV: test
+    container_name: lynx-portfolio-unit-tests
+    depends_on:
+      test-mongo:
+        condition: service_healthy
+    environment:
+      NODE_ENV: test
+      CI: "true"
+      # Test database
+      MONGO_URI: "mongodb://testroot:testpass@test-mongo:27017/test_portfolio?authSource=admin"
+      # Mock AWS credentials
+      S3_BUCKET_NAME: "test-bucket"
+      S3_REGION: "us-east-1"
+      S3_ACCESS_KEY_ID: "test-access-key"
+      S3_SECRET_ACCESS_KEY: "test-secret-key"
+      CLOUDFRONT_DOMAIN: "test.cloudfront.net"
+      CLOUDFRONT_DISTRIBUTION_ID: "TEST123"
+      # Feature flags for testing
+      USE_S3_CDN_STORAGE: "true"
+      ENABLE_LEGACY_FILESYSTEM: "false"
+      LOG_UPLOAD_PATHS: "false"
+      FEATURE_FLAG_LOGGING: "false"
+    volumes:
+      - .:/app:cached
+      - /app/node_modules
+      - ./coverage:/app/coverage
+    command: ["npm", "run", "test:unit"]
+    profiles: ["unit"]
+
+  # Integration tests (with LocalStack)
+  integration-tests:
+    build:
+      context: .
+      target: testing
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        NODE_ENV: test
+    container_name: lynx-portfolio-integration-tests
+    depends_on:
+      test-mongo:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    environment:
+      NODE_ENV: test
+      CI: "true"
+      # Test database
+      MONGO_URI: "mongodb://testroot:testpass@test-mongo:27017/test_portfolio?authSource=admin"
+      # LocalStack AWS services
+      S3_BUCKET_NAME: "test-portfolio-bucket"
+      S3_REGION: "us-east-1"
+      S3_ACCESS_KEY_ID: "test"
+      S3_SECRET_ACCESS_KEY: "test"
+      S3_ENDPOINT: "http://localstack:4566"
+      CLOUDFRONT_DOMAIN: "test.cloudfront.localstack"
+      CLOUDFRONT_DISTRIBUTION_ID: "TEST-DISTRIBUTION-ID"
+      AWS_ENDPOINT_URL: "http://localstack:4566"
+      # Feature flags
+      USE_S3_CDN_STORAGE: "true"
+      ENABLE_LEGACY_FILESYSTEM: "false"
+      LOG_UPLOAD_PATHS: "true"
+      FEATURE_FLAG_LOGGING: "true"
+    volumes:
+      - .:/app:cached
+      - /app/node_modules
+      - ./coverage:/app/coverage
+    command: ["npm", "run", "test:integration"]
+    profiles: ["integration"]
+
+  # All tests combined
+  all-tests:
+    build:
+      context: .
+      target: testing
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        NODE_ENV: test
+    container_name: lynx-portfolio-all-tests
+    depends_on:
+      test-mongo:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    environment:
+      NODE_ENV: test
+      CI: "true"
+      # Test database
+      MONGO_URI: "mongodb://testroot:testpass@test-mongo:27017/test_portfolio?authSource=admin"
+      # LocalStack for integration tests
+      S3_BUCKET_NAME: "test-portfolio-bucket"
+      S3_REGION: "us-east-1"
+      S3_ACCESS_KEY_ID: "test"
+      S3_SECRET_ACCESS_KEY: "test"
+      S3_ENDPOINT: "http://localstack:4566"
+      CLOUDFRONT_DOMAIN: "test.cloudfront.localstack"
+      CLOUDFRONT_DISTRIBUTION_ID: "TEST-DISTRIBUTION-ID"
+      AWS_ENDPOINT_URL: "http://localstack:4566"
+      # Feature flags
+      USE_S3_CDN_STORAGE: "true"
+      ENABLE_LEGACY_FILESYSTEM: "true"
+      LOG_UPLOAD_PATHS: "true"
+      FEATURE_FLAG_LOGGING: "true"
+    volumes:
+      - .:/app:cached
+      - /app/node_modules
+      - ./coverage:/app/coverage
+      - ./test-results:/app/test-results
+    command: ["npm", "run", "test:ci"]
+    profiles: ["all", "ci"]
+
+volumes:
+  test-mongo-data:
+    name: lynx-portfolio-test-mongo-data
+    driver: local
+
+networks:
+  default:
+    name: lynx-portfolio-testing-network

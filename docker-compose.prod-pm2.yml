@@ -1,0 +1,54 @@
+# =============================================================================
+# Docker Compose - Production (PM2) Standalone for Dokploy
+# =============================================================================
+# Use this when you want the Node.js app managed by PM2 without nginx.
+# Ensure MongoDB is already deployed on the shared network before starting.
+# =============================================================================
+
+name: lynx-portfolio-back-prod-pm2
+
+services:
+  prod-pm2:
+    build:
+      context: .
+      target: production-pm2
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        NODE_ENV: production
+    image: lynx-portfolio-back-prod-pm2:latest
+    container_name: lynx-portfolio-back-prod-pm2
+    ports:
+      - "${PROD_PORT:-6165}:${PROD_PORT:-6165}"
+    environment:
+      NODE_ENV: production
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret}
+      NGINX_HOST: ${NGINX_HOST:-localhost}
+      NGINX_PORT: ${NGINX_PORT:-80}
+      REDIS_URL: ${REDIS_URL:-}
+      MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio}
+      MONGO_APP_TEST_DB: ${MONGO_APP_TEST_DB:-lynx_portfolio_test}
+      MONGO_APP_USER: ${MONGO_APP_USER:-database_user}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-portfolio_pass}
+      MONGO_AUTH_SOURCE: ${MONGO_AUTH_SOURCE:-admin}
+      MONGO_URI: ${MONGO_URI}
+    volumes:
+      - node_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PROD_PORT:-6165}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+networks:
+  default:
+    external: true
+    name: lynx-portfolio-back-network
+
+volumes:
+  node_logs:
+    name: lynx-portfolio-back-logs
+    driver: local

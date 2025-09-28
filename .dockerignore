@@ -249,7 +249,37 @@ build/
 
 # Backup files that should not be included
 backups/
+mongo_backups/
 
 # Security files
 .secrets/
 secrets/
+
+# =============================================================================
+# Project-Specific Exclusions
+# =============================================================================
+
+# Database initialization and backups
+database_init/
+mongo-init/
+
+# Private migration and development files
+private-migration-history/
+useful-scripts/
+
+# GitHub workflows and templates
+.github/
+
+# Package lock files (prefer npm ci in production)
+package-lock.json
+
+# PM2 ecosystem config (environment specific)
+ecosystem.config.js
+
+# Shell scripts and automation (not needed in container)
+scripts/
+*.sh
+*.ps1
+
+# Development logs directory
+logs/

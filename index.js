@@ -20,7 +20,7 @@ app.get('/health', (_req, res) => {
 
 mongoose.Promise = global.Promise;
 
-const DEFAULT_URI = "mongodb://127.0.0.1:27519/lynx_portfolio";
+const DEFAULT_URI = "mongodb://127.0.0.1:27017/lynx_portfolio";
 let MONGO_URI = process.env.MONGO_URI || DEFAULT_URI;
 
 // Normalize Mongo URI: if credentials + db present but no authSource, default to admin (or MONGO_AUTH_SOURCE)
@@ -39,7 +39,7 @@ try {
 }
 
 console.log("MongoDB URI:", MONGO_URI.replace(/\/\/(.*):(.*)@/, '//***:***@'));
-console.log("MongoDB URI_Clean:", MONGO_URI);
+// console.log("MongoDB URI_Clean:", MONGO_URI);
 const MAX_RETRIES = parseInt(process.env.MONGO_MAX_RETRIES || '10', 10);
 const RETRY_DELAY_MS = parseInt(process.env.MONGO_RETRY_DELAY_MS || '3000', 10);
 

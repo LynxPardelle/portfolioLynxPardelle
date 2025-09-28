@@ -311,9 +311,21 @@ inspect: ## Inspect container configuration
 # Testing & Quality Commands
 # =============================================================================
 
-test: ## Run unit tests in container
+test: ## Run all tests with enhanced setup
+	@echo "$(CYAN)🧪 Running all tests...$(NC)"
+	docker compose -f docker-compose.test.yml --profile all up --build --abort-on-container-exit
+
+test-unit: ## Run unit tests only
 	@echo "$(CYAN)🧪 Running unit tests...$(NC)"
-	docker compose -p lynx-portfolio-back --profile test run --rm test npm test
+	docker compose -f docker-compose.test.yml --profile unit up --build --abort-on-container-exit
+
+test-integration: ## Run integration tests with LocalStack
+	@echo "$(CYAN)🧪 Running integration tests with LocalStack...$(NC)"
+	docker compose -f docker-compose.test.yml --profile integration up --build --abort-on-container-exit
+
+test-regression: ## Run regression tests
+	@echo "$(CYAN)🧪 Running regression tests...$(NC)"
+	docker compose -f docker-compose.test.yml --profile regression up --build --abort-on-container-exit
 
 test-watch: ## Run tests in watch mode
 	@echo "$(CYAN)🧪 Running tests in watch mode...$(NC)"
@@ -321,7 +333,24 @@ test-watch: ## Run tests in watch mode
 
 test-coverage: ## Run tests with coverage report
 	@echo "$(CYAN)🧪 Running tests with coverage...$(NC)"
-	docker compose -p lynx-portfolio-back --profile test run --rm test npm run test:coverage
+	docker compose -f docker-compose.test.yml --profile all up --build --abort-on-container-exit
+
+test-local: ## Run tests locally (requires Node.js)
+	@echo "$(CYAN)🧪 Running tests locally...$(NC)"
+	npm test
+
+test-ci: ## Run tests in CI mode
+	@echo "$(CYAN)🧪 Running CI tests...$(NC)"
+	docker compose -f docker-compose.test.yml --profile ci up --build --abort-on-container-exit
+
+test-localstack: ## Start LocalStack for local testing
+	@echo "$(CYAN)🧪 Starting LocalStack for testing...$(NC)"
+	docker compose -f docker-compose.localstack.yml up --build -d
+	@echo "$(GREEN)✅ LocalStack started at http://localhost:4566$(NC)"
+
+test-localstack-stop: ## Stop LocalStack
+	@echo "$(CYAN)🧪 Stopping LocalStack...$(NC)"
+	docker compose -f docker-compose.localstack.yml down
 
 lint: ## Run linting checks
 	@echo "$(CYAN)🔍 Running linting checks...$(NC)"
@@ -387,6 +416,114 @@ api-test: ## Test API endpoints
 	fi
 
 # =============================================================================
+# CDN Operations Commands
+# =============================================================================
+
+cf-invalidate: ## Invalidate CloudFront cache paths (use: make cf-invalidate PATHS="/images/*")
+ifndef PATHS
+	@echo "$(RED)❌ PATHS parameter required. Usage: make cf-invalidate PATHS=\"/images/*,/css/*\"$(NC)"
+	@exit 1
+endif
+	@echo "$(CYAN)🌐 Invalidating CloudFront paths: $(PATHS)$(NC)"
+	@echo "$(YELLOW)⚠️  Validating environment variables...$(NC)"
+ifndef CLOUDFRONT_DISTRIBUTION_ID
+	@echo "$(RED)❌ CLOUDFRONT_DISTRIBUTION_ID not set$(NC)"
+	@exit 1
+endif
+	@mkdir -p logs/operations
+	@echo "$(GREEN)✅ Starting CloudFront invalidation...$(NC)"
+	@if command -v node >/dev/null 2>&1; then \
+		node utility/create-media-backup.js --paths="$(PATHS)" --log; \
+	else \
+		docker compose -p lynx-portfolio-back exec dev node utility/create-media-backup.js --paths="$(PATHS)" --log; \
+	fi
+	@echo "$(GREEN)✅ CloudFront invalidation completed$(NC)"
+
+cf-invalidate-dry-run: ## Dry run CloudFront invalidation (use: make cf-invalidate-dry-run PATHS="/images/*")
+ifndef PATHS
+	@echo "$(RED)❌ PATHS parameter required. Usage: make cf-invalidate-dry-run PATHS=\"/images/*,/css/*\"$(NC)"
+	@exit 1
+endif
+	@echo "$(CYAN)🌐 DRY RUN: CloudFront invalidation for paths: $(PATHS)$(NC)"
+	@if command -v node >/dev/null 2>&1; then \
+		node utility/create-media-backup.js --paths="$(PATHS)" --dry-run; \
+	else \
+		docker compose -p lynx-portfolio-back exec dev node utility/create-media-backup.js --paths="$(PATHS)" --dry-run; \
+	fi
+
+s3-health: ## Run S3 bucket health diagnostics
+	@echo "$(CYAN)🏥 Running S3 health diagnostics...$(NC)"
+	@echo "$(YELLOW)⚠️  Validating environment variables...$(NC)"
+ifndef S3_BUCKET_NAME
+	@echo "$(RED)❌ S3_BUCKET_NAME not set$(NC)"
+	@exit 1
+endif
+	@mkdir -p logs/operations
+	@echo "$(GREEN)✅ Starting S3 health check...$(NC)"
+	@if command -v node >/dev/null 2>&1; then \
+		node utility/check-s3-health.js --log; \
+	else \
+		docker compose -p lynx-portfolio-back exec dev node utility/check-s3-health.js --log; \
+	fi
+	@echo "$(GREEN)✅ S3 health check completed$(NC)"
+
+s3-health-report: ## Generate detailed S3 health report
+	@echo "$(CYAN)📊 Generating detailed S3 health report...$(NC)"
+	@mkdir -p logs/operations
+	@if command -v node >/dev/null 2>&1; then \
+		node utility/check-s3-health.js --detailed --log; \
+	else \
+		docker compose -p lynx-portfolio-back exec dev node utility/check-s3-health.js --detailed --log; \
+	fi
+
+media-backup: ## Create media backup with metadata snapshot
+	@echo "$(CYAN)💾 Creating media backup...$(NC)"
+	@echo "$(YELLOW)⚠️  Validating environment variables...$(NC)"
+ifndef S3_BUCKET_NAME
+	@echo "$(RED)❌ S3_BUCKET_NAME not set$(NC)"
+	@exit 1
+endif
+ifndef MONGO_URI
+	@echo "$(RED)❌ MONGO_URI not set$(NC)"
+	@exit 1
+endif
+	@mkdir -p logs/operations
+	@echo "$(GREEN)✅ Starting media backup...$(NC)"
+	@if command -v node >/dev/null 2>&1; then \
+		node utility/create-media-backup.js --log; \
+	else \
+		docker compose -p lynx-portfolio-back exec dev node utility/create-media-backup.js --log; \
+	fi
+	@echo "$(GREEN)✅ Media backup completed$(NC)"
+
+media-backup-dry-run: ## Dry run media backup
+	@echo "$(CYAN)💾 DRY RUN: Media backup preview...$(NC)"
+	@if command -v node >/dev/null 2>&1; then \
+		node utility/create-media-backup.js --dry-run; \
+	else \
+		docker compose -p lynx-portfolio-back exec dev node utility/create-media-backup.js --dry-run; \
+	fi
+
+cdn-health: ## Run complete CDN health check (CloudFront + S3)
+	@echo "$(CYAN)🌐 Running complete CDN health check...$(NC)"
+	@$(MAKE) s3-health
+	@echo "$(CYAN)🌐 Checking CloudFront status...$(NC)"
+	@if command -v node >/dev/null 2>&1; then \
+		node -e "console.log('CloudFront distribution: $(CLOUDFRONT_DISTRIBUTION_ID)')"; \
+	else \
+		echo "CloudFront distribution: $(CLOUDFRONT_DISTRIBUTION_ID)"; \
+	fi
+	@echo "$(GREEN)✅ CDN health check completed$(NC)"
+
+cdn-status: ## Show CDN status and configuration
+	@echo "$(CYAN)📋 CDN Configuration Status:$(NC)"
+	@echo "S3 Bucket: $${S3_BUCKET_NAME:-'❌ Not set'}"
+	@echo "CloudFront Distribution: $${CLOUDFRONT_DISTRIBUTION_ID:-'❌ Not set'}"
+	@echo "CloudFront Domain: $${CLOUDFRONT_DOMAIN:-'❌ Not set'}"
+	@echo "S3 Region: $${S3_REGION:-'❌ Not set'}"
+	@echo "S3 Upload Prefix: $${S3_UPLOAD_PREFIX:-'uploads/'}"
+
+# =============================================================================
 # Utility Functions
 # =============================================================================
 
@@ -417,4 +554,5 @@ perf: ## Show container performance stats
         nginx nginx-detached prod-nginx prod-nginx-detached nginx-logs nginx-status nginx-reload \
         stop restart clean rebuild prune install install-dev update status logs health debug inspect \
         test test-watch test-coverage lint lint-fix security security-fix backup restore api-test \
+        cf-invalidate cf-invalidate-dry-run s3-health s3-health-report media-backup media-backup-dry-run cdn-health cdn-status \
         check-tools env-info perf backup backup-detached backup-logs restore weekly-backup-cron

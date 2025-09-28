@@ -9,16 +9,18 @@ const [validator, bcrypt, fs, path] = [
 ];
 
 /* Modelos */
-const [Article, ArticleSection, ArticleCat, ArticleSubCat] = [
+const [Article, ArticleSection, ArticleCat, ArticleSubCat, File] = [
   require("../models/article"),
   require("../models/articleSection"),
   require("../models/articleCat"),
   require("../models/articleSubCat"),
+  require("../models/file"),
 ];
 /* Services */
-const [_utility, _mail] = [
+const [_utility, _mail, s3Service] = [
   require("../services/utility"),
   require("../services/mail"),
+  require("../services/s3"),
 ];
 
 const populate = require("../populate/populate");
@@ -572,51 +574,19 @@ const controller = {
             Errors.push(`No section to delete. ${section._id}: ${section}`);
           } else {
             if (sectionToErase.principalFile) {
-              let path_file =
-                "./uploads/article" + sectionToErase.principalFile.location;
               try {
-                fs.exists(path_file, (exist, err) => {
-                  if (exist) {
-                    fs.unlink(path_file, (err) => {
-                      if (err) {
-                        throw new Error("error", "Error al borrar archivo.");
-                      }
-                    });
-                  }
-                });
-              } catch (e) {
-                throw new Error(
-                  "error",
-                  "Error al borrar archivo ./uploads/article" +
-                    sectionToErase.principalFile.location
-                );
+                await _utility.deleteFile(sectionToErase.principalFile._id);
+              } catch (deleteError) {
+                console.warn("Error deleting section principal file:", deleteError.message);
               }
-              let fileRemoved = await File.findOneAndDelete({
-                _id: sectionToErase.principalFile._id,
-              });
             }
             if (sectionToErase.files && sectionToErase.files[0]) {
               for (let file of sectionToErase.files) {
-                let path_file = "./uploads/article" + file.location;
                 try {
-                  fs.exists(path_file, (exist, err) => {
-                    if (exist) {
-                      fs.unlink(path_file, (err) => {
-                        if (err) {
-                          throw new Error("error", "Error al borrar archivo.");
-                        }
-                      });
-                    }
-                  });
-                } catch (e) {
-                  throw new Error(
-                    "error",
-                    "Error al borrar archivo ./uploads/article" + file.location
-                  );
+                  await _utility.deleteFile(file._id);
+                } catch (deleteError) {
+                  console.warn("Error deleting section file:", deleteError.message);
                 }
-                let fileRemoved = await File.findOneAndDelete({
-                  _id: file._id,
-                });
               }
             }
             let sectionDeleted = await ArticleSection.findByIdAndDelete(
@@ -626,27 +596,11 @@ const controller = {
         }
       }
       if (article.coverImg) {
-        let path_file = "./uploads/article" + article.coverImg.location;
         try {
-          fs.exists(path_file, (exist, err) => {
-            if (exist) {
-              fs.unlink(path_file, (err) => {
-                if (err) {
-                  throw new Error("error", "Error al borrar archivo.");
-                }
-              });
-            }
-          });
-        } catch (e) {
-          throw new Error(
-            "error",
-            "Error al borrar archivo ./uploads/article" +
-              article.coverImg.location
-          );
+          await _utility.deleteFile(article.coverImg._id);
+        } catch (deleteError) {
+          console.warn("Error deleting article cover image:", deleteError.message);
         }
-        let fileRemoved = await File.findOneAndDelete({
-          _id: article.coverImg._id,
-        });
       }
 
       const articleDeleted = await Article.findByIdAndDelete(articleId);
@@ -683,51 +637,19 @@ const controller = {
       }
 
       if (articleSection.principalFile) {
-        let path_file =
-          "./uploads/article" + articleSection.principalFile.location;
         try {
-          fs.exists(path_file, (exist, err) => {
-            if (exist) {
-              fs.unlink(path_file, (err) => {
-                if (err) {
-                  throw new Error("error", "Error al borrar archivo.");
-                }
-              });
-            }
-          });
-        } catch (e) {
-          throw new Error(
-            "error",
-            "Error al borrar archivo ./uploads/article" +
-              articleSection.principalFile.location
-          );
+          await _utility.deleteFile(articleSection.principalFile._id);
+        } catch (deleteError) {
+          console.warn("Error deleting article section principal file:", deleteError.message);
         }
-        let fileRemoved = await File.findOneAndDelete({
-          _id: sectionToErase.principalFile._id,
-        });
       }
       if (articleSection.files && articleSection.files[0]) {
         for (let file of articleSection.files) {
-          let path_file = "./uploads/article" + file.location;
           try {
-            fs.exists(path_file, (exist, err) => {
-              if (exist) {
-                fs.unlink(path_file, (err) => {
-                  if (err) {
-                    throw new Error("error", "Error al borrar archivo.");
-                  }
-                });
-              }
-            });
-          } catch (e) {
-            throw new Error(
-              "error",
-              "Error al borrar archivo ./uploads/article" + file.location
-            );
+            await _utility.deleteFile(file._id);
+          } catch (deleteError) {
+            console.warn("Error deleting article section file:", deleteError.message);
           }
-          let fileRemoved = await File.findOneAndDelete({
-            _id: file._id,
-          });
         }
       }
 
@@ -837,256 +759,121 @@ const controller = {
 
   /* Uploads */
   async UploadFileArticle(req, res) {
+    console.log("uploading article image to S3...");
     let nError = 500;
-    (async () => {
-      try {
-        const articleId = req.params.id;
-        const article = await Article.findById(articleId).populate(
-          populate.article
-        );
+    
+    try {
+      const articleId = req.params.id;
+      const article = await Article.findById(articleId).populate(
+        populate.article
+      );
 
-        if (!article) {
-          nError = 404;
-          throw new Error("No hay se encontró el artículo.");
-        }
-
-        //Recoger el fichero de la petición
-        if (!req.files) {
-          throw new Error("Archivo no subido...");
-          nError = 404;
-        }
-
-        /* Extensión y tamaño del fichero */
-        var file_ext = req.files[0].mimetype.split("/")[1];
-        var file_size = req.files[0].size;
-        var file_path = req.files[0].path;
-
-        if (
-          file_ext != "png" &&
-          file_ext != "gif" &&
-          file_ext != "jpg" &&
-          file_ext != "jpeg"
-        ) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error("La extensión del archivo no es válida.");
-        }
-
-        if (file_size > 50000000) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error(
-            "error",
-            "El archivo es demasiado grande. (tamaño máximo permitido = 45mb)"
-          );
-        }
-        //Conseguir nombre del archivo
-        var file_originalFileName = req.files[0].originalname;
-        var cutter = "/";
-        if (file_path.includes("\\")) {
-          cutter = "\\";
-        }
-        var file_split = file_path.split(cutter);
-
-        var file_name = req.files[0].filename;
-        var slicedOldName =
-          file_name.slice(0, 2) +
-          file_name.slice(file_name.length - 1, file_name.length);
-
-        var fileOriginalsplit = file_originalFileName.split(".");
-
-        var newOriginalName =
-          fileOriginalsplit[0] + slicedOldName + "." + fileOriginalsplit[1];
-
-        var newName =
-          file_split[0] + cutter + file_split[1] + cutter + newOriginalName;
-
-        await fs.rename(file_path, newName, function (err) {
-          if (err) {
-            throw new Error("El archivo NO se ha renombrado correctamente.");
-          }
-        });
-
-        /* Crear el objeto a guardar */
-        var file = await new File();
-
-        /* Asignar valores */
-        if (fileOriginalsplit[0].includes("EnglishTitle")) {
-          file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
-          file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
-        } else {
-          file.title = fileOriginalsplit[0];
-          file.titleEng = fileOriginalsplit[0];
-        }
-        file.location = newOriginalName;
-        file.type = file_ext;
-        file.size = file_size;
-
-        var fileStored = await file.save();
-
-        if (!fileStored) {
-          return res.status(404).send({
-            status: "error",
-            message: "El archivo NO se ha guardado.",
-          });
-        }
-
-        article.coverImg = fileStored._id;
-
-        const articleUpdated = await Article.findByIdAndUpdate(
-          { _id: articleId },
-          article,
-          { new: true }
-        ).populate(populate.article);
-
-        if (!articleUpdated) {
-          nError = 404;
-          throw new Error("No se actualizó el article.");
-        }
-
-        return res.status(200).send({
-          status: "success",
-          article: articleUpdated,
-          file: fileStored._id,
-        });
-      } catch (e) {
-        return res.status(nError).send({
-          status: "error",
-          message: "El archivo tuvo un error al cargarse.",
-          error_message: e.message,
-          error: e,
-        });
+      if (!article) {
+        nError = 404;
+        throw new Error("No hay se encontró el artículo.");
       }
-    })();
+
+      // Get uploaded file
+      if (!req.files || req.files.length === 0) {
+        nError = 404;
+        throw new Error("Archivo no subido...");
+      }
+
+      // Process file upload using utility
+      const { file, uploadResult } = await _utility.processFileUpload(
+        req.files[0],
+        "articles",
+        { articleId: articleId },
+        { maxSize: 50000000, allowedExtensions: ["png", "gif", "jpg", "jpeg"] }
+      );
+
+      // Update article with new cover image
+      article.coverImg = file._id;
+      const articleUpdated = await Article.findByIdAndUpdate(
+        { _id: articleId },
+        article,
+        { new: true }
+      ).populate(populate.article);
+
+      if (!articleUpdated) {
+        nError = 404;
+        throw new Error("No se actualizó el article.");
+      }
+
+      return res.status(200).send({
+        status: "success",
+        message: "Archivo subido exitosamente a S3",
+        article: articleUpdated,
+        file: {
+          id: file._id,
+          filename: file.title || file.titleEng,
+          cdnUrl: file.cdnUrl,
+          s3Key: file.s3Key,
+          size: file.size,
+          type: file.type,
+          metadata: file.metadata
+        },
+        s3Location: uploadResult.location,
+      });
+    } catch (e) {
+      console.error("Upload error:", e);
+      return res.status(nError).send({
+        status: "error",
+        message: "El archivo tuvo un error al cargarse.",
+        error_message: e.message,
+        error: e,
+      });
+    }
   },
 
   async UploadFileArticleSectionPrincipalFile(req, res) {
+    console.log("uploading article section principal file to S3...");
     let nError = 500;
+    
     try {
-      /* Recoger el id de la url */
-      let articleSection = await ArticleSection.findById(req.params.id);
+      const articleSectionId = req.params.id;
+      const articleSection = await ArticleSection.findById(articleSectionId);
+
       if (!articleSection) {
         nError = 404;
         throw new Error("No hay sección del article.");
       }
-      //Recoger el fichero de la petición
-      if (!req.files) {
-        throw new Error("Archivo no subido...");
+
+      // Get uploaded file
+      if (!req.files || req.files.length === 0) {
         nError = 404;
+        throw new Error("Archivo no subido...");
       }
-      /* Extensión y tamaño del fichero */
-      const file_ext = req.files[0].mimetype.split("/")[1];
-      var file_size = req.files[0].size;
-      var file_path = req.files[0].path;
-      if (
-        file_ext != "png" &&
-        file_ext != "gif" &&
-        file_ext != "jpg" &&
-        file_ext != "jpeg" &&
-        file_ext != "mp3" &&
-        file_ext != "mpeg" &&
-        file_ext != "mp4" &&
-        file_ext != "mov" &&
-        file_ext != "webp" &&
-        file_ext != "webm" &&
-        file_ext != "wav" &&
-        file_ext != "ogg" &&
-        file_ext != "psd" &&
-        file_ext != "zip" &&
-        file_ext != "rar" &&
-        file_ext != "ai" &&
-        file_ext != "flp" &&
-        file_ext != "als" &&
-        file_ext != "avi"
-      ) {
-        /* Borrar el archivo */
-        await fs.unlink(file_path, (err) => {
-          if (err) {
-            throw new Error("Error al borrar archivo.");
-          }
-        });
-        throw new Error("La extensión del archivo no es válida.");
-      }
-      if (file_size > 50000000) {
-        /* Borrar el archivo */
-        await fs.unlink(file_path, (err) => {
-          if (err) {
-            throw new Error("Error al borrar archivo.");
-          }
-        });
-        throw new Error(
-          "error",
-          "El archivo es demasiado grande. (tamaño máximo permitido = 45mb)"
-        );
-      }
-      //Conseguir nombre del archivo
-      var file_originalFileName = req.files[0].originalname;
-      var cutter = "/";
-      if (file_path.includes("\\")) {
-        cutter = "\\";
-      }
-      var file_split = file_path.split(cutter);
 
-      var file_name = req.files[0].filename;
-      var slicedOldName =
-        file_name.slice(0, 2) +
-        file_name.slice(file_name.length - 1, file_name.length);
-
-      var fileOriginalsplit = file_originalFileName.split(".");
-
-      var newOriginalName =
-        fileOriginalsplit[0] + slicedOldName + "." + fileOriginalsplit[1];
-
-      var newName =
-        file_split[0] + cutter + file_split[1] + cutter + newOriginalName;
-
-      await fs.rename(file_path, newName, function (err) {
-        if (err) {
-          throw new Error("El archivo NO se ha renombrado correctamente.");
+      // Process file upload using utility with extended file types for article sections
+      const { file, uploadResult } = await _utility.processFileUpload(
+        req.files[0],
+        "article-sections",
+        { articleSectionId: articleSectionId },
+        { 
+          maxSize: 50000000, 
+          allowedExtensions: [
+            "png", "gif", "jpg", "jpeg", "mp3", "mpeg", "mp4", "mov", 
+            "webp", "webm", "wav", "ogg", "psd", "zip", "rar", "ai", 
+            "flp", "als", "avi"
+          ] 
         }
-      });
-      /* Crear el objeto a guardar */
-      let file = await new File();
-      /* Asignar valores */
-      if (fileOriginalsplit[0].includes("EnglishTitle")) {
-        file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
-        file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
-      } else {
-        file.title = fileOriginalsplit[0];
-        file.titleEng = fileOriginalsplit[0];
-      }
-      file.location = newOriginalName;
-      file.type = file_ext;
-      file.size = file_size;
-      file.create_at = new Date();
-      const fileStored = await file.save();
-      if (!fileStored) {
-        return res.status(404).send({
-          status: "error",
-          message: "El archivo NO se ha guardado.",
-        });
-      }
-      articleSection.principalFile = fileStored._id;
+      );
+
+      // Update article section with new principal file
+      articleSection.principalFile = file._id;
       const articleSectionUpdate = await ArticleSection.findByIdAndUpdate(
         articleSection._id,
         articleSection,
-        {
-          new: true,
-        }
+        { new: true }
       ).populate();
+
       if (!articleSectionUpdate) {
         nError = 500;
-        errMessage = "No se pudo actualizar la sección principal";
-        throw new Error(errMessage);
+        throw new Error("No se pudo actualizar la sección principal");
       }
+
+      // Send notification email
       const mailTitle = `Se actualizó una sección principal.`;
       const mailText = `Se actualizó una sección principal.`;
       const mailHtml = `Se actualizó una sección principal.`;
@@ -1105,12 +892,24 @@ const controller = {
         },
       ];
       _mail.DoSendEmail(mails);
+
       return res.status(200).send({
         status: "success",
+        message: "Archivo subido exitosamente a S3",
         articleSection: articleSectionUpdate,
-        file: articleSectionUpdate.principalFile,
+        file: {
+          id: file._id,
+          filename: file.title || file.titleEng,
+          cdnUrl: file.cdnUrl,
+          s3Key: file.s3Key,
+          size: file.size,
+          type: file.type,
+          metadata: file.metadata
+        },
+        s3Location: uploadResult.location,
       });
     } catch (e) {
+      console.error("Upload error:", e);
       return res.status(nError).send({
         status: "error",
         message: "El archivo tuvo un error al cargarse.",
@@ -1121,138 +920,100 @@ const controller = {
   },
 
   async UploadFilesArticleSection(req, res) {
+    console.log("uploading article section files to S3...");
     let nError = 500;
+    
     try {
-      /* Recoger el id de la url */
-      let articleSection = await ArticleSection.findById(req.params.id);
+      const articleSectionId = req.params.id;
+      const articleSection = await ArticleSection.findById(articleSectionId);
+
       if (!articleSection) {
         nError = 404;
         throw new Error("No hay sección del article.");
       }
-      //Recoger el fichero de la petición
-      if (!req.files) {
-        throw new Error("Archivo no subido...");
+
+      // Get uploaded files
+      if (!req.files || req.files.length === 0) {
         nError = 404;
+        throw new Error("Archivos no subidos...");
       }
-      for (let file of req.files) {
-        /* Extensión y tamaño del fichero */
-        const file_ext = req.files[0].mimetype.split("/")[1];
-        var file_size = req.files[0].size;
-        var file_path = req.files[0].path;
-        if (
-          file_ext != "png" &&
-          file_ext != "gif" &&
-          file_ext != "jpg" &&
-          file_ext != "jpeg"
-        ) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error("La extensión del archivo no es válida.");
-        }
-        if (file_size > 50000000) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error(
-            "error",
-            "El archivo es demasiado grande. (tamaño máximo permitido = 45mb)"
+
+      const uploadedFiles = [];
+      const fileDetails = [];
+
+      // Process each file upload
+      for (let uploadedFile of req.files) {
+        try {
+          const { file, uploadResult } = await _utility.processFileUpload(
+            uploadedFile,
+            "article-sections",
+            { articleSectionId: articleSectionId },
+            { maxSize: 50000000, allowedExtensions: ["png", "gif", "jpg", "jpeg"] }
           );
-        }
-        //Conseguir nombre del archivo
-        var file_originalFileName = req.files[0].originalname;
-        var cutter = "/";
-        if (file_path.includes("\\")) {
-          cutter = "\\";
-        }
-        var file_split = file_path.split(cutter);
 
-        var file_name = req.files[0].filename;
-        var slicedOldName =
-          file_name.slice(0, 2) +
-          file_name.slice(file_name.length - 1, file_name.length);
-
-        var fileOriginalsplit = file_originalFileName.split(".");
-
-        var newOriginalName =
-          fileOriginalsplit[0] + slicedOldName + "." + fileOriginalsplit[1];
-
-        var newName =
-          file_split[0] + cutter + file_split[1] + cutter + newOriginalName;
-
-        await fs.rename(file_path, newName, function (err) {
-          if (err) {
-            throw new Error("El archivo NO se ha renombrado correctamente.");
-          }
-        });
-        /* Crear el objeto a guardar */
-        let file = await new File();
-        /* Asignar valores */
-        if (fileOriginalsplit[0].includes("EnglishTitle")) {
-          file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
-          file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
-        } else {
-          file.title = fileOriginalsplit[0];
-          file.titleEng = fileOriginalsplit[0];
-        }
-        file.location = newOriginalName;
-        file.type = file_ext;
-        file.size = file_size;
-        file.create_at = new Date();
-        const fileStored = await file.save();
-        if (!fileStored) {
-          return res.status(404).send({
-            status: "error",
-            message: "El archivo NO se ha guardado.",
+          uploadedFiles.push(file._id);
+          fileDetails.push({
+            id: file._id,
+            filename: file.title || file.titleEng,
+            cdnUrl: file.cdnUrl,
+            s3Key: file.s3Key,
+            size: file.size,
+            type: file.type,
+            metadata: file.metadata
           });
+        } catch (fileError) {
+          console.warn(`Error uploading file ${uploadedFile.originalname}:`, fileError.message);
+          // Continue with other files rather than failing completely
         }
-        articleSection.files.push(fileStored._id);
       }
+
+      if (uploadedFiles.length === 0) {
+        throw new Error("No se pudieron subir los archivos.");
+      }
+
+      // Add files to article section
+      if (!articleSection.files) {
+        articleSection.files = [];
+      }
+      articleSection.files.push(...uploadedFiles);
+
       const articleSectionUpdate = await ArticleSection.findByIdAndUpdate(
         articleSection._id,
         articleSection,
-        {
-          new: true,
-        }
+        { new: true }
       ).populate();
+
       if (!articleSectionUpdate) {
         nError = 500;
-        errMessage = "No se pudo actualizar la sección principal";
-        throw new Error(errMessage);
+        throw new Error("No se pudo actualizar la sección.");
       }
-      const mailTitle = `Se actualizó una sección principal.`;
-      const mailText = `Se actualizó una sección principal.`;
-      const mailHtml = `Se actualizó una sección principal.`;
+
+      // Send notification email
+      const mailTitle = `Se actualizaron archivos de sección.`;
+      const mailText = `Se subieron ${uploadedFiles.length} archivos a la sección.`;
+      const mailHtml = `Se subieron ${uploadedFiles.length} archivos a la sección.`;
       const mails = [
         {
           to: "lnxdrk@gmail.com",
           title: mailTitle,
           text: mailText,
           html: mailHtml,
-        },
-        {
-          to: `${userStored.email}`,
-          title: mailTitle,
-          text: mailText,
-          html: mailHtml,
-        },
+        }
       ];
       _mail.DoSendEmail(mails);
+
       return res.status(200).send({
         status: "success",
+        message: `${uploadedFiles.length} archivos subidos exitosamente a S3`,
         articleSection: articleSectionUpdate,
-        files: articleSectionUpdate.files,
+        uploadedFiles: uploadedFiles.length,
+        files: fileDetails
       });
     } catch (e) {
+      console.error("Upload error:", e);
       return res.status(nError).send({
         status: "error",
-        message: "El archivo tuvo un error al cargarse.",
+        message: "Los archivos tuvieron un error al cargarse.",
         error_message: e.message,
         error: e,
       });

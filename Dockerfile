@@ -59,7 +59,7 @@ RUN set -e; \
             adduser -S -G appgroup -s /bin/sh appuser; \
         fi; \
     fi
-RUN mkdir -p logs tmp uploads
+RUN mkdir -p logs tmp
 RUN chown -R appuser:appgroup /app
 
 ARG INCLUDE_DOTENV=true
@@ -214,7 +214,7 @@ COPY --from=build --chown=appuser:appgroup /app .
 RUN if [ "$INCLUDE_DOTENV" != "true" ] && [ -f .env ]; then echo "[production] Stripping .env" && rm .env; fi
 
 # Create necessary directories for runtime
-RUN mkdir -p logs tmp uploads
+RUN mkdir -p logs tmp
 RUN chown -R appuser:appgroup /app
 
 # Switch to non-root user
@@ -363,8 +363,8 @@ stdout_logfile_backups=3
 EOF
 
 # Create necessary directories
-RUN mkdir -p /var/log/supervisor /var/log/nginx /var/cache/nginx /tmp/nginx logs uploads && \
-    chown -R appuser:appgroup /app/logs /app/uploads && \
+RUN mkdir -p /var/log/supervisor /var/log/nginx /var/cache/nginx /tmp/nginx logs && \
+    chown -R appuser:appgroup /app/logs && \
     chmod -R 755 /var/log/nginx /var/cache/nginx /tmp/nginx
 
 # Set production environment

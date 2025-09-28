@@ -28,8 +28,8 @@ WORKDIR /scripts
 COPY scripts /scripts
 
 # Remove any attempt to source .env (not copied into image) to rely on injected env vars
-RUN sed -i '/source \.\.\/\.env/d' /scripts/backup_mongo_to_s3.sh /scripts/restore_mongo_from_s3.sh \
-    && chmod +x /scripts/*.sh
+# Keep the conditional .env loading for flexibility but rely on container env vars
+RUN chmod +x /scripts/*.sh
 
 # Create cron job (weekly 3am Sunday) and also log file
 RUN echo "0 3 * * 0 bash /scripts/backup_mongo_to_s3.sh >> /var/log/cron.log 2>&1" > /etc/cron.d/mongo-backup \

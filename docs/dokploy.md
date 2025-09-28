@@ -1,71 +1,164 @@
-# Dokploy deployment guide
+# Dokploy Deployment Guide
 
-This project provides per-service docker-compose files suited for Dokploy. Each stack joins a shared external Docker network so they can communicate even when deployed separately.
+This guide explains how to deploy the portfolio application using Dokploy, a Docker-based deployment platform. The project provides modular Docker Compose files that can be deployed as separate stacks.
 
-## Shared external network
+## What is Dokploy?
 
-- Name: lynx-portfolio-network (override via APP_NETWORK)
-- Create once on the host:
-  - docker network create lynx-portfolio-network
+Dokploy is a deployment platform that manages Docker containers and compose files. It allows you to deploy services independently while maintaining network connectivity between them.
 
-## Files
+## Network Configuration
 
-- docker-compose.mongo.yml — MongoDB database and volume
-- docker-compose.prod.yml — Node.js production app (no nginx)
-- docker-compose.app.yml — Node.js app (production build) [optional, alt]
-- docker-compose.nginx.yml — Standalone Nginx reverse proxy for the app [optional]
-- docker-compose.prod-nginx.yml — Single-container image with Node + Nginx [optional]
-- docker-compose.mongo-backup.yml — Cron-based Mongo backups to S3
+All services use a shared Docker network for communication:
 
-## Recommended deployment for Dokploy (no nginx)
+**Network Name**: `lynx-portfolio-back-network`
 
-1) Deploy docker-compose.mongo.yml (MongoDB)
-2) Deploy docker-compose.prod.yml (Backend app)
-3) (Optional) Deploy docker-compose.mongo-backup.yml (Backups)
+Create the network on your Dokploy host:
 
-## Alternatives
+```bash
+docker network create lynx-portfolio-back-network
+```
 
-- Separate nginx: Deploy mongo -> app -> nginx (use docker-compose.app.yml and docker-compose.nginx.yml)
-- Single container (Node+Nginx): Deploy mongo -> prod-nginx (use docker-compose.prod-nginx.yml)
-- In both cases, mongo-backup remains optional
+## Available Compose Files
 
-## Key environment variables (set in Dokploy)
+### Core Services
+- `docker-compose.mongo.yml` - MongoDB database with persistent storage
+- `docker-compose.prod.yml` - Production Node.js application (recommended)
+- `docker-compose.app.yml` - Alternative production application
 
-- APP_NETWORK=lynx-portfolio-network
-- DEV_PORT=6164
-- PROD_PORT=6165
-- NGINX_PORT=80
-- MONGO_PORT=27519
-- MONGO_ROOT_USERNAME, MONGO_ROOT_PASSWORD
-- MONGO_APP_DB=lynx_portfolio
-- MONGO_APP_TEST_DB=lynx_portfolio_test
-- MONGO_APP_USER=portfolio
-- MONGO_APP_PASSWORD=portfolio_pass
-- MONGO_AUTH_SOURCE=admin
-- MONGO_URI=mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_APP_DB}?authSource=${MONGO_AUTH_SOURCE}
-- JWT_SECRET=your-super-secret
-- CORS_ORIGIN=<http://lynxpardelle.com>,<https://www.lynxpardelle.com>
-- S3_BUCKET_NAME, S3_REGION, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, S3_ENDPOINT (for backups)
+### Proxy Options
+- `docker-compose.nginx.yml` - Standalone nginx reverse proxy
+- `docker-compose.prod-nginx.yml` - Combined Node.js + nginx in single container
 
-## Volumes
+### Additional Services
+- `docker-compose.mongo-backup.yml` - Automated MongoDB backups to S3
 
-- Mongo data volume is named via lynx-portfolio-back-mongo-data (default lynx-portfolio-mongo-data) so it can be reused by the backup stack. Create it automatically on first run or manually: docker volume create lynx-portfolio-mongo-data.
-- App logs/uploads volumes are defined per stack and retained across updates.
+## Deployment Strategy
 
-## Health checks
+### Recommended (Simple)
 
-- Mongo: ping via mongosh
-- App: GET /health on PORT (6165)
-- Nginx: /nginx-status and /health upstream
+Deploy these stacks in order:
 
-## Notes
+1. **MongoDB Database**: `docker-compose.mongo.yml`
+2. **Application**: `docker-compose.prod.yml` 
+3. **Backups** (optional): `docker-compose.mongo-backup.yml`
 
-- Dokploy deployment does not require nginx. The app service exposes ${PROD_PORT} on the host and listens internally on 6165.
-- If you choose to use nginx variants, ensure nginx.conf upstream points to app:6165.
-- When changing ports, update PORT, DEV_PORT/PROD_PORT, and nginx.conf upstream accordingly.
-- For local dev or Docker Compose non-Dokploy use, the original docker-compose.yml remains available.
+This setup exposes the application directly on port 6165 without nginx.
+
+### Alternative (With Nginx)
+
+For custom proxy requirements:
+
+1. **MongoDB Database**: `docker-compose.mongo.yml`
+2. **Application**: `docker-compose.app.yml`
+3. **Nginx Proxy**: `docker-compose.nginx.yml`
+4. **Backups** (optional): `docker-compose.mongo-backup.yml`
+
+## Environment Configuration
+
+Set these environment variables in your Dokploy deployment:
+
+### Required Variables
+
+**Application:**
+
+- `NODE_ENV=production`
+- `PROD_PORT=6165` (or your preferred port)
+- `JWT_SECRET=your-secure-jwt-secret`
+- `CORS_ORIGIN=https://yourdomain.com,https://www.yourdomain.com`
+
+**Database:**
+
+- `MONGO_PORT=27017`
+- `MONGO_ROOT_USERNAME=your-root-user`
+- `MONGO_ROOT_PASSWORD=your-secure-password`
+- `MONGO_APP_DB=lynx_portfolio`
+- `MONGO_APP_USER=your-app-user`
+- `MONGO_APP_PASSWORD=your-app-password`
+- `MONGO_AUTH_SOURCE=admin`
+
+**MongoDB Connection:**
+
+```bash
+MONGO_URI=mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_APP_DB}?authSource=${MONGO_AUTH_SOURCE}
+```
+
+### Optional Variables
+
+**S3 Storage (for backups and file uploads):**
+
+- `S3_BUCKET_NAME=your-bucket-name`
+- `S3_REGION=your-region`
+- `S3_ACCESS_KEY_ID=your-access-key`
+- `S3_SECRET_ACCESS_KEY=your-secret-key`
+
+**Nginx (if using proxy):**
+
+- `NGINX_PORT=80`
+
+## Volumes & Data Persistence
+
+**MongoDB Data:**
+
+- Volume: `lynx-portfolio-back-mongo-data`
+- Automatically created on first deployment
+- Shared between MongoDB and backup services
+
+**Application Logs:**
+
+- Volume: `lynx-portfolio-back-logs`
+- Retains logs across container updates
+
+## Health Checks
+
+The deployment includes built-in health monitoring:
+
+- **MongoDB**: Connection test via `mongosh`
+- **Application**: HTTP `GET /health` endpoint on port 6165
+- **Nginx**: Status endpoint at `/nginx-status`
+
+## Deployment Steps
+
+1. **Create the network** (if not exists):
+
+   ```bash
+   docker network create lynx-portfolio-back-network
+   ```
+
+2. **Configure environment variables** in Dokploy for each stack
+
+3. **Deploy MongoDB first**:
+   - Use `docker-compose.mongo.yml`
+   - Wait for health check to pass
+
+4. **Deploy the application**:
+   - Use `docker-compose.prod.yml`
+   - Verify it connects to MongoDB
+
+5. **Optional: Deploy backups**:
+   - Use `docker-compose.mongo-backup.yml`
+   - Configure S3 credentials if needed
 
 ## Troubleshooting
 
-- If nginx returns 502, check that the app’s /health endpoint returns 200 and that the containers are on the same network (docker inspect).
-- If the app cannot reach Mongo, verify MONGO_URI host is mongo with the correct port and credentials, and that the mongo stack is up.
+**Application can't connect to MongoDB:**
+
+- Verify `MONGO_URI` uses `mongo` as hostname
+- Check that both services are on the same network
+- Ensure MongoDB stack is running and healthy
+
+**502 Error with Nginx:**
+
+- Test application health: `curl http://app:6165/health`
+- Verify nginx configuration points to correct upstream
+- Check that services can communicate on the network
+
+**Backup service fails:**
+
+- Verify S3 credentials are correct
+- Check MongoDB connection from backup container
+- Review backup service logs for specific errors
+
+---
+
+*For local development, use the main `docker-compose.yml` with profiles instead.*
+

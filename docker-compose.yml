@@ -28,9 +28,22 @@ x-common-env: &common-env
   REDIS_URL: ${REDIS_URL:-}
   MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio}
   MONGO_APP_TEST_DB: ${MONGO_APP_TEST_DB:-lynx_portfolio_test}
-  MONGO_APP_USER: ${MONGO_APP_USER:-portfolio}
+  MONGO_APP_USER: ${MONGO_APP_USER:-database_user}
   MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-portfolio_pass}
   MONGO_AUTH_SOURCE: ${MONGO_AUTH_SOURCE:-admin}
+  # S3 Storage Configuration
+  S3_BUCKET_NAME: ${S3_BUCKET_NAME:-}
+  S3_REGION: ${S3_REGION:-us-east-1}
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+  S3_ENDPOINT: ${S3_ENDPOINT:-https://s3.amazonaws.com}
+  S3_UPLOAD_PREFIX: ${S3_UPLOAD_PREFIX:-uploads/}
+  S3_KMS_KEY_ARN: ${S3_KMS_KEY_ARN:-}
+  # CloudFront CDN Configuration
+  CLOUDFRONT_DOMAIN: ${CLOUDFRONT_DOMAIN:-}
+  CLOUDFRONT_DISTRIBUTION_ID: ${CLOUDFRONT_DISTRIBUTION_ID:-}
+  # AWS IAM Configuration
+  AWS_ROLE_TO_ASSUME: ${AWS_ROLE_TO_ASSUME:-}
 
 services:
   mongo-backup:
@@ -42,16 +55,18 @@ services:
       - mongo
     environment:
       MONGO_HOST: mongo
-      MONGO_PORT: ${MONGO_PORT:-27519}
+      MONGO_PORT: ${MONGO_PORT:-27017}
       MONGO_DB: ${MONGO_APP_DB:-lynx_portfolio}
-      MONGO_USER: ${MONGO_APP_USER:-portfolio}
+      MONGO_USER: ${MONGO_APP_USER:-database_user}
       MONGO_PASS: ${MONGO_APP_PASSWORD:-portfolio_pass}
       S3_BUCKET: ${S3_BUCKET_NAME}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
       S3_PATH: backups
       S3_ENDPOINT: ${S3_ENDPOINT}
       AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       AWS_DEFAULT_REGION: ${S3_REGION}
+      MONGO_BACKUP_KEEP: ${MONGO_BACKUP_KEEP:-4}
       TZ: UTC
     volumes:
       - mongo_data:/data/db:ro
@@ -75,9 +90,9 @@ services:
     image: lynx-portfolio-back-mongo-initialized:latest
     container_name: lynx-portfolio-back-mongo
     ports:
-      - "${MONGO_PORT:-27519}:27519"
+      - "${MONGO_PORT:-27017}:${MONGO_PORT:-27017}"
     environment:
-      MONGO_PORT: ${MONGO_PORT:-27519}
+      MONGO_PORT: ${MONGO_PORT:-27017}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
       MONGO_APP_DB: ${MONGO_APP_DB}
@@ -85,9 +100,9 @@ services:
       MONGO_APP_USER: ${MONGO_APP_USER}
       MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
       MONGO_RESTORE_ON_INIT: ${MONGO_RESTORE_ON_INIT:-true}
-    command: ["--bind_ip_all", "--port", "27519", "--wiredTigerCacheSizeGB=1"]
+    command: ["--bind_ip_all", "--port", "${MONGO_PORT:-27017}", "--wiredTigerCacheSizeGB=1"]
     healthcheck:
-      test: ["CMD", "mongosh", "--port", "27519", "--quiet", "--eval", "db.runCommand({ ping: 1 })"]
+      test: ["CMD", "mongosh", "--port", "${MONGO_PORT:-27017}", "--quiet", "--eval", "db.runCommand({ ping: 1 })"]
       interval: 20s
       timeout: 5s
       retries: 5
@@ -95,7 +110,6 @@ services:
     volumes:
       - mongo_data:/data/db
     restart: unless-stopped
-
   dev:
     build:
       context: .
@@ -126,7 +140,6 @@ services:
     # Restart policy
     restart: unless-stopped
     profiles: ["dev"]
-
   prod:
     build:
       context: .
@@ -148,7 +161,6 @@ services:
       MONGO_URI: ${MONGO_URI}
     volumes:
       - node_logs:/app/logs
-      - node_uploads:/app/uploads
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${PROD_PORT}/health"]
       interval: 30s
@@ -158,7 +170,6 @@ services:
     # Restart policy for production
     restart: unless-stopped
     profiles: ["prod"]
-
   # Production service with PM2
   prod-pm2:
     build:
@@ -178,7 +189,6 @@ services:
       MONGO_URI: ${MONGO_URI}
     volumes:
       - node_logs:/app/logs
-      - node_uploads:/app/uploads
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${PROD_PORT}/health"]
       interval: 30s
@@ -187,7 +197,6 @@ services:
       start_period: 30s
     restart: unless-stopped
     profiles: ["prod-pm2"]
-
   # Testing service
   test:
     build:
@@ -204,11 +213,24 @@ services:
       NODE_ENV: test
       CI: "true"
       MONGO_URI: ${MONGO_URI}
+      # Test-specific environment variables
+      S3_BUCKET_NAME: "test-bucket"
+      CLOUDFRONT_DOMAIN: "test.cloudfront.net"
+      CLOUDFRONT_DISTRIBUTION_ID: "TEST123"
+      S3_ACCESS_KEY_ID: "test-access-key"
+      S3_SECRET_ACCESS_KEY: "test-secret-key"
+      # Feature flags for testing
+      USE_S3_CDN_STORAGE: "true"
+      ENABLE_LEGACY_FILESYSTEM: "false"
+      LOG_UPLOAD_PATHS: "false"
+      FEATURE_FLAG_LOGGING: "false"
     volumes:
       - .:/app:cached
       - /app/node_modules
+      - ./tests:/app/tests
+      - ./coverage:/app/coverage
+    command: ["npm", "run", "test:ci"]
     profiles: ["test"]
-
   # Backend app service for nginx proxy
   app:
     build:
@@ -228,7 +250,6 @@ services:
       MONGO_URI: ${MONGO_URI}
     volumes:
       - node_logs:/app/logs
-      - node_uploads:/app/uploads
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${DEV_PORT}/health"]
       interval: 30s
@@ -237,7 +258,6 @@ services:
       start_period: 30s
     restart: unless-stopped
     profiles: ["nginx"]
-
   # Nginx reverse proxy service (standalone)
   nginx:
     build:
@@ -262,7 +282,6 @@ services:
       start_period: 30s
     restart: unless-stopped
     profiles: ["nginx"]
-
   # Production service with integrated nginx
   prod-nginx:
     build:
@@ -283,7 +302,6 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - node_logs:/app/logs
-      - node_uploads:/app/uploads
       - nginx_logs:/var/log/nginx
       - supervisor_logs:/var/log/supervisor
     healthcheck:
@@ -299,10 +317,6 @@ services:
 volumes:
   # Logs volume for persistent logging
   node_logs:
-    driver: local
-  
-  # Uploads volume for file uploads
-  node_uploads:
     driver: local
   
   # Nginx logs volume

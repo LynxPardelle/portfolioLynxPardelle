@@ -1,26 +1,51 @@
 # Health Endpoint
 
-This document explains the `/health` endpoint in the Lynx Pardelle Portfolio backend.
+The `/health` endpoint provides a quick way to check the application status and readiness.
 
 ## Purpose
-- Provides a simple way to check if the API and MongoDB are running.
+Check if the API server is running and whether MongoDB is connected.
 
 ## Usage
-- Send a GET request to `/health`.
-- Response includes:
-  - `status`: 'ok' if healthy, 'degraded' if DB is down
-  - `mongo`: 'connected' or 'disconnected'
-  - `error`: error message if DB is down
-  - `uptime`: server uptime in seconds
-  - `timestamp`: current server time
+Send a GET request to `/health` - no authentication required.
 
-## Example
+## Response Format
+
+**When MongoDB is connected (HTTP 200):**
+
 ```json
 {
   "status": "ok",
   "mongo": "connected",
   "error": null,
   "uptime": 123.45,
-  "timestamp": "2025-09-08T12:34:56.789Z"
+  "timestamp": "2025-09-27T12:34:56.789Z"
 }
 ```
+
+**When MongoDB is disconnected (HTTP 503):**
+
+```json
+{
+  "status": "degraded",
+  "mongo": "disconnected", 
+  "error": "Connection error message",
+  "uptime": 123.45,
+  "timestamp": "2025-09-27T12:34:56.789Z"
+}
+```
+
+## Response Fields
+
+- `status`: `"ok"` (healthy) or `"degraded"` (MongoDB down)
+- `mongo`: `"connected"` or `"disconnected"`
+- `error`: Error message when MongoDB is down, otherwise `null`
+- `uptime`: Server uptime in seconds
+- `timestamp`: Current server time in ISO format
+
+## Usage in Monitoring
+
+This endpoint is used by:
+
+- Docker health checks
+- Load balancers for readiness probes
+- Monitoring services for uptime checks

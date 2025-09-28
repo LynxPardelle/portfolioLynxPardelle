@@ -12,11 +12,11 @@ DATE=$(date +"%Y-%m-%d_%H-%M-%S")
 BACKUP_DIR="../mongo_backups"
 BACKUP_NAME="mongo_backup_$DATE.gz"
 MONGO_HOST="${MONGO_HOST:-mongo}"
-MONGO_PORT="${MONGO_PORT:-27519}"
+MONGO_PORT="${MONGO_PORT:-27017}"
 MONGO_DB="${MONGO_DB:-test}"
 MONGO_USER="${MONGO_USER}" # optional
 MONGO_PASS="${MONGO_PASS}" # optional
-S3_BUCKET="$S3_BUCKET"
+S3_BUCKET="${S3_BUCKET:-$S3_BUCKET_NAME}" # Support both variable names
 S3_PATH="${S3_PATH:-backups}" # optional
 
 # Optional custom S3 endpoint (for S3-compatible providers)
@@ -40,6 +40,7 @@ $DUMP_CMD
 
 # AWS credential guard (prefer AWS_* env vars used by AWS CLI)
 if [ -n "$S3_BUCKET" ] && [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+  echo "Uploading backup to S3: s3://$S3_BUCKET/$S3_PATH/$BACKUP_NAME"
   aws s3 $AWS_ARGS cp "$BACKUP_DIR/$BACKUP_NAME" "s3://$S3_BUCKET/$S3_PATH/$BACKUP_NAME"
   echo "Backup uploaded to S3: s3://$S3_BUCKET/$S3_PATH/$BACKUP_NAME"
 

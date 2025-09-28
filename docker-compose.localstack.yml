@@ -1,0 +1,67 @@
+# LocalStack Configuration for S3/CloudFront Testing
+
+version: '3.8'
+
+services:
+  localstack:
+    container_name: localstack-s3-testing
+    image: localstack/localstack:3.0
+    ports:
+      - "4566:4566"     # LocalStack Gateway
+      - "4510-4559:4510-4559"  # External service ports
+    environment:
+      # Core configuration
+      DEBUG: ${DEBUG:-0}
+      SERVICES: s3,cloudfront,iam,sts,cloudwatch
+      DATA_DIR: /tmp/localstack/data
+      HOST_TMP_FOLDER: ./tmp/localstack
+      
+      # S3 configuration
+      S3_ENDPOINT_STRATEGY: path
+      S3_SKIP_SIGNATURE_VALIDATION: 1
+      
+      # CloudFront configuration (basic simulation)
+      CLOUDFRONT_REQUIRE_AUTH: 0
+      
+      # Persistence
+      PERSISTENCE: 1
+      
+      # Default region for testing
+      AWS_DEFAULT_REGION: us-east-1
+      
+      # Security (for testing only)
+      SKIP_SSL_CERT_DOWNLOAD: 1
+      
+    volumes:
+      - "./tmp/localstack:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./tests/localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Test database for LocalStack integration tests
+  localstack-mongo:
+    image: mongo:8.0
+    container_name: localstack-mongo-testing
+    ports:
+      - "27518:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: testroot
+      MONGO_INITDB_ROOT_PASSWORD: testpass
+      MONGO_INITDB_DATABASE: test_portfolio
+    volumes:
+      - localstack-mongo-data:/data/db
+    command: ["mongod", "--bind_ip_all", "--port", "27017"]
+
+volumes:
+  localstack-mongo-data:
+    driver: local
+
+networks:
+  default:
+    name: localstack-testing-network

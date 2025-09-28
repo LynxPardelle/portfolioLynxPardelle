@@ -6,6 +6,11 @@ var bcrypt = require("bcrypt");
 var fs = require("fs");
 var path = require("path");
 
+/* Services */
+var s3Service = require("../services/s3");
+var _utility = require("../services/utility");
+const { S3ErrorHandler } = require("../services/s3ErrorHandler");
+
 //modelos
 var Album = require("../models/album");
 var BookImg = require("../models/bookImg");
@@ -27,6 +32,7 @@ var populateWebsite = ["desktopImg", "tabletImg", "mobileImg"];
 
 /* Main jwt */
 var jwt = require("../services/jwt");
+const { title } = require("process");
 
 var controller = {
   datosAutor: (req, res) => {
@@ -1345,26 +1351,11 @@ var controller = {
         }
 
         if (album.img) {
-          let path_file = "./uploads/main" + album.img.location;
-
           try {
-            fs.exists(path_file, (exist, err) => {
-              if (exist) {
-                fs.unlink(path_file, (err) => {
-                  if (err) {
-                    throw new Error("error", "Error al borrar archivo.");
-                  }
-                });
-              }
-            });
-          } catch (e) {
-            throw new Error(
-              "error",
-              "Error al borrar archivo ./uploads/main" + album.img.location
-            );
+            await _utility.deleteFile(album.img._id);
+          } catch (deleteError) {
+            console.warn("Error deleting album image file:", deleteError.message);
           }
-
-          let fileRemoved = await File.findOneAndDelete({ _id: album.img._id });
         }
 
         const albumDeleted = await Album.findByIdAndDelete(albumId);
@@ -1404,28 +1395,11 @@ var controller = {
         }
 
         if (bookImg.img) {
-          let path_file = "./uploads/main" + bookImg.img.location;
-
           try {
-            fs.exists(path_file, (exist, err) => {
-              if (exist) {
-                fs.unlink(path_file, (err) => {
-                  if (err) {
-                    throw new Error("error", "Error al borrar archivo.");
-                  }
-                });
-              }
-            });
-          } catch (e) {
-            throw new Error(
-              "error",
-              "Error al borrar archivo ./uploads/main" + bookImg.img.location
-            );
+            await _utility.deleteFile(bookImg.img._id);
+          } catch (deleteError) {
+            console.warn("Error deleting bookImg file:", deleteError.message);
           }
-
-          let fileRemoved = await File.findOneAndDelete({
-            _id: bookImg.img._id,
-          });
         }
 
         const bookImgDeleted = await BookImg.findByIdAndDelete(bookImgId);
@@ -1529,51 +1503,19 @@ var controller = {
         }
 
         if (song.song) {
-          let path_file = "./uploads/main" + song.song.location;
-
           try {
-            fs.exists(path_file, (exist, err) => {
-              if (exist) {
-                fs.unlink(path_file, (err) => {
-                  if (err) {
-                    throw new Error("error", "Error al borrar archivo.");
-                  }
-                });
-              }
-            });
-          } catch (e) {
-            throw new Error(
-              "error",
-              "Error al borrar archivo ./uploads/main" + song.song.location
-            );
+            await _utility.deleteFile(song.song._id);
+          } catch (deleteError) {
+            console.warn("Error deleting song file:", deleteError.message);
           }
-
-          let fileRemoved = await File.findOneAndDelete({ _id: song.song._id });
         }
 
         if (song.coverArt) {
-          let path_file = "./uploads/main" + song.coverArt.location;
-
           try {
-            fs.exists(path_file, (exist, err) => {
-              if (exist) {
-                fs.unlink(path_file, (err) => {
-                  if (err) {
-                    throw new Error("error", "Error al borrar archivo.");
-                  }
-                });
-              }
-            });
-          } catch (e) {
-            throw new Error(
-              "error",
-              "Error al borrar archivo ./uploads/main" + song.coverArt.location
-            );
+            await _utility.deleteFile(song.coverArt._id);
+          } catch (deleteError) {
+            console.warn("Error deleting song cover art:", deleteError.message);
           }
-
-          let fileRemoved = await File.findOneAndDelete({
-            _id: song.coverArt._id,
-          });
         }
 
         const songDeleted = await Song.findByIdAndDelete(songId);
@@ -1611,28 +1553,11 @@ var controller = {
         }
 
         if (video.video) {
-          let path_file = "./uploads/main" + video.video.location;
-
           try {
-            fs.exists(path_file, (exist, err) => {
-              if (exist) {
-                fs.unlink(path_file, (err) => {
-                  if (err) {
-                    throw new Error("error", "Error al borrar archivo.");
-                  }
-                });
-              }
-            });
-          } catch (e) {
-            throw new Error(
-              "error",
-              "Error al borrar archivo ./uploads/main" + video.video.location
-            );
+            await _utility.deleteFile(video.video._id);
+          } catch (deleteError) {
+            console.warn("Error deleting video file:", deleteError.message);
           }
-
-          let fileRemoved = await File.findOneAndDelete({
-            _id: video.video._id,
-          });
         }
 
         const videoDeleted = await Video.findByIdAndDelete(videoId);
@@ -1672,81 +1597,27 @@ var controller = {
         }
 
         if (website.desktopImg) {
-          let path_file = "./uploads/main" + website.desktopImg.location;
-
           try {
-            fs.exists(path_file, (exist, err) => {
-              if (exist) {
-                fs.unlink(path_file, (err) => {
-                  if (err) {
-                    throw new Error("error", "Error al borrar archivo.");
-                  }
-                });
-              }
-            });
-          } catch (e) {
-            throw new Error(
-              "error",
-              "Error al borrar archivo ./uploads/main" +
-                website.desktopImg.location
-            );
+            await _utility.deleteFile(website.desktopImg._id);
+          } catch (deleteError) {
+            console.warn("Error deleting website desktop image:", deleteError.message);
           }
-
-          let fileRemoved = await File.findOneAndDelete({
-            _id: website.desktopImg._id,
-          });
         }
 
         if (website.tabletImg) {
-          let path_file = "./uploads/main" + website.tabletImg.location;
-
           try {
-            fs.exists(path_file, (exist, err) => {
-              if (exist) {
-                fs.unlink(path_file, (err) => {
-                  if (err) {
-                    throw new Error("error", "Error al borrar archivo.");
-                  }
-                });
-              }
-            });
-          } catch (e) {
-            throw new Error(
-              "error",
-              "Error al borrar archivo ./uploads/main" +
-                website.tabletImg.location
-            );
+            await _utility.deleteFile(website.tabletImg._id);
+          } catch (deleteError) {
+            console.warn("Error deleting website tablet image:", deleteError.message);
           }
-
-          let fileRemoved = await File.findOneAndDelete({
-            _id: website.tabletImg._id,
-          });
         }
 
         if (website.mobileImg) {
-          let path_file = "./uploads/main" + website.mobileImg.location;
-
           try {
-            fs.exists(path_file, (exist, err) => {
-              if (exist) {
-                fs.unlink(path_file, (err) => {
-                  if (err) {
-                    throw new Error("error", "Error al borrar archivo.");
-                  }
-                });
-              }
-            });
-          } catch (e) {
-            throw new Error(
-              "error",
-              "Error al borrar archivo ./uploads/main" +
-                website.mobileImg.location
-            );
+            await _utility.deleteFile(website.mobileImg._id);
+          } catch (deleteError) {
+            console.warn("Error deleting website mobile image:", deleteError.message);
           }
-
-          let fileRemoved = await File.findOneAndDelete({
-            _id: website.mobileImg._id,
-          });
         }
 
         const websiteDeleted = await Website.findByIdAndDelete(websiteId);
@@ -1771,389 +1642,234 @@ var controller = {
 
   /* Uploads */
   async UploadFileAlbum(req, res) {
-    console.log("uploading image...");
+    console.log("Uploading album image to S3 with streaming pipeline...");
     let nError = 500;
-    (async () => {
-      try {
-        const albumId = req.params.id;
-        const album = await Album.findById(albumId).populate(populateAlbum);
+    
+    try {
+      const albumId = req.params.id;
+      const album = await Album.findById(albumId).populate(populateAlbum);
 
-        if (!album) {
-          nError = 404;
-          throw new Error("No hay se encontró el album.");
-        }
-
-        //Recoger el fichero de la petición
-        if (!req.files) {
-          throw new Error("Archivo no subido...");
-          nError = 404;
-        }
-
-        /* Extensión y tamaño del fichero */
-        var file_ext = req.files[0].mimetype.split("/")[1];
-        var file_size = req.files[0].size;
-        var file_path = req.files[0].path;
-
-        if (
-          file_ext != "png" &&
-          file_ext != "gif" &&
-          file_ext != "jpg" &&
-          file_ext != "jpeg"
-        ) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error("La extensión del archivo no es válida.");
-        }
-
-        if (file_size > 50000000) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error(
-            "error",
-            "El archivo es demasiado grande. (tamaño máximo permitido = 45mb)"
-          );
-        }
-        //Conseguir nombre del archivo
-        var file_originalFileName = req.files[0].originalname;
-        var cutter = "/";
-        if (file_path.includes("\\")) {
-          cutter = "\\";
-        }
-        var file_split = file_path.split(cutter);
-
-        var file_name = req.files[0].filename;
-        var slicedOldName =
-          file_name.slice(0, 2) +
-          file_name.slice(file_name.length - 1, file_name.length);
-
-        var fileOriginalsplit = file_originalFileName.split(".");
-
-        var newOriginalName =
-          fileOriginalsplit[0] + slicedOldName + "." + fileOriginalsplit[1];
-
-        var newName =
-          file_split[0] + cutter + file_split[1] + cutter + newOriginalName;
-
-        await fs.rename(file_path, newName, function (err) {
-          if (err) {
-            throw new Error("El archivo NO se ha renombrado correctamente.");
-          }
-        });
-
-        /* Crear el objeto a guardar */
-        var file = await new File();
-
-        /* Asignar valores */
-        if (fileOriginalsplit[0].includes("EnglishTitle")) {
-          file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
-          file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
-        } else {
-          file.title = fileOriginalsplit[0];
-          file.titleEng = fileOriginalsplit[0];
-        }
-        file.location = newOriginalName;
-        file.type = file_ext;
-        file.size = file_size;
-
-        var fileStored = await file.save();
-
-        if (!fileStored) {
-          return res.status(404).send({
-            status: "error",
-            message: "El archivo NO se ha guardado.",
-          });
-        }
-
-        album.img = fileStored._id;
-
-        const albumUpdated = await Album.findByIdAndUpdate(
-          { _id: albumId },
-          album,
-          { new: true }
-        ).populate(populateAlbum);
-
-        if (!albumUpdated) {
-          nError = 404;
-          throw new Error("No se actualizó el album.");
-        }
-
-        return res.status(200).send({
-          status: "success",
-          album: albumUpdated,
-          file: fileStored._id,
-        });
-      } catch (e) {
-        return res.status(nError).send({
-          status: "error",
-          message: "El archivo tuvo un error al cargarse.",
-          error_message: e.message,
-          error: e,
-        });
+      if (!album) {
+        nError = 404;
+        throw new Error("Album not found.");
       }
-    })();
+
+      // Get uploaded file
+      if (!req.files || req.files.length === 0) {
+        nError = 400;
+        throw new Error("No file uploaded.");
+      }
+
+      // Process file upload using new streaming utility
+      const { file, uploadResult } = await _utility.processFileUpload(
+        req.files[0],
+        "albums",
+        { 
+          albumId: albumId,
+          uploadedAt: new Date().toISOString(),
+          userAgent: req.headers['user-agent'] || 'unknown'
+        }
+      );
+
+      // Update album with new image
+      if (album.img) {
+        // Delete old image if exists
+        try {
+          await _utility.deleteFile(album.img);
+        } catch (deleteError) {
+          console.warn("Could not delete old album image:", deleteError.message);
+        }
+      }
+
+      album.img = file._id;
+      const albumUpdated = await Album.findByIdAndUpdate(
+        { _id: albumId },
+        album,
+        { new: true }
+      ).populate(populateAlbum);
+
+      if (!albumUpdated) {
+        nError = 404;
+        throw new Error("Failed to update album.");
+      }
+
+      // Invalidate CloudFront cache if configured
+      if (s3Service.isCloudFrontConfigured() && file.s3Key) {
+        try {
+          await s3Service.invalidateCacheWithMonitoring(file.s3Key);
+        } catch (invalidationError) {
+          console.warn("CloudFront invalidation failed:", invalidationError.message);
+        }
+      }
+
+      return res.status(200).send({
+        status: "success",
+        message: "File uploaded successfully to S3 with optimization",
+        album: albumUpdated,
+        file: {
+          id: file._id,
+          s3Key: file.s3Key,
+          s3Location: uploadResult.location,
+          cdnUrl: file.cdnUrl,
+          size: file.size,
+          type: file.type,
+          optimized: uploadResult.optimized || false
+        },
+        upload: {
+          originalSize: uploadResult.originalSize,
+          finalSize: uploadResult.optimizedSize || uploadResult.originalSize,
+          compressionRatio: uploadResult.compressionRatio || 0,
+          processingTime: uploadResult.processingTime
+        }
+      });
+    } catch (e) {
+      console.error("Upload error:", e);
+      return res.status(nError).send({
+        status: "error",
+        message: "File upload failed.",
+        error_message: e.message,
+        error: e,
+      });
+    }
   },
 
   async UploadFileBookImg(req, res) {
-    console.log("uploading image...");
-    let nError = 500;
-    (async () => {
-      try {
-        const bookImgId = req.params.id;
-        const bookImg = await BookImg.findById(bookImgId).populate(
-          populateBookImg
-        );
+    console.log("uploading book image to S3...");
+    
+    try {
+      const bookImgId = req.params.id;
+      const bookImg = await BookImg.findById(bookImgId).populate(populateBookImg);
 
-        if (!bookImg) {
-          nError = 404;
-          throw new Error("No hay se encontró el bookImg.");
-        }
-
-        //Recoger el fichero de la petición
-        if (!req.files) {
-          throw new Error("Archivo no subido...");
-          nError = 404;
-        }
-
-        /* Extensión y tamaño del fichero */
-        var file_ext = req.files[0].mimetype.split("/")[1];
-        var file_size = req.files[0].size;
-        var file_path = req.files[0].path;
-
-        if (
-          file_ext != "png" &&
-          file_ext != "gif" &&
-          file_ext != "jpg" &&
-          file_ext != "jpeg"
-        ) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error("La extensión del archivo no es válida.");
-        }
-
-        if (file_size > 50000000) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error(
-            "error",
-            "El archivo es demasiado grande. (tamaño máximo permitido = 45mb)"
-          );
-        }
-        //Conseguir nombre del archivo
-        var file_originalFileName = req.files[0].originalname;
-        var cutter = "/";
-        if (file_path.includes("\\")) {
-          cutter = "\\";
-        }
-        var file_split = file_path.split(cutter);
-
-        var file_name = req.files[0].filename;
-        var slicedOldName =
-          file_name.slice(0, 2) +
-          file_name.slice(file_name.length - 1, file_name.length);
-
-        var fileOriginalsplit = file_originalFileName.split(".");
-
-        var newOriginalName =
-          fileOriginalsplit[0] + slicedOldName + "." + fileOriginalsplit[1];
-
-        var newName =
-          file_split[0] + cutter + file_split[1] + cutter + newOriginalName;
-
-        await fs.rename(file_path, newName, function (err) {
-          if (err) {
-            throw new Error("El archivo NO se ha renombrado correctamente.");
-          }
-        });
-
-        /* Crear el objeto a guardar */
-        var file = await new File();
-
-        /* Asignar valores */
-        if (fileOriginalsplit[0].includes("EnglishTitle")) {
-          file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
-          file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
-        } else {
-          file.title = fileOriginalsplit[0];
-          file.titleEng = fileOriginalsplit[0];
-        }
-        file.location = newOriginalName;
-        file.type = file_ext;
-        file.size = file_size;
-
-        var fileStored = await file.save();
-
-        if (!fileStored) {
-          return res.status(404).send({
-            status: "error",
-            message: "El archivo NO se ha guardado.",
-          });
-        }
-
-        bookImg.img = fileStored._id;
-
-        const bookImgUpdated = await BookImg.findByIdAndUpdate(
-          { _id: bookImgId },
-          bookImg,
-          { new: true }
-        ).populate(populateBookImg);
-
-        if (!bookImgUpdated) {
-          nError = 404;
-          throw new Error("No se actualizó el bookImg.");
-        }
-
-        return res.status(200).send({
-          status: "success",
-          bookImg: bookImgUpdated,
-          file: fileStored._id,
-        });
-      } catch (e) {
-        return res.status(nError).send({
+      if (!bookImg) {
+        return res.status(404).json({
           status: "error",
-          message: "El archivo tuvo un error al cargarse.",
-          error_message: e.message,
-          error: e,
+          message: "No se encontró el bookImg.",
+          code: "BOOKIMG_NOT_FOUND"
         });
       }
-    })();
+
+      // Validate file upload
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          status: "error",
+          message: "No files uploaded",
+          code: "NO_FILES"
+        });
+      }
+
+      // Validate file type
+      const file = req.files[0];
+      const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+      const fileExtension = path.extname(file.originalname).toLowerCase();
+      
+      if (!validExtensions.includes(fileExtension)) {
+        return res.status(400).json({
+          status: "error",
+          message: `Invalid file extension: ${fileExtension}`,
+          code: "INVALID_FILE_TYPE"
+        });
+      }
+
+      // Process buffer upload with optimization
+      const uploadResult = await _utility.processBufferUpload(file, 'bookimg');
+
+      // Create File record
+      const fileRecord = new File({
+        name: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+        key: uploadResult.key,
+        s3Url: uploadResult.s3Url,
+        cdnUrl: uploadResult.cdnUrl,
+        category: 'bookimg',
+        metadata: {
+          bookImgId: bookImgId,
+          optimized: uploadResult.optimized || false
+        }
+      });
+
+      const savedFile = await fileRecord.save();
+
+      // Update bookImg with new image
+      bookImg.img = savedFile._id;
+      const bookImgUpdated = await BookImg.findByIdAndUpdate(
+        { _id: bookImgId },
+        bookImg,
+        { new: true }
+      ).populate(populateBookImg);
+
+      if (!bookImgUpdated) {
+        return res.status(404).json({
+          status: "error",
+          message: "No se actualizó el bookImg.",
+          code: "UPDATE_FAILED"
+        });
+      }
+
+      return res.status(200).json({
+        status: "success",
+        message: "Book image uploaded successfully to S3",
+        bookImg: bookImgUpdated,
+        file: {
+          id: savedFile._id,
+          originalName: file.originalname,
+          key: uploadResult.key,
+          url: uploadResult.cdnUrl || uploadResult.s3Url,
+          size: file.size,
+          optimized: uploadResult.optimized || false
+        }
+      });
+    } catch (error) {
+      console.error("UploadFileBookImg error:", error);
+      return S3ErrorHandler.handleUploadError(error, req, res);
+    }
   },
 
   async UploadFileMain(req, res) {
-    console.log("uploading image...");
+    console.log("uploading main image to S3...");
     let nError = 500;
+    
     try {
       const main = await Main.findOne().populate(populateMain);
       const mainId = main._id;
+      const option = req.params.id; // logo, backgroundImg, CVImage, CVBackground
 
       if (!main) {
         nError = 404;
         throw new Error("No hay se encontró main.");
       }
 
-      //Recoger el fichero de la petición
-      if (!req.files) {
-        throw new Error("Archivo no subido...");
+      // Get uploaded file
+      if (!req.files || req.files.length === 0) {
         nError = 404;
+        throw new Error("Archivo no subido...");
       }
 
-      /* Extensión y tamaño del fichero */
-      var file_ext = req.files[0].mimetype.split("/")[1];
-      var file_size = req.files[0].size;
-      var file_path = req.files[0].path;
+      // Process file upload using utility
+      const { file, uploadResult } = await _utility.processFileUpload(
+        req.files[0],
+        "main",
+        { mainId: mainId, option: option },
+        { maxSize: 50000000, allowedExtensions: ["png", "gif", "jpg", "jpeg"] }
+      );
 
-      if (
-        file_ext != "png" &&
-        file_ext != "gif" &&
-        file_ext != "jpg" &&
-        file_ext != "jpeg"
-      ) {
-        /* Borrar el archivo */
-        await fs.unlink(file_path, (err) => {
-          if (err) {
-            throw new Error("Error al borrar archivo.");
-          }
-        });
-        throw new Error("La extensión del archivo no es válida.");
+      // Update main with new image based on option
+      switch (option) {
+        case "logo":
+          main.logo = file._id;
+          break;
+        case "backgroundImg":
+          main.backgroundImg = file._id;
+          break;
+        case "CVImage":
+          main.CVImage = file._id;
+          break;
+        case "CVBackground":
+          main.CVBackground = file._id;
+          break;
+        default:
+          throw new Error("Invalid option: " + option);
       }
-
-      if (file_size > 50000000) {
-        /* Borrar el archivo */
-        await fs.unlink(file_path, (err) => {
-          if (err) {
-            throw new Error("Error al borrar archivo.");
-          }
-        });
-        throw new Error(
-          "error",
-          "El archivo es demasiado grande. (tamaño máximo permitido = 45mb)"
-        );
-      }
-      //Conseguir nombre del archivo
-      var file_originalFileName = req.files[0].originalname;
-      var cutter = "/";
-      if (file_path.includes("\\")) {
-        cutter = "\\";
-      }
-      var file_split = file_path.split(cutter);
-
-      var file_name = req.files[0].filename;
-      var slicedOldName =
-        file_name.slice(0, 2) +
-        file_name.slice(file_name.length - 1, file_name.length);
-
-      var fileOriginalsplit = file_originalFileName.split(".");
-
-      var newOriginalName =
-        fileOriginalsplit[0] + slicedOldName + "." + fileOriginalsplit[1];
-
-      var newName =
-        file_split[0] + cutter + file_split[1] + cutter + newOriginalName;
-
-      await fs.rename(file_path, newName, function (err) {
-        if (err) {
-          throw new Error("El archivo NO se ha renombrado correctamente.");
-        }
-      });
-
-      /* Crear el objeto a guardar */
-      var file = await new File();
-
-      /* Asignar valores */
-      if (fileOriginalsplit[0].includes("EnglishTitle")) {
-        file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
-        file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
-      } else {
-        file.title = fileOriginalsplit[0];
-        file.titleEng = fileOriginalsplit[0];
-      }
-      file.location = newOriginalName;
-      file.type = file_ext;
-      file.size = file_size;
-
-      var fileStored = await file.save();
-
-      if (!fileStored) {
-        return res.status(404).send({
-          status: "error",
-          message: "El archivo NO se ha guardado.",
-        });
-      }
-
-      /* Actualizar main */
-      var option = req.params.id;
-
-      await (() => {
-        switch (option) {
-          case "logo":
-            main.logo = fileStored._id;
-            break;
-          case "backgroundImg":
-            main.backgroundImg = fileStored._id;
-            break;
-          case "CVImage":
-            main.CVImage = fileStored._id;
-            break;
-          case "CVBackground":
-            main.CVBackground = fileStored._id;
-            break;
-        }
-      })();
 
       const mainUpdated = await Main.findByIdAndUpdate({ _id: mainId }, main, {
         new: true,
@@ -2161,18 +1877,22 @@ var controller = {
 
       if (!mainUpdated) {
         nError = 404;
-        throw new Error("No hay se actualizó el main.");
+        throw new Error("No se actualizó el main.");
       }
 
+      // Clean up sensitive data
       mainUpdated.key = undefined;
       mainUpdated.keyOld = undefined;
 
       return res.status(200).send({
         status: "success",
+        message: "Archivo subido exitosamente a S3",
         main: mainUpdated,
-        file: fileStored._id,
+        file: file._id,
+        s3Location: uploadResult.location,
       });
     } catch (e) {
+      console.error("Upload error:", e);
       return res.status(nError).send({
         status: "error",
         message: "El archivo tuvo un error al cargarse.",
@@ -2183,443 +1903,330 @@ var controller = {
   },
 
   async UploadFileSong(req, res) {
-    console.log("uploading image...");
+    console.log("uploading song file to S3...");
     let nError = 500;
-    (async () => {
-      try {
-        const songId = req.params.id;
-        const song = await Song.findById(songId).populate(populateSong);
+    
+    try {
+      const songId = req.params.id;
+      const option = req.params.option; // song or coverArt
+      const song = await Song.findById(songId).populate(populateSong);
 
-        if (!song) {
-          nError = 404;
-          throw new Error("No hay se encontró el song.");
-        }
-
-        //Recoger el fichero de la petición
-        if (!req.files) {
-          throw new Error("Archivo no subido...");
-          nError = 404;
-        }
-
-        /* Extensión y tamaño del fichero */
-        var file_ext = req.files[0].mimetype.split("/")[1];
-        var file_size = req.files[0].size;
-        var file_path = req.files[0].path;
-
-        /* Actualizar main */
-        var option = req.params.option;
-
-        if (
-          !option ||
-          (option === "song" &&
-            file_ext != "mp3" &&
-            file_ext != "mpeg" &&
-            file_ext != "ogg" &&
-            file_ext != "wav") ||
-          (option === "coverArt" &&
-            file_ext != "png" &&
-            file_ext != "gif" &&
-            file_ext != "jpg" &&
-            file_ext != "jpeg")
-        ) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error("La extensión del archivo no es válida.");
-        }
-
-        if (file_size > 100000000) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error(
-            "error",
-            "El archivo es demasiado grande. (tamaño máximo permitido = 45mb)"
-          );
-        }
-        //Conseguir nombre del archivo
-        var file_originalFileName = req.files[0].originalname;
-        var cutter = "/";
-        if (file_path.includes("\\")) {
-          cutter = "\\";
-        }
-        var file_split = file_path.split(cutter);
-
-        var file_name = req.files[0].filename;
-        var slicedOldName =
-          file_name.slice(0, 2) +
-          file_name.slice(file_name.length - 1, file_name.length);
-
-        var fileOriginalsplit = file_originalFileName.split(".");
-
-        var newOriginalName =
-          fileOriginalsplit[0] + slicedOldName + "." + fileOriginalsplit[1];
-
-        var newName =
-          file_split[0] + cutter + file_split[1] + cutter + newOriginalName;
-
-        await fs.rename(file_path, newName, function (err) {
-          if (err) {
-            throw new Error("El archivo NO se ha renombrado correctamente.");
-          }
-        });
-
-        /* Crear el objeto a guardar */
-        var file = await new File();
-
-        /* Asignar valores */
-        if (fileOriginalsplit[0].includes("EnglishTitle")) {
-          file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
-          file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
-        } else {
-          file.title = fileOriginalsplit[0];
-          file.titleEng = fileOriginalsplit[0];
-        }
-        file.location = newOriginalName;
-        file.type = file_ext;
-        file.size = file_size;
-
-        var fileStored = await file.save();
-
-        if (!fileStored) {
-          return res.status(404).send({
-            status: "error",
-            message: "El archivo NO se ha guardado.",
-          });
-        }
-
-        await (() => {
-          switch (option) {
-            case "song":
-              song.song = fileStored._id;
-              break;
-            case "coverArt":
-              song.coverArt = fileStored._id;
-              break;
-          }
-        })();
-
-        const songUpdated = await Song.findByIdAndUpdate(
-          { _id: songId },
-          song,
-          { new: true }
-        ).populate(populateSong);
-
-        if (!songUpdated) {
-          nError = 404;
-          throw new Error("No se actualizó el song.");
-        }
-
-        return res.status(200).send({
-          status: "success",
-          song: songUpdated,
-          file: fileStored._id,
-        });
-      } catch (e) {
-        return res.status(nError).send({
-          status: "error",
-          message: "El archivo tuvo un error al cargarse.",
-          error_message: e.message,
-          error: e,
-        });
+      if (!song) {
+        nError = 404;
+        throw new Error("No hay se encontró el song.");
       }
-    })();
+
+      // Get uploaded file
+      if (!req.files || req.files.length === 0) {
+        nError = 404;
+        throw new Error("Archivo no subido...");
+      }
+
+      // Determine allowed extensions and max size based on option
+      let allowedExtensions, maxSize;
+      if (option === "song") {
+        allowedExtensions = ["mp3", "mpeg", "ogg", "wav"];
+        maxSize = 100000000; // 100MB for audio files
+      } else if (option === "coverArt") {
+        allowedExtensions = ["png", "gif", "jpg", "jpeg"];
+        maxSize = 50000000; // 50MB for images
+      } else {
+        throw new Error("Invalid option: " + option);
+      }
+
+      // Process file upload using utility
+      const { file, uploadResult } = await _utility.processFileUpload(
+        req.files[0],
+        "songs",
+        { songId: songId, option: option },
+        { maxSize: maxSize, allowedExtensions: allowedExtensions }
+      );
+
+      // Update song with new file based on option
+      if (option === "song") {
+        song.song = file._id;
+      } else if (option === "coverArt") {
+        song.coverArt = file._id;
+      }
+
+      const songUpdated = await Song.findByIdAndUpdate(
+        { _id: songId },
+        song,
+        { new: true }
+      ).populate(populateSong);
+
+      if (!songUpdated) {
+        nError = 404;
+        throw new Error("No se actualizó el song.");
+      }
+
+      return res.status(200).send({
+        status: "success",
+        message: "Archivo subido exitosamente a S3",
+        song: songUpdated,
+        file: file._id,
+        s3Location: uploadResult.location,
+      });
+    } catch (e) {
+      console.error("Upload error:", e);
+      return res.status(nError).send({
+        status: "error",
+        message: "El archivo tuvo un error al cargarse.",
+        error_message: e.message,
+        error: e,
+      });
+    }
   },
 
   async UploadFileVideo(req, res) {
-    console.log("uploading image...");
+    console.log("uploading video to S3...");
     let nError = 500;
-    (async () => {
-      try {
-        const videoId = req.params.id;
-        const video = await Video.findById(videoId).populate(populateVideo);
+    
+    try {
+      const videoId = req.params.id;
+      const video = await Video.findById(videoId).populate(populateVideo);
 
-        if (!video) {
-          nError = 404;
-          throw new Error("No hay se encontró el video.");
-        }
-
-        //Recoger el fichero de la petición
-        if (!req.files) {
-          throw new Error("Archivo no subido...");
-          nError = 404;
-        }
-
-        /* Extensión y tamaño del fichero */
-        var file_ext = req.files[0].mimetype.split("/")[1];
-        var file_size = req.files[0].size;
-        var file_path = req.files[0].path;
-
-        if (file_ext != "mp4" && file_ext != "webm") {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error("La extensión del archivo no es válida.");
-        }
-
-        if (file_size > 50000000) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error(
-            "error",
-            "El archivo es demasiado grande. (tamaño máximo permitido = 45mb)"
-          );
-        }
-        //Conseguir nombre del archivo
-        var file_originalFileName = req.files[0].originalname;
-        var cutter = "/";
-        if (file_path.includes("\\")) {
-          cutter = "\\";
-        }
-        var file_split = file_path.split(cutter);
-
-        var file_name = req.files[0].filename;
-        var slicedOldName =
-          file_name.slice(0, 2) +
-          file_name.slice(file_name.length - 1, file_name.length);
-
-        var fileOriginalsplit = file_originalFileName.split(".");
-
-        var newOriginalName =
-          fileOriginalsplit[0] + slicedOldName + "." + fileOriginalsplit[1];
-
-        var newName =
-          file_split[0] + cutter + file_split[1] + cutter + newOriginalName;
-
-        await fs.rename(file_path, newName, function (err) {
-          if (err) {
-            throw new Error("El archivo NO se ha renombrado correctamente.");
-          }
-        });
-
-        /* Crear el objeto a guardar */
-        var file = await new File();
-
-        /* Asignar valores */
-        if (fileOriginalsplit[0].includes("EnglishTitle")) {
-          file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
-          file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
-        } else {
-          file.title = fileOriginalsplit[0];
-          file.titleEng = fileOriginalsplit[0];
-        }
-        file.location = newOriginalName;
-        file.type = file_ext;
-        file.size = file_size;
-
-        var fileStored = await file.save();
-
-        if (!fileStored) {
-          return res.status(404).send({
-            status: "error",
-            message: "El archivo NO se ha guardado.",
-          });
-        }
-
-        video.video = fileStored._id;
-
-        const videoUpdated = await Video.findByIdAndUpdate(
-          { _id: videoId },
-          video,
-          { new: true }
-        ).populate(populateVideo);
-
-        if (!videoUpdated) {
-          nError = 404;
-          throw new Error("No se actualizó el video.");
-        }
-
-        return res.status(200).send({
-          status: "success",
-          video: videoUpdated,
-          file: fileStored._id,
-        });
-      } catch (e) {
-        return res.status(nError).send({
-          status: "error",
-          message: "El archivo tuvo un error al cargarse.",
-          error_message: e.message,
-          error: e,
-        });
+      if (!video) {
+        nError = 404;
+        throw new Error("No hay se encontró el video.");
       }
-    })();
+
+      // Get uploaded file
+      if (!req.files || req.files.length === 0) {
+        nError = 404;
+        throw new Error("Archivo no subido...");
+      }
+
+      // Process file upload using utility
+      const { file, uploadResult } = await _utility.processFileUpload(
+        req.files[0],
+        "videos",
+        { videoId: videoId },
+        { maxSize: 200000000, allowedExtensions: ["mp4", "avi", "mov", "wmv", "flv", "webm"] }
+      );
+
+      // Update video with new file
+      video.video = file._id;
+      const videoUpdated = await Video.findByIdAndUpdate(
+        { _id: videoId },
+        video,
+        { new: true }
+      ).populate(populateVideo);
+
+      if (!videoUpdated) {
+        nError = 404;
+        throw new Error("No se actualizó el video.");
+      }
+
+      return res.status(200).send({
+        status: "success",
+        message: "Archivo subido exitosamente a S3",
+        video: videoUpdated,
+        file: file._id,
+        s3Location: uploadResult.location,
+      });
+    } catch (e) {
+      console.error("Upload error:", e);
+      return res.status(nError).send({
+        status: "error",
+        message: "El archivo tuvo un error al cargarse.",
+        error_message: e.message,
+        error: e,
+      });
+    }
   },
 
   async UploadFileWebsite(req, res) {
-    console.log("uploading image...");
+    console.log("uploading website image to S3...");
     let nError = 500;
-    (async () => {
-      try {
-        const websiteId = req.params.id;
-        const website = await Website.findById(websiteId).populate(
-          populateWebsite
-        );
+    
+    try {
+      const websiteId = req.params.id;
+      const option = req.params.option; // desktopImg, tabletImg, mobileImg
+      const website = await Website.findById(websiteId).populate(populateWebsite);
 
-        if (!website) {
-          nError = 404;
-          throw new Error("No hay se encontró el website.");
-        }
-
-        //Recoger el fichero de la petición
-        if (!req.files) {
-          throw new Error("Archivo no subido...");
-          nError = 404;
-        }
-
-        /* Extensión y tamaño del fichero */
-        var file_ext = req.files[0].mimetype.split("/")[1];
-        var file_size = req.files[0].size;
-        var file_path = req.files[0].path;
-
-        if (
-          file_ext != "png" &&
-          file_ext != "gif" &&
-          file_ext != "jpg" &&
-          file_ext != "jpeg"
-        ) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error("La extensión del archivo no es válida.");
-        }
-
-        if (file_size > 50000000) {
-          /* Borrar el archivo */
-          await fs.unlink(file_path, (err) => {
-            if (err) {
-              throw new Error("Error al borrar archivo.");
-            }
-          });
-          throw new Error(
-            "error",
-            "El archivo es demasiado grande. (tamaño máximo permitido = 45mb)"
-          );
-        }
-        //Conseguir nombre del archivo
-        var file_originalFileName = req.files[0].originalname;
-        var cutter = "/";
-        if (file_path.includes("\\")) {
-          cutter = "\\";
-        }
-        var file_split = file_path.split(cutter);
-
-        var file_name = req.files[0].filename;
-        var slicedOldName =
-          file_name.slice(0, 2) +
-          file_name.slice(file_name.length - 1, file_name.length);
-
-        var fileOriginalsplit = file_originalFileName.split(".");
-
-        var newOriginalName =
-          fileOriginalsplit[0] + slicedOldName + "." + fileOriginalsplit[1];
-
-        var newName =
-          file_split[0] + cutter + file_split[1] + cutter + newOriginalName;
-
-        await fs.rename(file_path, newName, function (err) {
-          if (err) {
-            throw new Error("El archivo NO se ha renombrado correctamente.");
-          }
-        });
-
-        /* Crear el objeto a guardar */
-        var file = await new File();
-
-        /* Asignar valores */
-        if (fileOriginalsplit[0].includes("EnglishTitle")) {
-          file.title = fileOriginalsplit[0].split("EnglishTitle")[0];
-          file.titleEng = fileOriginalsplit[0].split("EnglishTitle")[1];
-        } else {
-          file.title = fileOriginalsplit[0];
-          file.titleEng = fileOriginalsplit[0];
-        }
-        file.location = newOriginalName;
-        file.type = file_ext;
-        file.size = file_size;
-
-        var fileStored = await file.save();
-
-        if (!fileStored) {
-          return res.status(404).send({
-            status: "error",
-            message: "El archivo NO se ha guardado.",
-          });
-        }
-
-        /* Actualizar main */
-        var option = req.params.option;
-
-        await (() => {
-          switch (option) {
-            case "desktopImg":
-              website.desktopImg = fileStored._id;
-              break;
-            case "tabletImg":
-              website.tabletImg = fileStored._id;
-              break;
-            case "mobileImg":
-              website.mobileImg = fileStored._id;
-              break;
-          }
-        })();
-
-        const websiteUpdated = await Website.findByIdAndUpdate(
-          { _id: websiteId },
-          website,
-          { new: true }
-        ).populate(populateWebsite);
-
-        if (!websiteUpdated) {
-          nError = 404;
-          throw new Error("No se actualizó el website.");
-        }
-
-        return res.status(200).send({
-          status: "success",
-          website: websiteUpdated,
-          file: fileStored._id,
-        });
-      } catch (e) {
-        return res.status(nError).send({
-          status: "error",
-          message: "El archivo tuvo un error al cargarse.",
-          error_message: e.message,
-          error: e,
-        });
+      if (!website) {
+        nError = 404;
+        throw new Error("No hay se encontró el website.");
       }
-    })();
+
+      // Get uploaded file
+      if (!req.files || req.files.length === 0) {
+        nError = 404;
+        throw new Error("Archivo no subido...");
+      }
+
+      // Validate option
+      if (!["desktopImg", "tabletImg", "mobileImg"].includes(option)) {
+        throw new Error("Invalid option: " + option);
+      }
+
+      // Process file upload using utility
+      const { file, uploadResult } = await _utility.processFileUpload(
+        req.files[0],
+        "websites",
+        { websiteId: websiteId, option: option },
+        { maxSize: 50000000, allowedExtensions: ["png", "gif", "jpg", "jpeg"] }
+      );
+
+      // Update website with new image based on option
+      website[option] = file._id;
+
+      const websiteUpdated = await Website.findByIdAndUpdate(
+        { _id: websiteId },
+        website,
+        { new: true }
+      ).populate(populateWebsite);
+
+      if (!websiteUpdated) {
+        nError = 404;
+        throw new Error("No se actualizó el website.");
+      }
+
+      return res.status(200).send({
+        status: "success",
+        message: "Archivo subido exitosamente a S3",
+        website: websiteUpdated,
+        file: file._id,
+        s3Location: uploadResult.location,
+      });
+    } catch (e) {
+      console.error("Upload error:", e);
+      return res.status(nError).send({
+        status: "error",
+        message: "El archivo tuvo un error al cargarse.",
+        error_message: e.message,
+        error: e,
+      });
+    }
   },
 
   async getFile(req, res) {
-    var file = req.params.file;
-    var path_file = "./uploads/main/" + file;
-
-    fs.exists(path_file, (exists) => {
-      if (exists) {
-        return res.sendFile(path.resolve(path_file));
-      } else {
-        return res.status(404).send({
+    try {
+      const fileId = req.params.id;
+      
+      console.log('getFile called with fileId:', fileId);
+      
+      // Validate that the ID is a valid MongoDB ObjectId
+      if (!fileId || !fileId.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).send({
           status: "error",
-          message: "El archivo no existe.",
+          message: "Invalid file ID format",
+          code: "INVALID_FILE_ID"
         });
       }
-    });
+      
+      // Find the file by ID
+      const file = await File.findById(fileId);
+
+      // S3/CDN serving logic (S3-only mode)
+      if (file && file.s3Key && s3Service.isConfigured()) {
+        try {
+          if (file.cdnUrl && s3Service.isCloudFrontConfigured()) {
+            // Redirect to CloudFront CDN URL for better performance
+            return res.redirect(file.cdnUrl);
+          } else if (file.location) {
+            // Redirect to direct S3 URL
+            return res.redirect(file.location);
+          } else {
+            // Generate CDN URL on the fly and update file record
+            const cdnUrl = s3Service.buildCdnUrl(file.s3Key);
+            
+            // Update file record with CDN URL for future requests
+            await File.findByIdAndUpdate(file._id, { cdnUrl: cdnUrl });
+            
+            return res.redirect(cdnUrl);
+          }
+        } catch (s3Error) {
+          console.warn("S3/CDN redirect error:", s3Error.message);
+          
+          return res.status(503).send({
+            status: "error",
+            message: "S3/CDN service temporarily unavailable.",
+            code: "S3_SERVICE_ERROR",
+            hint: "Please try again later."
+          });
+        }
+      }
+      
+      // File not found in S3 storage system
+      const errorMessage = "El archivo no existe en el sistema de archivos S3.";
+      const hint = "Este sistema usa solo almacenamiento S3. Verifique que el archivo haya sido migrado.";
+      
+      return res.status(404).send({
+        status: "error",
+        message: errorMessage,
+        code: "FILE_NOT_FOUND",
+        strategy: "s3-only",
+        hint: hint
+      });
+    } catch (error) {
+      console.error("File serving error:", error);
+      return res.status(500).send({
+        status: "error",
+        message: "Error al servir el archivo.",
+        error_message: error.message,
+      });
+    }
+  },
+
+  /**
+   * Get file metadata with CDN URLs
+   * Returns file information including CDN URLs instead of serving the file directly
+   */
+  async getFileInfo(req, res) {
+    try {
+      const fileId = req.params.id;
+      
+      const file = await File.findById(fileId);
+      
+      if (!file) {
+        return res.status(404).json({
+          status: "error",
+          message: "File not found"
+        });
+      }
+
+      // Build response with CDN URLs
+      const response = {
+        id: file._id,
+        filename: file.title || file.titleEng || 'Unknown',
+        originalFilename: file.metadata?.originalName || file.title,
+        size: file.size,
+        type: file.type,
+        mimeType: file.metadata?.mimeType,
+        cdnUrl: file.cdnUrl,
+        s3Key: file.s3Key,
+        s3Url: file.location, // Direct S3 URL for fallback
+        checksums: file.checksums,
+        metadata: file.metadata,
+        createdAt: file.createdAt,
+        updatedAt: file.updatedAt
+      };
+
+      // Generate CDN URL if missing
+      if (!file.cdnUrl && file.s3Key && s3Service.isConfigured()) {
+        const cdnUrl = s3Service.buildCdnUrl(file.s3Key);
+        response.cdnUrl = cdnUrl;
+        
+        // Update file record asynchronously
+        File.findByIdAndUpdate(file._id, { cdnUrl: cdnUrl }).catch(err => {
+          console.warn("Could not update file CDN URL:", err.message);
+        });
+      }
+
+      return res.status(200).json({
+        status: "success",
+        file: response
+      });
+    } catch (error) {
+      console.error("File info error:", error);
+      return res.status(500).json({
+        status: "error", 
+        message: "Error retrieving file information",
+        error_message: error.message
+      });
+    }
   },
 };
 

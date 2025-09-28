@@ -27,15 +27,16 @@ services:
       JWT_SECRET: ${JWT_SECRET:-your-jwt-secret}
       MONGO_URI: ${MONGO_URI}
       MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio}
-      MONGO_APP_USER: ${MONGO_APP_USER:-portfolio}
+      MONGO_APP_TEST_DB: ${MONGO_APP_TEST_DB:-lynx_portfolio_test}
+      MONGO_APP_USER: ${MONGO_APP_USER:-database_user}
       MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-portfolio_pass}
       MONGO_AUTH_SOURCE: ${MONGO_AUTH_SOURCE:-admin}
+      REDIS_URL: ${REDIS_URL:-}
       NGINX_HOST: ${NGINX_HOST:-localhost}
       NGINX_PORT: ${NGINX_PORT:-80}
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - node_logs:/app/logs
-      - node_uploads:/app/uploads
       - nginx_logs:/var/log/nginx
       - supervisor_logs:/var/log/supervisor
     healthcheck:
@@ -54,9 +55,6 @@ networks:
 volumes:
   node_logs:
     name: lynx-portfolio-back-logs
-    driver: local
-  node_uploads:
-    name: lynx-portfolio-back-uploads
     driver: local
   nginx_logs:
     name: lynx-portfolio-back-nginx-logs
