@@ -1028,7 +1028,7 @@ const controller = {
         .limit(limit)
         .skip(skip)
         .populate(populate.article);
-      const total = await Article.count(json);
+      const total = await Article.countDocuments(json);
       return { articles, total };
     } catch (err) {
       throw Error(err);
