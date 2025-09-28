@@ -23,6 +23,7 @@ services:
     ports:
       - "${PROD_PORT:-6165}:6165"
     environment:
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:${PROD_PORT:-6165}}
       NODE_ENV: production
       # Keep internal app port at 6165 for consistency with Dockerfile healthcheck
       PORT: 6165
