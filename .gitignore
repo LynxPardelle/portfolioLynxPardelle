@@ -143,8 +143,8 @@ secrets/
 mongo_backups/*
 !mongo_backups/.gitkeep
 
-# Private migration history (contains sensitive migration data)
-private-migration-history/
+# Private projects (contains sensitive project data)
+private-projects/
 
 # Useful scripts for development (generic reusable tools)
 useful-scripts/

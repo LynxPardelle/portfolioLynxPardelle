@@ -47,8 +47,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 # - Restrict network exposure (bind_ip).
 
 
-# Copy database_init BSON/metadata files
-COPY database_init/ /database_init/
 # Copy all init scripts (including z_restore_db_if_needed.sh which runs last)
 COPY mongo-init/ /docker-entrypoint-initdb.d/
 # Enforce deterministic ordering: user creation before restore
