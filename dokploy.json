@@ -1,0 +1,491 @@
+{
+  "name": "portfolio-mongo-unified",
+  "description": "Portfolio application with MongoDB Unified Container optimized for Dokploy deployment",
+  "version": "2.0.0",
+  "type": "docker-compose",
+  "framework": "nodejs-mongodb",
+  
+  "repository": {
+    "url": "https://github.com/yourusername/portfolioLynxPardelle.git",
+    "branch": "main",
+    "buildPath": "."
+  },
+  
+  "services": {
+    "mongo-unified": {
+      "image": "mongo-unified:2.0.0",
+      "description": "Unified MongoDB container with backup, health monitoring, and deployment automation",
+      "buildConfig": {
+        "dockerfile": "private-projects/mongo-backup-v2/docker/Dockerfile.mongo-unified",
+        "context": ".",
+        "target": "production"
+      },
+      "ports": [
+        {
+          "hostPort": 27017,
+          "containerPort": 27017,
+          "protocol": "tcp"
+        }
+      ],
+      "environmentVariables": {
+        "MONGO_INITDB_ROOT_USERNAME": "root",
+        "MONGO_INITDB_ROOT_PASSWORD": "${MONGO_ROOT_PASSWORD}",
+        "MONGO_PORT": "27017",
+        "MONGO_APP_DB": "lynx_portfolio",
+        "MONGO_APP_USER": "portfolio",
+        "MONGO_APP_PASSWORD": "${MONGO_APP_PASSWORD}",
+        "MONGO_APP_TEST_DB": "lynx_portfolio_test",
+        "S3_BUCKET_NAME": "${S3_BUCKET_NAME}",
+        "S3_REGION": "${S3_REGION}",
+        "S3_ACCESS_KEY_ID": "${S3_ACCESS_KEY_ID}",
+        "S3_SECRET_ACCESS_KEY": "${S3_SECRET_ACCESS_KEY}",
+        "S3_BACKUP_PATH": "backups",
+        "S3_DEPLOYMENT_BACKUP_PATH": "deployment-backups",
+        "ENABLE_BACKUP_SERVICE": "true",
+        "ENABLE_HEALTH_MONITORING": "true",
+        "SUPERVISOR_LOG_LEVEL": "info",
+        "MONGO_BACKUP_KEEP": "14",
+        "TZ": "UTC",
+        "LANG": "en_US.UTF-8"
+      },
+      "volumes": [
+        {
+          "name": "mongo-data",
+          "hostPath": "/var/lib/dokploy/data/portfolio/mongo",
+          "containerPath": "/data/db",
+          "type": "bind"
+        },
+        {
+          "name": "mongo-backups",
+          "hostPath": "/var/lib/dokploy/backups/portfolio/mongo",
+          "containerPath": "/data/backups",
+          "type": "bind"
+        },
+        {
+          "name": "mongo-logs",
+          "hostPath": "/var/lib/dokploy/logs/portfolio/mongo",
+          "containerPath": "/var/log",
+          "type": "bind"
+        }
+      ],
+      "networks": ["app-network"],
+      "healthCheck": {
+        "command": "/opt/mongo-unified/scripts/health-check.sh",
+        "interval": 30,
+        "timeout": 10,
+        "retries": 5,
+        "startPeriod": 60
+      },
+      "resources": {
+        "limits": {
+          "memory": "2G",
+          "cpus": "2.0"
+        },
+        "reservations": {
+          "memory": "1G",
+          "cpus": "1.0"
+        }
+      },
+      "restartPolicy": "unless-stopped",
+      "labels": {
+        "com.lynxpardelle.service": "mongo-unified",
+        "com.lynxpardelle.version": "2.0.0",
+        "com.lynxpardelle.component": "database",
+        "traefik.enable": "false"
+      }
+    },
+    
+    "app": {
+      "image": "portfolio-app:latest",
+      "description": "Node.js portfolio application",
+      "buildConfig": {
+        "dockerfile": "Dockerfile",
+        "context": ".",
+        "target": "production"
+      },
+      "dependsOn": [
+        {
+          "service": "mongo-unified",
+          "condition": "service_healthy"
+        }
+      ],
+      "ports": [
+        {
+          "hostPort": "${APP_PORT}",
+          "containerPort": 6165,
+          "protocol": "tcp"
+        }
+      ],
+      "environmentVariables": {
+        "NODE_ENV": "production",
+        "PORT": "6165",
+        "API_BASE_URL": "https://${DOMAIN_NAME}",
+        "CORS_ORIGIN": "https://${DOMAIN_NAME}",
+        "JWT_SECRET": "${JWT_SECRET}",
+        "MONGO_URI": "mongodb://portfolio:${MONGO_APP_PASSWORD}@mongo-unified:27017/lynx_portfolio",
+        "MONGO_TEST_URI": "mongodb://portfolio:${MONGO_APP_PASSWORD}@mongo-unified:27017/lynx_portfolio_test",
+        "MONGO_APP_DB": "lynx_portfolio",
+        "MONGO_APP_TEST_DB": "lynx_portfolio_test",
+        "MONGO_APP_USER": "portfolio",
+        "MONGO_APP_PASSWORD": "${MONGO_APP_PASSWORD}",
+        "MONGO_AUTH_SOURCE": "admin",
+        "S3_BUCKET_NAME": "${S3_BUCKET_NAME}",
+        "S3_REGION": "${S3_REGION}",
+        "S3_ACCESS_KEY_ID": "${S3_ACCESS_KEY_ID}",
+        "S3_SECRET_ACCESS_KEY": "${S3_SECRET_ACCESS_KEY}",
+        "S3_ENDPOINT": "https://s3.amazonaws.com",
+        "S3_UPLOAD_PREFIX": "uploads/",
+        "S3_KMS_KEY_ARN": "${S3_KMS_KEY_ARN}",
+        "CLOUDFRONT_DOMAIN": "${CLOUDFRONT_DOMAIN}",
+        "CLOUDFRONT_DISTRIBUTION_ID": "${CLOUDFRONT_DISTRIBUTION_ID}",
+        "AWS_ROLE_TO_ASSUME": "${AWS_ROLE_TO_ASSUME}",
+        "USE_S3_CDN_STORAGE": "true",
+        "ENABLE_LEGACY_FILESYSTEM": "false",
+        "LOG_UPLOAD_PATHS": "false",
+        "FEATURE_FLAG_LOGGING": "false"
+      },
+      "volumes": [
+        {
+          "name": "app-logs",
+          "hostPath": "/var/lib/dokploy/logs/portfolio/app",
+          "containerPath": "/app/logs",
+          "type": "bind"
+        }
+      ],
+      "networks": ["app-network"],
+      "healthCheck": {
+        "command": "curl -f http://localhost:6165/health",
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 30
+      },
+      "resources": {
+        "limits": {
+          "memory": "1G",
+          "cpus": "1.0"
+        },
+        "reservations": {
+          "memory": "512M",
+          "cpus": "0.5"
+        }
+      },
+      "restartPolicy": "unless-stopped",
+      "labels": {
+        "com.lynxpardelle.service": "portfolio-app",
+        "com.lynxpardelle.version": "2.0.0",
+        "com.lynxpardelle.component": "application",
+        "traefik.enable": "true",
+        "traefik.http.routers.portfolio.rule": "Host(`${DOMAIN_NAME}`)",
+        "traefik.http.routers.portfolio.tls": "true",
+        "traefik.http.routers.portfolio.tls.certresolver": "letsencrypt",
+        "traefik.http.services.portfolio.loadbalancer.server.port": "6165"
+      }
+    }
+  },
+  
+  "networks": {
+    "app-network": {
+      "name": "portfolio-network",
+      "driver": "bridge",
+      "ipam": {
+        "driver": "default",
+        "config": [
+          {
+            "subnet": "172.20.0.0/16"
+          }
+        ]
+      }
+    }
+  },
+  
+  "volumes": {
+    "mongo-data": {
+      "name": "portfolio-mongo-data",
+      "driver": "local"
+    },
+    "mongo-backups": {
+      "name": "portfolio-mongo-backups",
+      "driver": "local"
+    },
+    "mongo-logs": {
+      "name": "portfolio-mongo-logs",
+      "driver": "local"
+    },
+    "app-logs": {
+      "name": "portfolio-app-logs",
+      "driver": "local"
+    }
+  },
+  
+  "deployment": {
+    "strategy": "blue-green",
+    "healthCheckGracePeriod": 60,
+    "shutdownGracePeriod": 30,
+    
+    "preDeploymentHooks": [
+      {
+        "name": "pre-deployment-backup",
+        "description": "Create database backup before deployment",
+        "command": "docker exec portfolio-mongo-unified /opt/mongo-unified/scripts/pre-deployment-backup.sh",
+        "timeout": 300,
+        "retries": 2,
+        "continueOnError": false
+      },
+      {
+        "name": "verify-s3-connectivity",
+        "description": "Verify S3 connectivity for backups",
+        "command": "docker exec portfolio-mongo-unified /opt/mongo-unified/scripts/verify-s3-connectivity.sh",
+        "timeout": 60,
+        "retries": 3,
+        "continueOnError": true
+      }
+    ],
+    
+    "postDeploymentHooks": [
+      {
+        "name": "verify-deployment",
+        "description": "Verify unified container deployment",
+        "command": "docker exec portfolio-mongo-unified /opt/mongo-unified/scripts/health-check.sh",
+        "timeout": 120,
+        "retries": 5,
+        "continueOnError": false
+      },
+      {
+        "name": "verify-application",
+        "description": "Verify application connectivity",
+        "command": "curl -f http://localhost:${APP_PORT}/health",
+        "timeout": 30,
+        "retries": 3,
+        "continueOnError": false
+      },
+      {
+        "name": "post-deployment-backup",
+        "description": "Create post-deployment backup",
+        "command": "docker exec portfolio-mongo-unified /opt/mongo-unified/scripts/backup_mongo_to_s3.sh --post-deployment",
+        "timeout": 300,
+        "retries": 2,
+        "continueOnError": true
+      }
+    ],
+    
+    "rollbackHooks": [
+      {
+        "name": "database-rollback",
+        "description": "Rollback database to previous state",
+        "command": "docker exec portfolio-mongo-unified /opt/mongo-unified/scripts/rollback.sh",
+        "timeout": 600,
+        "retries": 1,
+        "continueOnError": false
+      },
+      {
+        "name": "cleanup-failed-deployment",
+        "description": "Clean up failed deployment artifacts",
+        "command": "docker exec portfolio-mongo-unified /opt/mongo-unified/scripts/cleanup-failed-deployment.sh",
+        "timeout": 120,
+        "retries": 1,
+        "continueOnError": true
+      }
+    ]
+  },
+  
+  "monitoring": {
+    "healthEndpoints": [
+      {
+        "name": "application-health",
+        "url": "http://localhost:${APP_PORT}/health",
+        "interval": 30,
+        "timeout": 10,
+        "expectedStatus": 200
+      },
+      {
+        "name": "mongodb-health",
+        "command": "docker exec portfolio-mongo-unified /opt/mongo-unified/scripts/health-check.sh",
+        "interval": 60,
+        "timeout": 15
+      }
+    ],
+    
+    "logAggregation": {
+      "enabled": true,
+      "paths": [
+        "/var/lib/dokploy/logs/portfolio/app/*.log",
+        "/var/lib/dokploy/logs/portfolio/mongo/*.log"
+      ],
+      "retention": "30d"
+    },
+    
+    "metrics": {
+      "enabled": true,
+      "endpoints": [
+        {
+          "name": "container-stats",
+          "type": "docker-stats",
+          "containers": ["portfolio-mongo-unified", "portfolio-app"]
+        }
+      ]
+    }
+  },
+  
+  "backup": {
+    "enabled": true,
+    "schedule": "0 2 * * *",
+    "retention": {
+      "daily": 7,
+      "weekly": 4,
+      "monthly": 12
+    },
+    
+    "databases": [
+      {
+        "name": "mongodb-unified",
+        "type": "mongodb",
+        "connection": "mongodb://portfolio:${MONGO_APP_PASSWORD}@mongo-unified:27017/lynx_portfolio",
+        "databases": ["lynx_portfolio", "lynx_portfolio_test"],
+        "s3Config": {
+          "bucket": "${S3_BUCKET_NAME}",
+          "path": "dokploy-backups/mongodb",
+          "region": "${S3_REGION}",
+          "accessKeyId": "${S3_ACCESS_KEY_ID}",
+          "secretAccessKey": "${S3_SECRET_ACCESS_KEY}"
+        }
+      }
+    ],
+    
+    "volumes": [
+      {
+        "name": "mongo-data",
+        "path": "/var/lib/dokploy/data/portfolio/mongo",
+        "s3Config": {
+          "bucket": "${S3_BUCKET_NAME}",
+          "path": "dokploy-backups/volumes/mongo-data",
+          "region": "${S3_REGION}",
+          "accessKeyId": "${S3_ACCESS_KEY_ID}",
+          "secretAccessKey": "${S3_SECRET_ACCESS_KEY}"
+        }
+      }
+    ]
+  },
+  
+  "security": {
+    "secrets": [
+      {
+        "name": "mongo-root-password",
+        "description": "MongoDB root password",
+        "required": true,
+        "type": "password"
+      },
+      {
+        "name": "mongo-app-password",
+        "description": "MongoDB application user password",
+        "required": true,
+        "type": "password"
+      },
+      {
+        "name": "jwt-secret",
+        "description": "JWT signing secret",
+        "required": true,
+        "type": "secret"
+      },
+      {
+        "name": "s3-access-key",
+        "description": "S3 access key for backups",
+        "required": true,
+        "type": "credential"
+      },
+      {
+        "name": "s3-secret-key",
+        "description": "S3 secret key for backups",
+        "required": true,
+        "type": "credential"
+      }
+    ],
+    
+    "networkPolicies": {
+      "ingress": [
+        {
+          "from": "traefik",
+          "to": "app",
+          "ports": [6165]
+        }
+      ],
+      "egress": [
+        {
+          "from": "app",
+          "to": "mongo-unified",
+          "ports": [27017]
+        },
+        {
+          "from": "mongo-unified",
+          "to": "s3",
+          "ports": [443]
+        }
+      ]
+    }
+  },
+  
+  "scaling": {
+    "app": {
+      "minReplicas": 1,
+      "maxReplicas": 3,
+      "targetCPUUtilization": 70,
+      "targetMemoryUtilization": 80
+    },
+    "mongo-unified": {
+      "replicas": 1,
+      "scalable": false,
+      "reason": "Stateful service with data persistence"
+    }
+  },
+  
+  "environmentVariables": {
+    "required": [
+      "DOMAIN_NAME",
+      "APP_PORT",
+      "MONGO_ROOT_PASSWORD", 
+      "MONGO_APP_PASSWORD",
+      "JWT_SECRET",
+      "S3_BUCKET_NAME",
+      "S3_REGION",
+      "S3_ACCESS_KEY_ID",
+      "S3_SECRET_ACCESS_KEY"
+    ],
+    "optional": [
+      "CLOUDFRONT_DOMAIN",
+      "CLOUDFRONT_DISTRIBUTION_ID",
+      "S3_KMS_KEY_ARN",
+      "AWS_ROLE_TO_ASSUME"
+    ]
+  },
+  
+  "documentation": {
+    "readme": "README.md",
+    "changelog": "CHANGELOG.md",
+    "architecture": "docs/architecture-overview.md",
+    "deployment": "docs/dokploy.md",
+    "troubleshooting": "docs/runbooks/",
+    "api": {
+      "openapi": "docs/api/openapi.yaml",
+      "postman": "docs/api/portfolio.postman_collection.json"
+    }
+  },
+  
+  "tags": [
+    "nodejs",
+    "mongodb",
+    "portfolio",
+    "unified-container",
+    "s3-backup",
+    "dokploy",
+    "production-ready"
+  ],
+  
+  "metadata": {
+    "author": "LynxPardelle",
+    "license": "MIT",
+    "supportedPlatforms": ["linux/amd64", "linux/arm64"],
+    "minimumDokployVersion": "0.1.0",
+    "lastUpdated": "2024-01-15",
+    "configurationVersion": "2.0.0"
+  }
+}

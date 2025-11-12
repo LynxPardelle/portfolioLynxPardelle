@@ -1,0 +1,78 @@
+# =============================================================================
+# Docker Compose - MongoDB Unified Container (Production/Dokploy)
+# =============================================================================
+# Single-container deployment for MongoDB + backups + supervisor-managed
+# health processes. Intended for production (Dokploy) and local validation.
+# =============================================================================
+
+name: lynx-portfolio-back-mongo-unified
+
+services:
+  mongo-unified:
+    build:
+      context: .
+      dockerfile: private-projects/mongo-backup-v2/docker/Dockerfile.mongo-unified
+    image: lynx-portfolio-back-mongo-unified:2.0.0
+    container_name: mongo-unified
+    restart: unless-stopped
+
+    environment:
+      # Mongo Core
+      MONGO_PORT: ${MONGO_PORT:-27017}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio}
+      MONGO_APP_USER: ${MONGO_APP_USER:-portfolio}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
+      MONGO_AUTH_SOURCE: ${MONGO_AUTH_SOURCE:-admin}
+
+      # Backups / S3
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_BACKUP_PATH: ${S3_BACKUP_PATH:-backups}
+      S3_DEPLOYMENT_BACKUP_PATH: ${S3_DEPLOYMENT_BACKUP_PATH:-deployment-backups}
+      MONGO_BACKUP_KEEP: ${MONGO_BACKUP_KEEP:-4}
+
+      # Performance knobs
+      MONGO_WT_CACHE_GB: ${MONGO_WT_CACHE_GB:-1}
+      BACKUP_NUM_PARALLEL: ${BACKUP_NUM_PARALLEL:-4}
+      BACKUP_NICE: ${BACKUP_NICE:-10}
+      BACKUP_IONICE_CLASS: ${BACKUP_IONICE_CLASS:-2}
+      BACKUP_IONICE_PRIORITY: ${BACKUP_IONICE_PRIORITY:-7}
+      BACKUP_READ_PREFERENCE: ${BACKUP_READ_PREFERENCE:-}
+      RESTORE_NUM_PARALLEL: ${RESTORE_NUM_PARALLEL:-4}
+      RESTORE_NUM_WORKERS: ${RESTORE_NUM_WORKERS:-8}
+
+      # Feature flags
+      ENABLE_BACKUP_SERVICE: "true"
+      ENABLE_HEALTH_MONITORING: "true"
+
+      TZ: ${TZ:-UTC}
+
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+      # 9217 is the custom backup metrics exporter when enabled
+      - "9217:9217"
+
+    volumes:
+      - mongo_unified_data:/data/db
+      - mongo_unified_backups:/data/backups
+      - mongo_unified_logs:/var/log
+
+    healthcheck:
+      test: ["CMD", "/opt/mongo-unified/scripts/health-check.sh", "--production"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+volumes:
+  mongo_unified_data:
+    name: lynx-portfolio-back-mongo-unified-data
+  mongo_unified_backups:
+    name: lynx-portfolio-back-mongo-unified-backups
+  mongo_unified_logs:
+    name: lynx-portfolio-back-mongo-unified-logs

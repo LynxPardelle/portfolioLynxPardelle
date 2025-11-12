@@ -1,13 +1,43 @@
 # =============================================================================
-# Docker Compose - Development (Standalone for Dokploy or local overrides)
+# Docker Compose - Development Environment Enhanced for Unified MongoDB
 # =============================================================================
-# Run this stack when you want only the Node.js dev container. Make sure the
-# MongoDB stack is already up so the MONGO_URI host is reachable.
+# This configuration provides development-specific overrides for the unified
+# MongoDB container and application services with hot-reload capabilities.
 # =============================================================================
 
 name: lynx-portfolio-back-dev
 
 services:
+  # =============================================================================
+  # MongoDB Unified Container - Development Overrides
+  # =============================================================================
+  mongo-unified:
+    profiles: ["dev"]
+    environment:
+      # Development-specific settings
+      SUPERVISOR_LOG_LEVEL: debug
+      ENABLE_DEBUG_LOGGING: true
+      # Development database names
+      MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio_dev}
+      MONGO_APP_TEST_DB: ${MONGO_APP_TEST_DB:-lynx_portfolio_test_dev}
+    volumes:
+      # Development script overrides (align with /opt paths for consistency)
+      - ./private-projects/mongo-backup-v2/scripts:/opt/mongo-unified/scripts:rw
+      - ./private-projects/mongo-backup-v2/config:/opt/mongo-unified/config:rw
+      # Development data (separate from production)
+      - mongo_dev_data:/data/db
+      - mongo_dev_logs:/var/log
+    ports:
+      # Expose additional ports for debugging
+      - "${MONGO_PORT:-27017}:27017"
+      - "28017:28017"  # Optional: HTTP status interface
+    labels:
+      - "com.lynxpardelle.environment=development"
+      - "com.lynxpardelle.debug=enabled"
+
+  # =============================================================================
+  # Application Service - Development Configuration
+  # =============================================================================
   dev:
     build:
       context: .
@@ -18,53 +48,109 @@ services:
         NODE_ENV: development
     image: lynx-portfolio-back-dev:latest
     container_name: lynx-portfolio-back-dev
+    depends_on:
+      mongo-unified:
+        condition: service_healthy
     ports:
-      - "${DEV_PORT:-6164}:${DEV_PORT:-6164}"
+      - "${DEV_PORT:-6165}:${DEV_PORT:-6165}"
     environment:
       NODE_ENV: development
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
-      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret}
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-dev}
       NGINX_HOST: ${NGINX_HOST:-localhost}
       NGINX_PORT: ${NGINX_PORT:-80}
       REDIS_URL: ${REDIS_URL:-}
-      MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio}
-      MONGO_APP_TEST_DB: ${MONGO_APP_TEST_DB:-lynx_portfolio_test}
-      MONGO_APP_USER: ${MONGO_APP_USER:-database_user}
+      
+      # Unified MongoDB connection (preferred)
+      MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio_dev}
+      MONGO_APP_TEST_DB: ${MONGO_APP_TEST_DB:-lynx_portfolio_test_dev}
+      MONGO_APP_USER: ${MONGO_APP_USER:-portfolio}
       MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-portfolio_pass}
       MONGO_AUTH_SOURCE: ${MONGO_AUTH_SOURCE:-admin}
-      MONGO_URI: ${MONGO_URI}
+      MONGO_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_DB:-lynx_portfolio_dev}
+      MONGO_TEST_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_TEST_DB:-lynx_portfolio_test_dev}
+      
+      # Development settings
       CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-false}
-      # S3 Storage Configuration
-      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-}
+      DEBUG: app:*,mongo:*
+      LOG_LEVEL: debug
+      
+      # S3 Storage Configuration (development/testing)
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-dev-portfolio-bucket}
       S3_REGION: ${S3_REGION:-us-east-1}
       S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
       S3_ENDPOINT: ${S3_ENDPOINT:-https://s3.amazonaws.com}
-      S3_UPLOAD_PREFIX: ${S3_UPLOAD_PREFIX:-uploads/}
+      S3_UPLOAD_PREFIX: ${S3_UPLOAD_PREFIX:-dev-uploads/}
       S3_KMS_KEY_ARN: ${S3_KMS_KEY_ARN:-}
-      # CloudFront CDN Configuration
+      
+      # CloudFront CDN Configuration (development)
       CLOUDFRONT_DOMAIN: ${CLOUDFRONT_DOMAIN:-}
       CLOUDFRONT_DISTRIBUTION_ID: ${CLOUDFRONT_DISTRIBUTION_ID:-}
+      
       # AWS IAM Configuration
       AWS_ROLE_TO_ASSUME: ${AWS_ROLE_TO_ASSUME:-}
+      
+      # Development feature flags
+      USE_S3_CDN_STORAGE: "false"
+      ENABLE_LEGACY_FILESYSTEM: "true"
+      LOG_UPLOAD_PATHS: "true"
+      FEATURE_FLAG_LOGGING: "true"
     volumes:
       - .:/app:cached
       - /app/node_modules
       - node_logs:/app/logs
+    networks:
+      - app-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${DEV_PORT:-6164}/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:${DEV_PORT:-6165}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
     restart: unless-stopped
 
+# =============================================================================
+# Development Networks
+# =============================================================================
 networks:
+  # Unified container network (preferred)
+  app-network:
+    name: ${COMPOSE_PROJECT_NAME:-portfolio}-dev-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${NETWORK_SUBNET:-172.21.0.0/16}
+  
+  # Legacy network (backward compatibility)
   default:
     external: true
     name: lynx-portfolio-back-network
 
+# =============================================================================
+# Development Volumes
+# =============================================================================
 volumes:
+  # Application logs
   node_logs:
-    name: lynx-portfolio-back-logs
+    name: lynx-portfolio-back-dev-logs
     driver: local
+    
+  # Development MongoDB data (separate from production)
+  mongo_dev_data:
+    name: lynx-portfolio-mongo-dev-data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MONGO_DATA_PATH:-./data/mongo-dev}
+      
+  # Development MongoDB logs
+  mongo_dev_logs:
+    name: lynx-portfolio-mongo-dev-logs
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MONGO_LOG_PATH:-./logs/mongo-dev}

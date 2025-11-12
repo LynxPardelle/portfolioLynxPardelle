@@ -33,18 +33,22 @@ This guide describes the Docker services and deployment configurations for the p
 
 ### Database Services
 
-**`mongo`** - MongoDB database
+Preferred (Unified):
 
-- Persistent data storage via `mongo_data` volume
-- Configurable port (default: 27017)
-- Includes health checks and initialization scripts
+**`mongo-unified`** - Unified MongoDB + Backup
 
-**`mongo-backup`** - Automated backups
+- Single container that includes MongoDB, backup scheduler, and health tooling
+- Uses `private-projects/mongo-backup-v2/docker/docker-compose.unified.yml`
+- S3-first initialization and backup workflows via private-projects/mongo-backup-v2 scripts
 
-- Scheduled MongoDB backups to S3
-- Cron-based scheduling (weekly by default)
-- Configurable retention policy
-- Profile: `backup`
+Legacy (Archived):
+
+**`mongo`** and **`mongo-backup`** standalone services have been archived under:
+
+- `private-projects/mongo-backup-v2/archive/pre-unified/docker-compose.mongo.yml`
+- `private-projects/mongo-backup-v2/archive/pre-unified/docker-compose.mongo-backup.yml`
+
+Use the unified service for all new deployments.
 
 ### Proxy Services
 
@@ -114,10 +118,10 @@ For Dokploy-style deployments, individual compose files are available:
 
 **Infrastructure:**
 
-- `docker-compose.mongo.yml` - MongoDB database
-- `docker-compose.mongo-backup.yml` - Backup service
+- `private-projects/mongo-backup-v2/docker/docker-compose.unified.yml` - Unified MongoDB + Backup (preferred)
 - `docker-compose.nginx.yml` - Nginx proxy
 - `docker-compose.prod-nginx.yml` - Combined app + nginx
+- Archived (legacy): see private-projects/mongo-backup-v2/archive/pre-unified for `docker-compose.mongo*.yml`
 
 **Testing:**
 

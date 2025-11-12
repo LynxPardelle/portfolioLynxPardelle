@@ -1,17 +1,21 @@
 # =============================================================================
-# Docker Compose Configuration for Node.js Template
+# Main Docker Compose Configuration - Updated for Unified MongoDB Container
 # =============================================================================
 # This compose file provides multiple deployment profiles:
-# - create: Project creation and initialization
 # - dev: Development environment with hot-reload
 # - prod: Production environment
 # - prod-pm2: Production with PM2 process manager
 # - nginx: Nginx reverse proxy only
 # - prod-nginx: Production with nginx reverse proxy
 # - test: Testing environment
+# - unified: MongoDB Unified Container deployment
 # =============================================================================
 
 name: lynx-portfolio-back
+
+# Include unified MongoDB configuration
+include:
+  - private-projects/mongo-backup-v2/docker/docker-compose.unified.yml
 
 # Define reusable configuration
 x-common-variables: &common-variables
@@ -46,70 +50,10 @@ x-common-env: &common-env
   AWS_ROLE_TO_ASSUME: ${AWS_ROLE_TO_ASSUME:-}
 
 services:
-  mongo-backup:
-    build:
-      context: .
-      dockerfile: Dockerfile.mongo-backup
-    container_name: lynx-portfolio-back-mongo-backup
-    depends_on:
-      - mongo
-    environment:
-      MONGO_HOST: mongo
-      MONGO_PORT: ${MONGO_PORT:-27017}
-      MONGO_DB: ${MONGO_APP_DB:-lynx_portfolio}
-      MONGO_USER: ${MONGO_APP_USER:-database_user}
-      MONGO_PASS: ${MONGO_APP_PASSWORD:-portfolio_pass}
-      S3_BUCKET: ${S3_BUCKET_NAME}
-      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
-      S3_PATH: backups
-      S3_ENDPOINT: ${S3_ENDPOINT}
-      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
-      AWS_DEFAULT_REGION: ${S3_REGION}
-      MONGO_BACKUP_KEEP: ${MONGO_BACKUP_KEEP:-4}
-      TZ: UTC
-    volumes:
-      - mongo_data:/data/db:ro
-      - ./scripts:/scripts:ro
-      - ./mongo_backups:/mongo_backups
-    healthcheck:
-        # Security: Enforce strong passwords in production
-        # Set MONGO_INITDB_ROOT_PASSWORD and MONGO_APP_PASSWORD to long, random values
-        # Optionally set MONGO_TLS_MODE and MONGO_TLS_CERT/KEY for SSL
-      test: ["CMD", "bash", "-c", "ls /mongo_backups/mongo_backup_*.gz 2>/dev/null | tail -n 1"]
-      interval: 2m
-      timeout: 10s
-      retries: 3
-      start_period: 3m
-    restart: unless-stopped
-    profiles: ["backup"]
-  mongo:
-    build:
-      context: .
-      dockerfile: Dockerfile.mongo
-    image: lynx-portfolio-back-mongo-initialized:latest
-    container_name: lynx-portfolio-back-mongo
-    ports:
-      - "${MONGO_PORT:-27017}:${MONGO_PORT:-27017}"
-    environment:
-      MONGO_PORT: ${MONGO_PORT:-27017}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-      MONGO_APP_DB: ${MONGO_APP_DB}
-      MONGO_APP_TEST_DB: ${MONGO_APP_TEST_DB}
-      MONGO_APP_USER: ${MONGO_APP_USER}
-      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
-      MONGO_RESTORE_ON_INIT: ${MONGO_RESTORE_ON_INIT:-true}
-    command: ["--bind_ip_all", "--port", "${MONGO_PORT:-27017}", "--wiredTigerCacheSizeGB=1"]
-    healthcheck:
-      test: ["CMD", "mongosh", "--port", "${MONGO_PORT:-27017}", "--quiet", "--eval", "db.runCommand({ ping: 1 })"]
-      interval: 20s
-      timeout: 5s
-      retries: 5
-      start_period: 25s
-    volumes:
-      - mongo_data:/data/db
-    restart: unless-stopped
+  # =============================================================================
+  # Application Services
+  # =============================================================================
+  
   dev:
     build:
       context: .
@@ -119,27 +63,33 @@ services:
         NODE_ENV: development
     container_name: lynx-portfolio-back-dev
     depends_on:
-      - mongo
+      mongo-unified:
+        condition: service_healthy
     ports:
       - "${DEV_PORT}:${DEV_PORT}"
     environment:
       <<: *common-env
-      MONGO_URI: ${MONGO_URI}
+      # Unified container connection (preferred)
+      MONGO_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_DB:-lynx_portfolio}
+      MONGO_TEST_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_TEST_DB:-lynx_portfolio_test}
+      # Legacy fallback
+      MONGO_URI_LEGACY: ${MONGO_URI}
       CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-false}
     volumes:
       # Mount source code for hot-reload (excludes node_modules for performance)
       - .:/app:cached
       - /app/node_modules
       - node_logs:/app/logs
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${DEV_PORT}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
-    # Restart policy
     restart: unless-stopped
-    profiles: ["dev"]
+    profiles: ["dev", "unified"]
   prod:
     build:
       context: .
@@ -148,28 +98,33 @@ services:
         <<: *common-variables
         NODE_ENV: production
       cache_from:
-        # To run weekly backup: docker compose --profile backup up mongo-backup
         - node:22-alpine
     container_name: lynx-portfolio-back-prod
     depends_on:
-      - mongo
+      mongo-unified:
+        condition: service_healthy
     ports:
       - "${PROD_PORT}:${PROD_PORT}"
     environment:
       <<: *common-env
       NODE_ENV: production
-      MONGO_URI: ${MONGO_URI}
+      # Unified container connection (preferred)
+      MONGO_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_DB:-lynx_portfolio}
+      MONGO_TEST_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_TEST_DB:-lynx_portfolio_test}
+      # Legacy fallback
+      MONGO_URI_LEGACY: ${MONGO_URI}
     volumes:
       - node_logs:/app/logs
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${PROD_PORT}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
-    # Restart policy for production
     restart: unless-stopped
-    profiles: ["prod"]
+    profiles: ["prod", "unified"]
   # Production service with PM2
   prod-pm2:
     build:
@@ -180,15 +135,22 @@ services:
         NODE_ENV: production
     container_name: lynx-portfolio-back-prod-pm2
     depends_on:
-      - mongo
+      mongo-unified:
+        condition: service_healthy
     ports:
       - "${PROD_PORT}:${PROD_PORT}"
     environment:
       <<: *common-env
       NODE_ENV: production
-      MONGO_URI: ${MONGO_URI}
+      # Unified container connection (preferred)
+      MONGO_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_DB:-lynx_portfolio}
+      MONGO_TEST_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_TEST_DB:-lynx_portfolio_test}
+      # Legacy fallback
+      MONGO_URI_LEGACY: ${MONGO_URI}
     volumes:
       - node_logs:/app/logs
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${PROD_PORT}/health"]
       interval: 30s
@@ -196,7 +158,7 @@ services:
       retries: 3
       start_period: 30s
     restart: unless-stopped
-    profiles: ["prod-pm2"]
+    profiles: ["prod-pm2", "unified"]
   # Testing service
   test:
     build:
@@ -207,12 +169,17 @@ services:
         NODE_ENV: test
     container_name: lynx-portfolio-back-test
     depends_on:
-      - mongo
+      mongo-unified:
+        condition: service_healthy
     environment:
       <<: *common-env
       NODE_ENV: test
       CI: "true"
-      MONGO_URI: ${MONGO_URI}
+      # Unified container connection (preferred)
+      MONGO_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_TEST_DB:-lynx_portfolio_test}
+      MONGO_TEST_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_TEST_DB:-lynx_portfolio_test}
+      # Legacy fallback
+      MONGO_URI_LEGACY: ${MONGO_URI}
       # Test-specific environment variables
       S3_BUCKET_NAME: "test-bucket"
       CLOUDFRONT_DOMAIN: "test.cloudfront.net"
@@ -229,8 +196,10 @@ services:
       - /app/node_modules
       - ./tests:/app/tests
       - ./coverage:/app/coverage
+    networks:
+      - app-network
     command: ["npm", "run", "test:ci"]
-    profiles: ["test"]
+    profiles: ["test", "unified"]
   # Backend app service for nginx proxy
   app:
     build:
@@ -241,15 +210,22 @@ services:
         NODE_ENV: production
     container_name: lynx-portfolio-back-app
     depends_on:
-      - mongo
+      mongo-unified:
+        condition: service_healthy
     expose:
       - "6165"
     environment:
       <<: *common-env
       NODE_ENV: production
-      MONGO_URI: ${MONGO_URI}
+      # Unified container connection (preferred)
+      MONGO_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_DB:-lynx_portfolio}
+      MONGO_TEST_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_TEST_DB:-lynx_portfolio_test}
+      # Legacy fallback
+      MONGO_URI_LEGACY: ${MONGO_URI}
     volumes:
       - node_logs:/app/logs
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${DEV_PORT}/health"]
       interval: 30s
@@ -257,7 +233,7 @@ services:
       retries: 3
       start_period: 30s
     restart: unless-stopped
-    profiles: ["nginx"]
+    profiles: ["nginx", "unified"]
   # Nginx reverse proxy service (standalone)
   nginx:
     build:
@@ -266,6 +242,7 @@ services:
     container_name: lynx-portfolio-back-nginx
     depends_on:
       - app
+      - mongo-unified
     ports:
       - "${NGINX_PORT}:80"
     volumes:
@@ -274,6 +251,8 @@ services:
     environment:
       NGINX_HOST: ${NGINX_HOST}
       NGINX_PORT: ${NGINX_PORT}
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/nginx-status"]
       interval: 30s
@@ -281,7 +260,7 @@ services:
       retries: 3
       start_period: 30s
     restart: unless-stopped
-    profiles: ["nginx"]
+    profiles: ["nginx", "unified"]
   # Production service with integrated nginx
   prod-nginx:
     build:
@@ -292,18 +271,25 @@ services:
         NODE_ENV: production
     container_name: lynx-portfolio-back-prod-nginx
     depends_on:
-      - mongo
+      mongo-unified:
+        condition: service_healthy
     ports:
       - "${NGINX_PORT}:80"
     environment:
       <<: *common-env
       NODE_ENV: production
-      MONGO_URI: ${MONGO_URI}
+      # Unified container connection (preferred)
+      MONGO_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_DB:-lynx_portfolio}
+      MONGO_TEST_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_TEST_DB:-lynx_portfolio_test}
+      # Legacy fallback
+      MONGO_URI_LEGACY: ${MONGO_URI}
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - node_logs:/app/logs
       - nginx_logs:/var/log/nginx
       - supervisor_logs:/var/log/supervisor
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
@@ -311,11 +297,13 @@ services:
       retries: 3
       start_period: 60s
     restart: unless-stopped
-    profiles: ["prod-nginx"]
+    profiles: ["prod-nginx", "unified"]
 
-# Named volumes for better performance and persistence
+# =============================================================================
+# Global Volume Definitions
+# =============================================================================
 volumes:
-  # Logs volume for persistent logging
+  # Application logs volume
   node_logs:
     driver: local
   
@@ -327,12 +315,16 @@ volumes:
   supervisor_logs:
     driver: local
 
-  # MongoDB data volume
-  mongo_data:
-    driver: local
 
-# Network configuration (optional - Docker creates default network)
+# =============================================================================
+# Global Network Definitions
+# =============================================================================
 networks:
-  default:
-    external: true
-    name: lynx-portfolio-back-network
+  # Unified container network (preferred)
+  app-network:
+    name: ${COMPOSE_PROJECT_NAME:-portfolio}-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${NETWORK_SUBNET:-172.20.0.0/16}

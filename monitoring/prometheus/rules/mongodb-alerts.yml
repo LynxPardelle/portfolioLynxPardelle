@@ -1,0 +1,103 @@
+groups:
+  - name: mongodb-unified-alerts
+    rules:
+      - alert: MongoDBDown
+        expr: up{job="mongodb-unified"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB is down"
+          description: "MongoDB unified container exporter is not responding for more than 1 minute"
+
+      - alert: MongoDBHighConnections
+        expr: mongodb_connections{state="current"} > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MongoDB high connection count"
+          description: "MongoDB has {{ $value }} active connections"
+
+      - alert: MongoDBSlowQueries
+        expr: rate(mongodb_mongod_op_counters_total[5m]) > 1000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MongoDB high query rate"
+          description: "MongoDB query rate is {{ $value }} operations per second"
+
+      - alert: MongoDBHighMemoryUsage
+        expr: (mongodb_memory{type="resident"} / 1024 / 1024) > 1500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MongoDB high memory usage"
+          description: "MongoDB is using {{ $value }}MB of resident memory"
+
+      - alert: MongoDBDiskSpaceHigh
+        expr: (mongodb_stats_storage_size / mongodb_stats_data_size) > 3
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MongoDB high storage overhead"
+          description: "Storage size is {{ $value }}x larger than data size"
+
+      - alert: ContainerHighCPU
+        expr: rate(container_cpu_usage_seconds_total{name="mongo-unified"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container high CPU usage"
+          description: "MongoDB container CPU usage is {{ $value }}%"
+
+      - alert: ContainerHighMemory
+        expr: container_memory_usage_bytes{name="mongo-unified"} / container_spec_memory_limit_bytes{name="mongo-unified"} > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container high memory usage"
+          description: "MongoDB container memory usage is {{ $value }}%"
+
+      - alert: BackupFailure
+        expr: backup_last_success{job="backup-monitor"} < (time() - 86400)
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB backup failure"
+          description: "Last successful backup was {{ $value }} seconds ago"
+
+      - alert: S3BackupUploadFailure
+        expr: s3_upload_last_success{job="backup-monitor"} < (time() - 86400)
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "S3 backup upload failure"
+          description: "Last successful S3 upload was {{ $value }} seconds ago"
+
+  - name: application-alerts
+    rules:
+      - alert: ApplicationDown
+        expr: up{job="portfolio-app"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Portfolio application is down"
+          description: "Application has been down for more than 2 minutes"
+
+      - alert: ApplicationHighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High application error rate"
+          description: "Error rate is {{ $value }}% over the last 5 minutes"

@@ -6,7 +6,7 @@ Automated MongoDB backup system that stores compressed database dumps to Amazon 
 
 **Backup Process:**
 
-- Dedicated `mongo-backup` container runs scheduled backups
+- Unified `mongo-unified` container runs scheduled backups (managed by supervisor/cron inside the container)
 - Creates compressed MongoDB dumps using `mongodump`
 - Uploads backups to S3 bucket under `backups/` folder
 - Maintains local copies in `mongo_backups/` directory
@@ -14,8 +14,8 @@ Automated MongoDB backup system that stores compressed database dumps to Amazon 
 
 **Scheduling:**
 
-- Default: Weekly backups every Sunday at 3 AM
-- Configurable via `MONGO_BACKUP_CRON` environment variable
+- Default: Daily at 2 AM and Weekly on Sunday at 3 AM (configurable via BACKUP_SCHEDULE_* envs)
+- Configurable via `BACKUP_SCHEDULE_DAILY` and `BACKUP_SCHEDULE_WEEKLY`
 - Manual backup execution available
 
 ## Required Configuration
@@ -75,26 +75,26 @@ All MongoDB connection details are automatically configured from the main databa
 
 ## Manual Operations
 
-**Start Backup Service:**
+**Start Unified Service:**
 
 ```powershell
-# Start automated backup service
-make backup
+# Start unified MongoDB + backup service
+docker compose -f private-projects/mongo-backup-v2/docker/docker-compose.unified.yml up -d --build
 
-# View backup logs
-make backup-logs
+# View container logs
+docker compose -f private-projects/mongo-backup-v2/docker/docker-compose.unified.yml logs -f mongo-unified
 ```
 
 **Manual Backup:**
 
 ```powershell
-docker compose exec mongo-backup bash /scripts/backup_mongo_to_s3.sh
+docker compose -f private-projects/mongo-backup-v2/docker/docker-compose.unified.yml exec mongo-unified /opt/mongo-unified/scripts/backup_mongo_to_s3.sh manual
 ```
 
 **Restore from S3:**
 
 ```powershell
-docker compose exec mongo-backup bash /scripts/restore_mongo_from_s3.sh
+docker compose -f private-projects/mongo-backup-v2/docker/docker-compose.unified.yml exec mongo-unified /opt/mongo-unified/scripts/restore_mongo_from_s3.sh
 ```
 
 **Note:** Manual operations require the backup container to be running.
@@ -103,13 +103,13 @@ docker compose exec mongo-backup bash /scripts/restore_mongo_from_s3.sh
 
 **With Main Application:**
 
-- Use `docker-compose.yml` with `--profile backup`
-- Backup service runs alongside other services
+- Use `private-projects/mongo-backup-v2/docker/docker-compose.unified.yml` alongside the app compose
+- Unified service runs alongside the app; app connects via `mongo-unified:27017`
 
 **Standalone (Dokploy):**
 
-- Use `docker-compose.mongo-backup.yml`
-- Deploy as separate stack after MongoDB stack
+- Use `private-projects/mongo-backup-v2/docker/docker-compose.unified.yml`
+- Deploy as a dedicated Dokploy service (the container includes MongoDB + backups)
 
 ## Troubleshooting
 

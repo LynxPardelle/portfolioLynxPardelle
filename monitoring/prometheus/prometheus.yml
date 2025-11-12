@@ -1,0 +1,59 @@
+# =============================================================================
+# Prometheus Configuration for MongoDB Unified Container Monitoring
+# =============================================================================
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+rule_files:
+  - "/etc/prometheus/rules/*.yml"
+
+scrape_configs:
+  # Prometheus self
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # MongoDB Exporter (separate container)
+  - job_name: mongodb-unified
+    static_configs:
+      - targets: ["mongodb-exporter:9216"]
+    scrape_interval: 30s
+    metrics_path: /metrics
+    params:
+      collect[]:
+        - database
+        - collection
+        - topmetrics
+        - indexstats
+        - connpoolstats
+
+  # cAdvisor container metrics
+  - job_name: cadvisor
+    static_configs:
+      - targets: ["cadvisor:8080"]
+    scrape_interval: 30s
+
+  # Node exporter system metrics
+  - job_name: node-exporter
+    static_configs:
+      - targets: ["node-exporter:9100"]
+
+  # Custom backup monitoring from unified container
+  - job_name: backup-monitor
+    static_configs:
+      - targets: ["mongo-unified:9217"]
+    scrape_interval: 60s
+    metrics_path: /backup-metrics
+
+  # Application metrics (optional; enable if your app exposes /metrics)
+  # - job_name: portfolio-app
+  #   static_configs:
+  #     - targets: ["prod:6165"]
+  #   metrics_path: /metrics
+  #   scrape_interval: 30s

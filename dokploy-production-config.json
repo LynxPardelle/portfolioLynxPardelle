@@ -1,0 +1,64 @@
+{
+  "name": "portfolio-mongo-unified-production",
+  "description": "Production deployment of MongoDB Unified Container v2.0",
+  "version": "2.0.0",
+  "environment": "production",
+  "services": {
+    "mongo-unified": {
+      "image": "lynx-portfolio-back-mongo-unified:2.0.0",
+      "buildConfig": {
+        "dockerfile": "private-projects/mongo-backup-v2/docker/Dockerfile.mongo-unified",
+        "context": "."
+      },
+      "environmentVariables": {
+        "MONGO_ROOT_USERNAME": "${MONGO_ROOT_USERNAME}",
+        "MONGO_ROOT_PASSWORD": "${MONGO_ROOT_PASSWORD}",
+        "MONGO_APP_DB": "${MONGO_APP_DB}",
+        "MONGO_APP_USER": "${MONGO_APP_USER}",
+        "MONGO_APP_PASSWORD": "${MONGO_APP_PASSWORD}",
+        "S3_BUCKET_NAME": "${S3_BUCKET_NAME}",
+        "S3_ACCESS_KEY_ID": "${S3_ACCESS_KEY_ID}",
+        "S3_SECRET_ACCESS_KEY": "${S3_SECRET_ACCESS_KEY}",
+        "S3_REGION": "${S3_REGION}",
+        "ENABLE_BACKUP_SERVICE": "true",
+        "ENABLE_HEALTH_MONITORING": "true"
+      },
+      "volumes": [
+        { "hostPath": "/var/lib/dokploy/data/mongo-unified", "containerPath": "/data/db", "type": "bind" },
+        { "hostPath": "/var/lib/dokploy/backups/mongo-unified", "containerPath": "/data/backups", "type": "bind" },
+        { "hostPath": "/var/lib/dokploy/logs/mongo-unified", "containerPath": "/var/log", "type": "bind" }
+      ],
+      "ports": [
+        { "hostPort": 27017, "containerPort": 27017, "protocol": "tcp" },
+        { "hostPort": 9217, "containerPort": 9217, "protocol": "tcp" }
+      ],
+      "healthCheck": {
+        "command": "/opt/mongo-unified/scripts/health-check.sh --production",
+        "interval": 30,
+        "timeout": 10,
+        "retries": 5,
+        "startPeriod": 90
+      },
+      "resources": {
+        "memory": "2G",
+        "cpus": "2.0",
+        "memoryReservation": "1.5G",
+        "cpusReservation": "1.0"
+      },
+      "restartPolicy": { "condition": "unless-stopped", "delay": "5s", "maxAttempts": 3, "window": "120s" }
+    }
+  },
+  "deployment": {
+    "strategy": "blue-green",
+    "rollbackOnFailure": true
+  },
+  "monitoring": {
+    "healthCheckUrl": "http://localhost:9217/metrics"
+  },
+  "backup": {
+    "enabled": true,
+    "schedule": "0 3 * * 0",
+    "retention": "30d",
+    "s3Config": { "bucket": "${S3_BUCKET_NAME}", "region": "${S3_REGION}", "path": "production-backups" }
+  }
+}

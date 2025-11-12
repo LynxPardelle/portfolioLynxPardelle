@@ -1,40 +1,5 @@
 ###############################################
-# Dedicated Dockerfile for mongo-backup service
-# Builds a lightweight image with cron + awscli + mongodb tools
+# Moved: archived under
+# private-projects/mongo-backup-v2/archive/pre-unified/Dockerfile.mongo-backup
 ###############################################
-FROM ubuntu:22.04
-
-ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=UTC
-
-# Install dependencies and MongoDB database tools (mongodump, mongorestore)
-RUN apt-get update \
-     && apt-get install -y --no-install-recommends \
-         ca-certificates \
-         gnupg \
-         curl \
-         cron \
-         awscli \
-         bash \
-     && curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg \
-     && echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-6.0.list \
-     && apt-get update \
-     && apt-get install -y --no-install-recommends mongodb-database-tools \
-     && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /scripts
-
-# Copy only scripts needed
-COPY scripts /scripts
-
-# Remove any attempt to source .env (not copied into image) to rely on injected env vars
-# Keep the conditional .env loading for flexibility but rely on container env vars
-RUN chmod +x /scripts/*.sh
-
-# Create cron job (weekly 3am Sunday) and also log file
-RUN echo "0 3 * * 0 bash /scripts/backup_mongo_to_s3.sh >> /var/log/cron.log 2>&1" > /etc/cron.d/mongo-backup \
-    && chmod 0644 /etc/cron.d/mongo-backup \
-    && crontab /etc/cron.d/mongo-backup
-
-# Provide a simple entrypoint: start cron, run an initial backup (optional), then tail logs
-CMD ["bash", "-c", "cron && bash /scripts/backup_mongo_to_s3.sh || echo 'Initial backup failed (continuing)'; touch /var/log/cron.log; tail -f /var/log/cron.log"]
+FROM scratch

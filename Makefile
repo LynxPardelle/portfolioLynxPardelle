@@ -89,9 +89,12 @@ help: ## Show this help message with all available commands
 	@echo "  lint-fix          - Run linting with auto-fix"
 	@echo "  security          - Run security audit"
 	@echo ""
-	@echo "$(GREEN)💾 Backup & Restore:$(NC)"
-	@echo "  backup            - Backup project data and configuration"
-	@echo "  restore           - Restore from backup"
+	@echo "$(GREEN)💾 Unified MongoDB (backup):$(NC)"
+	@echo "  unified-up        - Start unified MongoDB container"
+	@echo "  unified-down      - Stop unified MongoDB container"
+	@echo "  unified-logs      - Show unified container logs"
+	@echo "  unified-backup    - Run manual backup inside unified container"
+	@echo "  unified-restore   - Run restore inside unified container"
 	@echo ""
 	@echo "$(YELLOW)💡 Environment Variables (from .env):$(NC)"
 	@echo "  DEV_PORT: $(DEV_PORT)"
@@ -370,31 +373,32 @@ security-fix: ## Fix security vulnerabilities automatically
 	docker compose -p lynx-portfolio-back exec dev npm audit fix
 
 # =============================================================================
-# Backup & Restore Commands
+# Unified MongoDB Backup Commands
 # =============================================================================
 
-backup: ## Run mongo-backup service for automated backups
-	@echo "$(CYAN)💾 Running mongo-backup service...$(NC)"
-	docker compose -p lynx-portfolio-back --profile backup up --build mongo-backup
+UNIFIED_COMPOSE := private-projects/mongo-backup-v2/docker/docker-compose.unified.yml
 
-backup-detached: ## Run mongo-backup service in background
-	@echo "$(CYAN)💾 Running mongo-backup service (background)...$(NC)"
-	docker compose -p lynx-portfolio-back --profile backup up --build -d mongo-backup
-	@echo "$(GREEN)✅ Mongo-backup service started$(NC)"
+unified-up: ## Start unified MongoDB container
+	@echo "$(CYAN)💾 Starting unified MongoDB container...$(NC)"
+	docker compose -f $(UNIFIED_COMPOSE) up --build -d mongo-unified
+	@echo "$(GREEN)✅ Unified MongoDB container started$(NC)"
 
-backup-logs: ## Show mongo-backup container logs
-	@echo "$(CYAN)📋 Mongo-backup container logs:$(NC)"
-	docker compose -p lynx-portfolio-back logs -f mongo-backup
+unified-down: ## Stop unified MongoDB container
+	@echo "$(CYAN)� Stopping unified MongoDB container...$(NC)"
+	docker compose -f $(UNIFIED_COMPOSE) down
+	@echo "$(GREEN)✅ Unified MongoDB container stopped$(NC)"
 
-restore: ## Restore MongoDB from S3 backup
-	@echo "$(CYAN)📂 Restoring MongoDB from S3 backup...$(NC)"
-	docker compose -p lynx-portfolio-back exec mongo-backup bash /scripts/restore_mongo_from_s3.sh
-	@echo "$(GREEN)✅ Restore script executed$(NC)"
+unified-logs: ## Show unified container logs
+	@echo "$(CYAN)📋 Unified MongoDB container logs:$(NC)"
+	docker compose -f $(UNIFIED_COMPOSE) logs -f mongo-unified
 
-weekly-backup-cron: ## Run weekly backup cron script manually
-	@echo "$(CYAN)🕒 Running weekly backup cron script...$(NC)"
-	docker compose -p lynx-portfolio-back exec mongo-backup bash /scripts/weekly_backup_cron.sh
-	@echo "$(GREEN)✅ Weekly backup cron script executed$(NC)"
+unified-backup: ## Run manual backup inside unified container
+	@echo "$(CYAN)� Running manual backup in unified container...$(NC)"
+	docker compose -f $(UNIFIED_COMPOSE) exec mongo-unified /opt/mongo-unified/scripts/backup_mongo_to_s3.sh manual
+
+unified-restore: ## Run restore inside unified container
+	@echo "$(CYAN)� Running restore in unified container...$(NC)"
+	docker compose -f $(UNIFIED_COMPOSE) exec mongo-unified /opt/mongo-unified/scripts/restore_mongo_from_s3.sh
 
 # =============================================================================
 # API Testing Commands
@@ -551,8 +555,8 @@ perf: ## Show container performance stats
 
 # Mark all targets as PHONY to avoid conflicts with file names
 .PHONY: help create dev dev-detached dev-logs dev-shell prod prod-detached prod-pm2 prod-pm2-detached prod-logs prod-shell \
-        nginx nginx-detached prod-nginx prod-nginx-detached nginx-logs nginx-status nginx-reload \
-        stop restart clean rebuild prune install install-dev update status logs health debug inspect \
-        test test-watch test-coverage lint lint-fix security security-fix backup restore api-test \
-        cf-invalidate cf-invalidate-dry-run s3-health s3-health-report media-backup media-backup-dry-run cdn-health cdn-status \
-        check-tools env-info perf backup backup-detached backup-logs restore weekly-backup-cron
+	nginx nginx-detached prod-nginx prod-nginx-detached nginx-logs nginx-status nginx-reload \
+	stop restart clean rebuild prune install install-dev update status logs health debug inspect \
+	test test-watch test-coverage lint lint-fix security security-fix api-test \
+	cf-invalidate cf-invalidate-dry-run s3-health s3-health-report media-backup media-backup-dry-run cdn-health cdn-status \
+	check-tools env-info perf unified-up unified-down unified-logs unified-backup unified-restore

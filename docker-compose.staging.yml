@@ -1,0 +1,224 @@
+# =============================================================================
+# Staging Environment - MongoDB Unified Container
+# =============================================================================
+# Docker Compose format version removed (obsolete in newer versions)
+
+services:
+  mongo-unified-staging:
+    image: mongo-unified:${STAGING_VERSION:-2.0.0-staging}
+    container_name: portfolio-mongo-unified-staging
+    
+    build:
+      context: .
+      dockerfile: private-projects/mongo-backup-v2/docker/Dockerfile.mongo-unified
+      target: staging
+      args:
+        - MONGO_VERSION=${MONGO_VERSION:-8.0.13}
+        - BUILD_DATE=${BUILD_DATE:-}
+        - VCS_REF=${VCS_REF:-}
+    
+    environment:
+      # MongoDB Configuration (Staging)
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-staging_root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-staging_secure_password}
+      MONGO_PORT: ${MONGO_PORT:-27017}
+      
+      # Application Database (Staging)
+      MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio_staging}
+      MONGO_APP_USER: ${MONGO_APP_USER:-portfolio_staging}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-staging_portfolio_pass}
+      MONGO_APP_TEST_DB: ${MONGO_APP_TEST_DB:-lynx_portfolio_test_staging}
+      
+      # S3 Configuration (Staging Bucket)
+      S3_BUCKET_NAME: ${S3_STAGING_BUCKET_NAME:-portfolio-backups-staging}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ACCESS_KEY_ID: ${S3_STAGING_ACCESS_KEY_ID:-}
+      S3_SECRET_ACCESS_KEY: ${S3_STAGING_SECRET_ACCESS_KEY:-}
+      S3_BACKUP_PATH: ${S3_BACKUP_PATH:-staging-backups}
+      S3_DEPLOYMENT_BACKUP_PATH: ${S3_DEPLOYMENT_BACKUP_PATH:-staging-deployment-backups}
+      
+      # Staging-Specific Features
+      ENABLE_BACKUP_SERVICE: true
+      ENABLE_HEALTH_MONITORING: true
+      ENABLE_DEBUG_LOGGING: true
+      SUPERVISOR_LOG_LEVEL: debug
+      
+      # Staging Performance Testing
+      ENABLE_PERFORMANCE_MONITORING: true
+      ENABLE_SLOW_QUERY_LOG: true
+      
+      # Environment markers
+      ENVIRONMENT: staging
+      # Compose does not support shell substitution in defaults; keep a simple default
+      DEPLOYMENT_ID: ${DEPLOYMENT_ID:-staging}
+      
+      # System Configuration
+      TZ: ${TZ:-UTC}
+      LANG: ${LANG:-en_US.UTF-8}
+    
+    ports:
+      - "${MONGO_STAGING_PORT:-27017}:27017"
+      - "${MONGO_STATUS_PORT:-28017}:28017"
+    
+    volumes:
+      # Staging data persistence
+      - staging_mongo_data:/data/db
+      - ./mongo_backups_staging:/data/backups
+      - staging_mongo_logs:/var/log
+      
+      # Configuration and script overrides (match unified container paths)
+      - ./private-projects/mongo-backup-v2/staging-config:/opt/mongo-unified/config:ro
+      - ./private-projects/mongo-backup-v2/scripts:/opt/mongo-unified/scripts:ro
+    
+    networks:
+      - staging-network
+    
+    # Staging resource allocation
+    deploy:
+      resources:
+        limits:
+          memory: ${MONGO_MEMORY_LIMIT:-2G}
+          cpus: '${MONGO_CPU_LIMIT:-2.0}'
+        reservations:
+          memory: ${MONGO_MEMORY_RESERVATION:-1G}
+          cpus: '${MONGO_CPU_RESERVATION:-1.0}'
+    
+    healthcheck:
+      test: ["CMD", "/opt/mongo-unified/scripts/health-check.sh", "--staging"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    
+    restart: unless-stopped
+    
+    # Security context
+    user: "mongodb:mongodb"
+    
+    # System limits and capabilities
+    ulimits:
+      nofile:
+        soft: 64000
+        hard: 64000
+      nproc: 4096
+    
+    labels:
+      - "environment=staging"
+      - "service=mongo-unified"
+      - "version=2.0.0-staging"
+      - "com.lynxpardelle.service=mongo-unified-staging"
+      - "com.lynxpardelle.version=2.0.0-staging"
+      - "com.lynxpardelle.component=database"
+      - "traefik.enable=false"
+
+  # Application service for staging
+  app-staging:
+    image: portfolio-app:${APP_STAGING_VERSION:-staging}
+    container_name: portfolio-app-staging
+    
+    build:
+      context: .
+      target: production
+      args:
+        - NODE_ENV=staging
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    
+    environment:
+      NODE_ENV: staging
+      PORT: 6165
+      
+      # MongoDB Connection (Staging)
+      MONGO_URI: mongodb://${MONGO_APP_USER:-portfolio_staging}:${MONGO_APP_PASSWORD:-staging_portfolio_pass}@mongo-unified-staging:27017/${MONGO_APP_DB:-lynx_portfolio_staging}
+      MONGO_TEST_URI: mongodb://${MONGO_APP_USER:-portfolio_staging}:${MONGO_APP_PASSWORD:-staging_portfolio_pass}@mongo-unified-staging:27017/${MONGO_APP_TEST_DB:-lynx_portfolio_test_staging}
+      
+      # Application Configuration
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      JWT_SECRET: ${JWT_SECRET:-staging_jwt_secret}
+      
+      # S3 Configuration (Staging)
+      S3_BUCKET_NAME: ${S3_STAGING_BUCKET_NAME:-portfolio-backups-staging}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ACCESS_KEY_ID: ${S3_STAGING_ACCESS_KEY_ID:-}
+      S3_SECRET_ACCESS_KEY: ${S3_STAGING_SECRET_ACCESS_KEY:-}
+      S3_UPLOAD_PREFIX: ${S3_UPLOAD_PREFIX:-staging-uploads/}
+      
+      # Staging-specific configuration
+      DEBUG: app:*,mongo:*
+      LOG_LEVEL: debug
+      ENABLE_PROFILING: true
+      
+      # Feature flags for staging
+      USE_S3_CDN_STORAGE: "false"
+      ENABLE_LEGACY_FILESYSTEM: "true"
+      LOG_UPLOAD_PATHS: "true"
+      FEATURE_FLAG_LOGGING: "true"
+    
+    ports:
+      - "${APP_STAGING_PORT:-3001}:6165"
+    
+    depends_on:
+      mongo-unified-staging:
+        condition: service_healthy
+    
+    networks:
+      - staging-network
+    
+    volumes:
+      - staging_app_logs:/app/logs
+    
+    # Resource limits for staging
+    deploy:
+      resources:
+        limits:
+          memory: ${APP_MEMORY_LIMIT:-1G}
+          cpus: '${APP_CPU_LIMIT:-1.0}'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6165/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    restart: unless-stopped
+    
+    labels:
+      - "environment=staging"
+      - "service=portfolio-app"
+      - "version=staging"
+      - "com.lynxpardelle.service=portfolio-app-staging"
+      - "com.lynxpardelle.component=application"
+
+volumes:
+  staging_mongo_data:
+    name: portfolio-staging-mongo-data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${STAGING_MONGO_DATA_PATH:-./data/staging/mongo}
+  
+  staging_mongo_logs:
+    name: portfolio-staging-mongo-logs
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${STAGING_MONGO_LOG_PATH:-./logs/staging/mongo}
+  
+  staging_app_logs:
+    name: portfolio-staging-app-logs
+    driver: local
+
+networks:
+  staging-network:
+    name: portfolio-staging-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${STAGING_NETWORK_SUBNET:-172.21.0.0/16}

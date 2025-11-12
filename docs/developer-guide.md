@@ -208,7 +208,7 @@ make prod
 For Dokploy or similar platforms, use individual compose files:
 ```bash
 docker compose -f docker-compose.app.yml up      # App only
-docker compose -f docker-compose.mongo.yml up    # Database only
+docker compose -f private-projects/mongo-backup-v2/docker/docker-compose.unified.yml up    # Database + backups
 ```
 
 ## Health Checks

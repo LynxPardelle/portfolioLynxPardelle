@@ -1,14 +1,54 @@
 # =============================================================================
-# Docker Compose - Production App (Standalone for Dokploy)
+# Docker Compose - Production Environment Enhanced for Unified MongoDB
 # =============================================================================
-# Use this for Dokploy: deploy this stack along with docker-compose.mongo.yml.
-# No nginx is required; the service exposes the app on ${PROD_PORT} externally
-# while the app continues to listen on 6165 internally.
+# This configuration provides production-ready optimizations for the unified
+# MongoDB container and application services with security and performance tuning.
 # =============================================================================
 
 name: lynx-portfolio-back-prod
 
 services:
+  # =============================================================================
+  # MongoDB Unified Container - Production Optimizations
+  # =============================================================================
+  mongo-unified:
+    profiles: ["prod"]
+    environment:
+      # Production security and performance
+      SUPERVISOR_LOG_LEVEL: info
+      ENABLE_DEBUG_LOGGING: false
+      MONGO_OPLOG_SIZE: 1024
+      # Production backup schedule
+      MONGO_BACKUP_KEEP: ${MONGO_BACKUP_KEEP:-14}
+      ENABLE_BACKUP_SERVICE: true
+      ENABLE_HEALTH_MONITORING: true
+    deploy:
+      # Production resource constraints
+      resources:
+        limits:
+          memory: ${MONGO_MEMORY_LIMIT:-2G}
+          cpus: '${MONGO_CPU_LIMIT:-2.0}'
+        reservations:
+          memory: ${MONGO_MEMORY_RESERVATION:-1G}
+          cpus: '${MONGO_CPU_RESERVATION:-1.0}'
+    volumes:
+      # Production data persistence (no development overrides)
+      - mongo_prod_data:/data/db
+      - mongo_prod_logs:/var/log
+      - ./mongo_backups:/data/backups
+    # Production security hardening
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
+    labels:
+      - "com.lynxpardelle.environment=production"
+      - "com.lynxpardelle.backup=enabled"
+
+  # =============================================================================
+  # Application Service - Production Configuration  
+  # =============================================================================
   lynx-portfolio-back-prod:
     build:
       context: .
@@ -18,8 +58,11 @@ services:
         GID: ${GID:-1000}
         NODE_ENV: production
     image: lynx-portfolio-back-app:latest
-    container_name: lynx-portfolio-back-app
+    container_name: lynx-portfolio-back-prod-app
     hostname: lynx-portfolio-back-app
+    depends_on:
+      mongo-unified:
+        condition: service_healthy
     ports:
       - "${PROD_PORT:-6165}:6165"
     environment:
@@ -32,13 +75,17 @@ services:
       NGINX_HOST: ${NGINX_HOST:-localhost}
       NGINX_PORT: ${NGINX_PORT:-80}
       REDIS_URL: ${REDIS_URL:-}
+      
+      # Unified MongoDB connection (preferred)
       MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio}
       MONGO_APP_TEST_DB: ${MONGO_APP_TEST_DB:-lynx_portfolio_test}
       MONGO_APP_USER: ${MONGO_APP_USER:-portfolio}
       MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-portfolio_pass}
       MONGO_AUTH_SOURCE: ${MONGO_AUTH_SOURCE:-admin}
-      MONGO_URI: ${MONGO_URI}
-      # S3 Storage Configuration
+      MONGO_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_DB:-lynx_portfolio}
+      MONGO_TEST_URI: mongodb://${MONGO_APP_USER:-portfolio}:${MONGO_APP_PASSWORD:-portfolio_pass}@mongo-unified:${MONGO_PORT:-27017}/${MONGO_APP_TEST_DB:-lynx_portfolio_test}
+      
+      # S3 Storage Configuration (production)
       S3_BUCKET_NAME: ${S3_BUCKET_NAME:-}
       S3_REGION: ${S3_REGION:-us-east-1}
       S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
@@ -46,13 +93,38 @@ services:
       S3_ENDPOINT: ${S3_ENDPOINT:-https://s3.amazonaws.com}
       S3_UPLOAD_PREFIX: ${S3_UPLOAD_PREFIX:-uploads/}
       S3_KMS_KEY_ARN: ${S3_KMS_KEY_ARN:-}
-      # CloudFront CDN Configuration
+      
+      # CloudFront CDN Configuration (production)
       CLOUDFRONT_DOMAIN: ${CLOUDFRONT_DOMAIN:-}
       CLOUDFRONT_DISTRIBUTION_ID: ${CLOUDFRONT_DISTRIBUTION_ID:-}
+      
       # AWS IAM Configuration
       AWS_ROLE_TO_ASSUME: ${AWS_ROLE_TO_ASSUME:-}
+      
+      # Production feature flags
+      USE_S3_CDN_STORAGE: "true"
+      ENABLE_LEGACY_FILESYSTEM: "false"
+      LOG_UPLOAD_PATHS: "false"
+      FEATURE_FLAG_LOGGING: "false"
     volumes:
       - node_logs:/app/logs
+    networks:
+      - app-network
+    # Production resource limits
+    deploy:
+      resources:
+        limits:
+          memory: ${APP_MEMORY_LIMIT:-1G}
+          cpus: '${APP_CPU_LIMIT:-1.0}'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # Production security
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp:noexec,nosuid,size=32m
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:6165/health"]
       interval: 30s
@@ -61,12 +133,47 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+# =============================================================================
+# Production Networks
+# =============================================================================
 networks:
+  # Unified container network (preferred)
+  app-network:
+    name: ${COMPOSE_PROJECT_NAME:-portfolio}-prod-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${NETWORK_SUBNET:-172.22.0.0/16}
+  
+  # Legacy network (backward compatibility)
   default:
     external: true
     name: lynx-portfolio-back-network
 
+# =============================================================================
+# Production Volumes
+# =============================================================================
 volumes:
+  # Application logs
   node_logs:
-    name: lynx-portfolio-back-logs
+    name: lynx-portfolio-back-prod-logs
     driver: local
+    
+  # Production MongoDB data (persistent and secure)
+  mongo_prod_data:
+    name: lynx-portfolio-mongo-prod-data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MONGO_DATA_PATH:-./data/mongo-prod}
+      
+  # Production MongoDB logs
+  mongo_prod_logs:
+    name: lynx-portfolio-mongo-prod-logs
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MONGO_LOG_PATH:-./logs/mongo-prod}

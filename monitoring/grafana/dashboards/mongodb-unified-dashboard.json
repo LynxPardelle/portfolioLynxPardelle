@@ -1,0 +1,98 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "MongoDB Unified Container - Production Monitoring",
+    "tags": ["mongodb", "unified", "production"],
+    "timezone": "UTC",
+    "panels": [
+      {
+        "id": 1,
+        "title": "MongoDB Status",
+        "type": "stat",
+        "targets": [
+          { "expr": "up{job=\"mongodb-unified\"}", "legendFormat": "MongoDB Status" }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "thresholds" },
+            "thresholds": { "steps": [ { "color": "red", "value": 0 }, { "color": "green", "value": 1 } ] }
+          }
+        },
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 }
+      },
+      {
+        "id": 2,
+        "title": "Database Connections",
+        "type": "graph",
+        "targets": [
+          { "expr": "mongodb_connections{state=\"current\"}", "legendFormat": "Current Connections" },
+          { "expr": "mongodb_connections{state=\"available\"}", "legendFormat": "Available Connections" }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 6, "y": 0 }
+      },
+      {
+        "id": 3,
+        "title": "Query Operations Rate",
+        "type": "graph",
+        "targets": [
+          { "expr": "rate(mongodb_mongod_op_counters_total{type=\"query\"}[5m])", "legendFormat": "Queries/sec" },
+          { "expr": "rate(mongodb_mongod_op_counters_total{type=\"insert\"}[5m])", "legendFormat": "Inserts/sec" },
+          { "expr": "rate(mongodb_mongod_op_counters_total{type=\"update\"}[5m])", "legendFormat": "Updates/sec" },
+          { "expr": "rate(mongodb_mongod_op_counters_total{type=\"delete\"}[5m])", "legendFormat": "Deletes/sec" }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+      },
+      {
+        "id": 4,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          { "expr": "mongodb_memory{type=\"resident\"} / 1024 / 1024", "legendFormat": "Resident Memory (MB)" },
+          { "expr": "mongodb_memory{type=\"virtual\"} / 1024 / 1024", "legendFormat": "Virtual Memory (MB)" }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+      },
+      {
+        "id": 5,
+        "title": "Container Resource Usage",
+        "type": "graph",
+        "targets": [
+          { "expr": "rate(container_cpu_usage_seconds_total{name=\"mongo-unified\"}[5m]) * 100", "legendFormat": "CPU Usage %" },
+          { "expr": "container_memory_usage_bytes{name=\"mongo-unified\"} / 1024 / 1024", "legendFormat": "Memory Usage (MB)" }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 }
+      },
+      {
+        "id": 6,
+        "title": "Backup Status",
+        "type": "stat",
+        "targets": [
+          { "expr": "backup_last_success", "legendFormat": "Last Backup Success" },
+          { "expr": "s3_upload_last_success", "legendFormat": "Last S3 Upload Success" }
+        ],
+        "fieldConfig": { "defaults": { "unit": "dateTimeFromNow" } },
+        "gridPos": { "h": 4, "w": 12, "x": 12, "y": 16 }
+      },
+      {
+        "id": 7,
+        "title": "Database Size",
+        "type": "graph",
+        "targets": [
+          { "expr": "mongodb_stats_data_size / 1024 / 1024", "legendFormat": "Data Size (MB)" },
+          { "expr": "mongodb_stats_storage_size / 1024 / 1024", "legendFormat": "Storage Size (MB)" },
+          { "expr": "mongodb_stats_index_size / 1024 / 1024", "legendFormat": "Index Size (MB)" }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 }
+      },
+      {
+        "id": 8,
+        "title": "Slow Queries",
+        "type": "graph",
+        "targets": [ { "expr": "rate(mongodb_mongod_metrics_query_executor_total{state=\"slow\"}[5m])", "legendFormat": "Slow Queries/sec" } ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 }
+      }
+    ],
+    "time": { "from": "now-6h", "to": "now" },
+    "refresh": "30s"
+  }
+}

@@ -115,32 +115,29 @@ Monitor for **24-48 hours** after deployment:
 If database changes are involved:
 
 ```bash
-# Restore from latest backup
-make restore
+# Restore from latest backup (unified container)
+docker compose -f private-projects/mongo-backup-v2/docker/docker-compose.unified.yml exec mongo-unified /opt/mongo-unified/scripts/restore_mongo_from_s3.sh
 
-# Or restore specific backup
-docker compose exec mongo-backup bash /scripts/restore_mongo_from_s3.sh
+# Or run an explicit restore command with options
+docker compose -f private-projects/mongo-backup-v2/docker/docker-compose.unified.yml exec mongo-unified /opt/mongo-unified/scripts/restore_mongo_from_s3.sh --db "$MONGO_APP_DB"
 ```
 
 ## Backup & Recovery
 
 ### Automated Backups
 
-- **Schedule**: Weekly (Sundays at 3 AM)
+- **Schedule**: Daily at 2 AM and Weekly on Sundays at 3 AM (configurable via `BACKUP_SCHEDULE_DAILY`/`BACKUP_SCHEDULE_WEEKLY`)
 - **Retention**: 4 backups (configurable with `MONGO_BACKUP_KEEP`)
 - **Location**: S3 bucket under `backups/` prefix
 
 ### Manual Backup
 
 ```bash
-# Create immediate backup
-make backup
+# Create immediate backup (manual)
+docker compose -f private-projects/mongo-backup-v2/docker/docker-compose.unified.yml exec mongo-unified /opt/mongo-unified/scripts/backup_mongo_to_s3.sh manual
 
-# Run backup in background
-make backup-detached
-
-# Check backup status
-make backup-logs
+# Check container logs
+docker compose -f private-projects/mongo-backup-v2/docker/docker-compose.unified.yml logs -f mongo-unified
 ```
 
 ### Recovery
@@ -190,13 +187,12 @@ docker compose logs app     # Application container only
 
 **Database Logs:**
 ```bash
-docker compose logs mongo
+docker compose -f private-projects/mongo-backup-v2/docker/docker-compose.unified.yml logs mongo-unified
 ```
 
 **Backup Logs:**
 ```bash
-make backup-logs
-docker compose logs mongo-backup
+docker compose -f private-projects/mongo-backup-v2/docker/docker-compose.unified.yml logs -f mongo-unified
 ```
 
 ## Security

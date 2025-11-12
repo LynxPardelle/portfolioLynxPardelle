@@ -1,7 +1,4 @@
 #!/bin/bash
-# Weekly MongoDB backup cron job
-
-SCRIPT_DIR=$(dirname "$0")
-
-# Run backup script
-bash "$SCRIPT_DIR/backup_mongo_to_s3.sh"
+# DEPRECATED: Weekly cron moved inside unified container via /etc/cron.d
+echo "[DEPRECATED] Cron is managed inside the mongo-unified container. Nothing to run here." >&2
+exit 0
