@@ -22,7 +22,7 @@ docker network create lynx-portfolio-back-network
 
 ### Core Services
 - `private-projects/mongo-backup-v2/docker/docker-compose.unified.yml` - Unified MongoDB database with integrated backups and health management (recommended)
-- `docker-compose.prod.yml` - Production Node.js application (recommended)
+- `docker-compose.prod.yml` - Production Node.js application for separated-stack Dokploy deployments (recommended)
 - `docker-compose.app.yml` - Alternative production application
 
 ### Proxy Options
@@ -42,6 +42,8 @@ Deploy these stacks in order:
 2. **Application**: `docker-compose.prod.yml`
 
 This setup exposes the application directly on port 6165 without nginx. The database container handles backups internally.
+
+Important: `docker-compose.prod.yml` is app-only in separated-stack deployments. MongoDB must be deployed and healthy first on the shared network.
 
 ### Alternative (With Nginx)
 
@@ -77,7 +79,7 @@ Set these environment variables in your Dokploy deployment:
 **MongoDB Connection:**
 
 ```bash
-MONGO_URI=mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_APP_DB}?authSource=${MONGO_AUTH_SOURCE}
+MONGO_URI=mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo-unified:${MONGO_PORT}/${MONGO_APP_DB}?authSource=${MONGO_AUTH_SOURCE}
 ```
 
 ### Optional Variables
@@ -132,16 +134,26 @@ The deployment includes built-in health monitoring:
    - Use `docker-compose.prod.yml`
    - Verify it connects to MongoDB
 
-5. **Backups**:
+5. **Run preflight (recommended)**:
+   - `make preflight-prod-dokploy`
+   - Confirms Docker/Compose availability, shared network presence, and compose validity
+
+6. **Backups**:
    - No separate stack required; configure S3 credentials on the unified service
 
 ## Troubleshooting
 
 **Application can't connect to MongoDB:**
 
-- Verify `MONGO_URI` uses `mongo` as hostname
+- Verify `MONGO_URI` uses `mongo-unified` as hostname
 - Check that both services are on the same network
 - Ensure MongoDB stack is running and healthy
+
+**Generic Docker command failed:**
+
+- Run `docker compose -f docker-compose.prod.yml config` and fix the first reported error.
+- Confirm shared network exists: `docker network inspect lynx-portfolio-back-network`.
+- Run `make preflight-prod-dokploy` before Dokploy deployment.
 
 **502 Error with Nginx:**
 

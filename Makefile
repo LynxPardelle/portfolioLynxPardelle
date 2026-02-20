@@ -73,6 +73,8 @@ help: ## Show this help message with all available commands
 	@echo "  clean             - Clean containers, volumes, and build cache"
 	@echo "  rebuild           - Rebuild containers from scratch"
 	@echo "  prune             - Remove unused Docker resources"
+	@echo "  validate-prod-compose - Validate docker-compose.prod.yml"
+	@echo "  preflight-prod-dokploy - Validate app stack preconditions for Dokploy"
 	@echo ""
 	@echo "$(GREEN)📊 Monitoring & Debugging:$(NC)"
 	@echo "  status            - Show container status and health"
@@ -534,9 +536,22 @@ cdn-status: ## Show CDN status and configuration
 # Check if required tools are installed
 check-tools: ## Check if required tools are installed
 	@echo "$(CYAN)🔍 Checking required tools...$(NC)"
-	@command -v docker >/dev/null 2>&1 || (echo "$(RED)❌ Docker not found$(NC)" && exit 1)
-	@command -v docker compose >/dev/null 2>&1 || command -v docker-compose >/dev/null 2>&1 || (echo "$(RED)❌ Docker Compose not found$(NC)" && exit 1)
+	@docker --version || (echo "$(RED)❌ Docker not found$(NC)" && exit 1)
+	@docker compose version || docker-compose --version || (echo "$(RED)❌ Docker Compose not found$(NC)" && exit 1)
 	@echo "$(GREEN)✅ All required tools are installed$(NC)"
+
+validate-prod-compose: ## Validate docker-compose.prod.yml syntax and resolved configuration
+	@echo "$(CYAN)🔎 Validating docker-compose.prod.yml...$(NC)"
+	@docker compose -f docker-compose.prod.yml config
+	@echo "$(GREEN)✅ docker-compose.prod.yml is valid$(NC)"
+
+preflight-prod-dokploy: ## Preflight checks for separated Dokploy app stack deployment
+	@echo "$(CYAN)🛫 Running Dokploy app-stack preflight checks...$(NC)"
+	@$(MAKE) check-tools
+	@docker network inspect lynx-portfolio-back-network || (echo "$(RED)❌ Missing network: lynx-portfolio-back-network$(NC)" && exit 1)
+	@echo "$(GREEN)✅ Shared network exists$(NC)"
+	@docker compose -f docker-compose.prod.yml config
+	@echo "$(GREEN)✅ Compose validation passed$(NC)"
 
 # Environment information
 env-info: ## Display environment information
@@ -559,4 +574,4 @@ perf: ## Show container performance stats
 	stop restart clean rebuild prune install install-dev update status logs health debug inspect \
 	test test-watch test-coverage lint lint-fix security security-fix api-test \
 	cf-invalidate cf-invalidate-dry-run s3-health s3-health-report media-backup media-backup-dry-run cdn-health cdn-status \
-	check-tools env-info perf unified-up unified-down unified-logs unified-backup unified-restore
+	check-tools validate-prod-compose preflight-prod-dokploy env-info perf unified-up unified-down unified-logs unified-backup unified-restore

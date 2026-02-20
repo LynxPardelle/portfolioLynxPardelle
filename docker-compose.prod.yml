@@ -9,44 +9,6 @@ name: lynx-portfolio-back-prod
 
 services:
   # =============================================================================
-  # MongoDB Unified Container - Production Optimizations
-  # =============================================================================
-  mongo-unified:
-    profiles: ["prod"]
-    environment:
-      # Production security and performance
-      SUPERVISOR_LOG_LEVEL: info
-      ENABLE_DEBUG_LOGGING: false
-      MONGO_OPLOG_SIZE: 1024
-      # Production backup schedule
-      MONGO_BACKUP_KEEP: ${MONGO_BACKUP_KEEP:-14}
-      ENABLE_BACKUP_SERVICE: true
-      ENABLE_HEALTH_MONITORING: true
-    deploy:
-      # Production resource constraints
-      resources:
-        limits:
-          memory: ${MONGO_MEMORY_LIMIT:-2G}
-          cpus: '${MONGO_CPU_LIMIT:-2.0}'
-        reservations:
-          memory: ${MONGO_MEMORY_RESERVATION:-1G}
-          cpus: '${MONGO_CPU_RESERVATION:-1.0}'
-    volumes:
-      # Production data persistence (no development overrides)
-      - mongo_prod_data:/data/db
-      - mongo_prod_logs:/var/log
-      - ./mongo_backups:/data/backups
-    # Production security hardening
-    security_opt:
-      - no-new-privileges:true
-    read_only: false
-    tmpfs:
-      - /tmp:noexec,nosuid,size=64m
-    labels:
-      - "com.lynxpardelle.environment=production"
-      - "com.lynxpardelle.backup=enabled"
-
-  # =============================================================================
   # Application Service - Production Configuration  
   # =============================================================================
   lynx-portfolio-back-prod:
@@ -60,9 +22,6 @@ services:
     image: lynx-portfolio-back-app:latest
     container_name: lynx-portfolio-back-prod-app
     hostname: lynx-portfolio-back-app
-    depends_on:
-      mongo-unified:
-        condition: service_healthy
     ports:
       - "${PROD_PORT:-6165}:6165"
     environment:
@@ -108,8 +67,6 @@ services:
       FEATURE_FLAG_LOGGING: "false"
     volumes:
       - node_logs:/app/logs
-    networks:
-      - app-network
     # Production resource limits
     deploy:
       resources:
@@ -137,16 +94,7 @@ services:
 # Production Networks
 # =============================================================================
 networks:
-  # Unified container network (preferred)
-  app-network:
-    name: ${COMPOSE_PROJECT_NAME:-portfolio}-prod-network
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: ${NETWORK_SUBNET:-172.22.0.0/16}
-  
-  # Legacy network (backward compatibility)
+  # Shared external network for separated app/database stacks
   default:
     external: true
     name: lynx-portfolio-back-network
@@ -159,21 +107,3 @@ volumes:
   node_logs:
     name: lynx-portfolio-back-prod-logs
     driver: local
-    
-  # Production MongoDB data (persistent and secure)
-  mongo_prod_data:
-    name: lynx-portfolio-mongo-prod-data
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${MONGO_DATA_PATH:-./data/mongo-prod}
-      
-  # Production MongoDB logs
-  mongo_prod_logs:
-    name: lynx-portfolio-mongo-prod-logs
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${MONGO_LOG_PATH:-./logs/mongo-prod}
