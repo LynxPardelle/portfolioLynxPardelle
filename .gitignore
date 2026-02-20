@@ -144,7 +144,8 @@ mongo_backups/*
 !mongo_backups/.gitkeep
 
 # Private projects (contains sensitive project data)
-private-projects/
+# Allow checked-in unified Mongo assets while still ignoring optional secrets.
+private-projects/**/secrets/
 
 # Useful scripts for development (generic reusable tools)
 useful-scripts/

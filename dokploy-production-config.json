@@ -5,7 +5,7 @@
   "environment": "production",
   "services": {
     "mongo-unified": {
-      "image": "lynx-portfolio-back-mongo-unified:2.0.0",
+      "image": "lynx-portfolio-back-mongo:2.0.0",
       "buildConfig": {
         "dockerfile": "private-projects/mongo-backup-v2/docker/Dockerfile.mongo-unified",
         "context": "."

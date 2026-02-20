@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  mongo-unified:
+    build:
+      context: ../../..
+      dockerfile: private-projects/mongo-backup-v2/docker/Dockerfile.mongo
+      args:
+        - MONGO_VERSION=${MONGO_VERSION:-7.0}
+    image: lynx-portfolio-mongo-unified:${MONGO_VERSION:-7.0}
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-lynx_root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-changeme}
+      MONGO_APP_DB: ${MONGO_APP_DB:-lynx_portfolio}
+      MONGO_APP_USER: ${MONGO_APP_USER:-portfolio}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-portfolio_pass}
+      MONGO_PORT: ${MONGO_PORT:-27017}
+      MONGO_CONTAINER_PORT: 27017
+      MONGO_BACKUP_KEEP: ${MONGO_BACKUP_KEEP:-4}
+      MONGO_BACKUP_CRON: ${MONGO_BACKUP_CRON:-0 3 * * 0}
+      ENABLE_BACKUP_SERVICE: "true"
+      ENABLE_HEALTH_MONITORING: "true"
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+      S3_BACKUP_PATH: ${S3_BACKUP_PATH:-backups}
+      TZ: ${TZ:-UTC}
+    volumes:
+      - mongo_unified_data:/data/db
+      - mongo_unified_backups:/data/backups
+      - mongo_unified_logs:/var/log
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+      - "9217:9217"
+    healthcheck:
+      test: ["CMD", "/opt/mongo-unified/scripts/health-check.sh", "--unified"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  mongo_unified_data:
+  mongo_unified_backups:
+  mongo_unified_logs:
