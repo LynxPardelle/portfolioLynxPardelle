@@ -21,7 +21,7 @@ docker network create lynx-portfolio-back-network
 ## Available Compose Files
 
 ### Core Services
-- `private-projects/mongo-backup-v2/docker/docker-compose.unified.yml` - Unified MongoDB database with integrated backups and health management (recommended)
+- `docker-compose.mongo.yml` - MongoDB database stack with backups and health monitoring (recommended)
 - `docker-compose.prod.yml` - Production Node.js application for separated-stack Dokploy deployments (recommended)
 - `docker-compose.app.yml` - Alternative production application
 
@@ -30,7 +30,7 @@ docker network create lynx-portfolio-back-network
 - `docker-compose.prod-nginx.yml` - Combined Node.js + nginx in single container
 
 ### Additional Services
-- (Legacy) `docker-compose.mongo.yml` and `docker-compose.mongo-backup.yml` are archived under `private-projects/mongo-backup-v2/archive/pre-unified/`
+- `private-projects/mongo-backup-v2/docker/docker-compose.unified.yml` - Alternative unified Mongo stack for specific environments
 
 ## Deployment Strategy
 
@@ -38,18 +38,18 @@ docker network create lynx-portfolio-back-network
 
 Deploy these stacks in order:
 
-1. **MongoDB Unified**: `private-projects/mongo-backup-v2/docker/docker-compose.unified.yml`
+1. **MongoDB**: `docker-compose.mongo.yml`
 2. **Application**: `docker-compose.prod.yml`
 
 This setup exposes the application directly on port 6165 without nginx. The database container handles backups internally.
 
-Important: `docker-compose.prod.yml` is app-only in separated-stack deployments. MongoDB must be deployed and healthy first on the shared network.
+Important: `docker-compose.prod.yml` is app-only in separated-stack deployments. `docker-compose.mongo.yml` must be deployed and healthy first on the shared network.
 
 ### Alternative (With Nginx)
 
 For custom proxy requirements:
 
-1. **MongoDB Unified**: `private-projects/mongo-backup-v2/docker/docker-compose.unified.yml`
+1. **MongoDB**: `docker-compose.mongo.yml`
 2. **Application**: `docker-compose.app.yml`
 3. **Nginx Proxy**: `docker-compose.nginx.yml`
 
@@ -79,8 +79,11 @@ Set these environment variables in your Dokploy deployment:
 **MongoDB Connection:**
 
 ```bash
-MONGO_URI=mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongo-unified:${MONGO_PORT}/${MONGO_APP_DB}?authSource=${MONGO_AUTH_SOURCE}
+MONGO_HOST=mongo
+MONGO_URI=mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_APP_DB}?authSource=${MONGO_AUTH_SOURCE}
 ```
+
+Use `MONGO_HOST=mongo` when deploying `docker-compose.mongo.yml` as the DB stack.
 
 ### Optional Variables
 
@@ -124,10 +127,16 @@ The deployment includes built-in health monitoring:
    docker network create lynx-portfolio-back-network
    ```
 
+   Or run:
+
+   ```bash
+   make ensure-shared-network
+   ```
+
 2. **Configure environment variables** in Dokploy for each stack
 
 3. **Deploy MongoDB first**:
-   - Use `private-projects/mongo-backup-v2/docker/docker-compose.unified.yml`
+   - Use `docker-compose.mongo.yml`
    - Wait for health check to pass
 
 4. **Deploy the application**:
@@ -139,20 +148,20 @@ The deployment includes built-in health monitoring:
    - Confirms Docker/Compose availability, shared network presence, and compose validity
 
 6. **Backups**:
-   - No separate stack required; configure S3 credentials on the unified service
+   - Configure S3 credentials on the MongoDB stack service
 
 ## Troubleshooting
 
 **Application can't connect to MongoDB:**
 
-- Verify `MONGO_URI` uses `mongo-unified` as hostname
+- Verify `MONGO_HOST` is set to `mongo` for `docker-compose.mongo.yml`
 - Check that both services are on the same network
 - Ensure MongoDB stack is running and healthy
 
 **Generic Docker command failed:**
 
 - Run `docker compose -f docker-compose.prod.yml config` and fix the first reported error.
-- Confirm shared network exists: `docker network inspect lynx-portfolio-back-network`.
+- Ensure shared network exists: `make ensure-shared-network`.
 - Run `make preflight-prod-dokploy` before Dokploy deployment.
 
 **502 Error with Nginx:**

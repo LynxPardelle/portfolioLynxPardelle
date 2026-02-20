@@ -73,6 +73,7 @@ help: ## Show this help message with all available commands
 	@echo "  clean             - Clean containers, volumes, and build cache"
 	@echo "  rebuild           - Rebuild containers from scratch"
 	@echo "  prune             - Remove unused Docker resources"
+	@echo "  ensure-shared-network - Create Dokploy shared network if missing"
 	@echo "  validate-prod-compose - Validate docker-compose.prod.yml"
 	@echo "  preflight-prod-dokploy - Validate app stack preconditions for Dokploy"
 	@echo ""
@@ -548,10 +549,15 @@ validate-prod-compose: ## Validate docker-compose.prod.yml syntax and resolved c
 preflight-prod-dokploy: ## Preflight checks for separated Dokploy app stack deployment
 	@echo "$(CYAN)🛫 Running Dokploy app-stack preflight checks...$(NC)"
 	@$(MAKE) check-tools
-	@docker network inspect lynx-portfolio-back-network || (echo "$(RED)❌ Missing network: lynx-portfolio-back-network$(NC)" && exit 1)
+	@$(MAKE) ensure-shared-network
 	@echo "$(GREEN)✅ Shared network exists$(NC)"
 	@docker compose -f docker-compose.prod.yml config
 	@echo "$(GREEN)✅ Compose validation passed$(NC)"
+
+ensure-shared-network: ## Create Dokploy shared network if missing
+	@echo "$(CYAN)🌐 Ensuring shared network exists...$(NC)"
+	@docker network inspect lynx-portfolio-back-network || docker network create lynx-portfolio-back-network
+	@echo "$(GREEN)✅ Shared network ready: lynx-portfolio-back-network$(NC)"
 
 # Environment information
 env-info: ## Display environment information
@@ -574,4 +580,4 @@ perf: ## Show container performance stats
 	stop restart clean rebuild prune install install-dev update status logs health debug inspect \
 	test test-watch test-coverage lint lint-fix security security-fix api-test \
 	cf-invalidate cf-invalidate-dry-run s3-health s3-health-report media-backup media-backup-dry-run cdn-health cdn-status \
-	check-tools validate-prod-compose preflight-prod-dokploy env-info perf unified-up unified-down unified-logs unified-backup unified-restore
+	check-tools ensure-shared-network validate-prod-compose preflight-prod-dokploy env-info perf unified-up unified-down unified-logs unified-backup unified-restore
